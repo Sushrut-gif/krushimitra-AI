@@ -38,13 +38,13 @@ export default function AdminAuth() {
     }
   }, [isAdminAuthenticated, navigate]);
 
-  // Handle Form Submit
-  const handleSubmit = (e) => {
+  // Handle Form Submit — async for Supabase
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setErrorMsg('');
 
     if (!adminId.trim()) {
-      setErrorMsg('कृपया प्रशासक किंवा अधिकारी आयडी प्रविष्ट करा.');
+      setErrorMsg('कृपया प्रशासक मोबाईल किंवा अधिकारी आयडी प्रविष्ट करा.');
       return;
     }
     if (!password.trim()) {
@@ -54,22 +54,20 @@ export default function AdminAuth() {
 
     setIsSubmitting(true);
 
-    setTimeout(() => {
-      const res = loginAdmin({
-        identifier: adminId.trim(),
-        password: password.trim(),
-      });
+    const res = await loginAdmin({
+      identifier: adminId.trim(),
+      password: password.trim(),
+    });
 
-      if (res.success) {
-        navigate(from, { replace: true });
-      } else {
-        setErrorMsg(
-          res.error ||
-            'अवैध प्रशासक आयडी किंवा पासवर्ड! केवळ अधिकृत बाजार समिती अधिकाऱ्यांना प्रवेश आहे.'
-        );
-        setIsSubmitting(false);
-      }
-    }, 350);
+    if (res.success) {
+      navigate(from, { replace: true });
+    } else {
+      setErrorMsg(
+        res.error ||
+          'अवैध प्रशासक आयडी किंवा पासवर्ड! केवळ अधिकृत बाजार समिती अधिकाऱ्यांना प्रवेश आहे.'
+      );
+      setIsSubmitting(false);
+    }
   };
 
   // Quick fill helper for demonstration
@@ -218,28 +216,28 @@ export default function AdminAuth() {
           {/* Pre-configured Demo Credentials Chips */}
           <div className="p-4 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-2">
             <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">
-              डेमो / चाचणीसाठी अधिकृत क्रेडेन्शियल्स:
+              अधिकृत प्रवेश क्रेडेन्शियल्स (Supabase):
             </span>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               <button
                 type="button"
-                onClick={() => handleQuickCredential('admin', 'admin')}
+                onClick={() => handleQuickCredential('9999999999', 'admin123')}
                 className="p-2 rounded-xl bg-slate-800 hover:bg-slate-750 border border-slate-700 text-left transition-all cursor-pointer group"
               >
-                <span className="text-[10px] text-amber-400 font-bold block">प्रशासक १ (Standard):</span>
+                <span className="text-[10px] text-amber-400 font-bold block">प्रशासक (Supabase):</span>
                 <span className="text-xs font-mono text-slate-200 font-semibold group-hover:text-white">
-                  admin / admin
+                  9999999999 / admin123
                 </span>
               </button>
 
               <button
                 type="button"
-                onClick={() => handleQuickCredential('APMC-ADMIN', 'apmc@2026')}
+                onClick={() => handleQuickCredential('admin', 'admin')}
                 className="p-2 rounded-xl bg-slate-800 hover:bg-slate-750 border border-slate-700 text-left transition-all cursor-pointer group"
               >
-                <span className="text-[10px] text-amber-400 font-bold block">प्रशासक २ (Official):</span>
+                <span className="text-[10px] text-amber-400 font-bold block">प्रशासक (Legacy):</span>
                 <span className="text-xs font-mono text-slate-200 font-semibold group-hover:text-white">
-                  APMC-ADMIN / apmc@2026
+                  admin / admin
                 </span>
               </button>
             </div>

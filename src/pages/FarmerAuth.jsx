@@ -116,8 +116,8 @@ export default function FarmerAuth({ initialMode = 'login' }) {
     setError('');
   };
 
-  // Handle Login Submit
-  const handleLoginSubmit = (e) => {
+  // Handle Login Submit — async for Supabase
+  const handleLoginSubmit = async (e) => {
     e.preventDefault();
     setError('');
 
@@ -133,7 +133,7 @@ export default function FarmerAuth({ initialMode = 'login' }) {
     }
 
     setLoading(true);
-    const result = loginFarmer({
+    const result = await loginFarmer({
       mobile: trimmedMobile,
       password: loginPassword,
     });
@@ -146,8 +146,8 @@ export default function FarmerAuth({ initialMode = 'login' }) {
     }
   };
 
-  // Handle Register Submit
-  const handleRegisterSubmit = (e) => {
+  // Handle Register Submit — async for Supabase
+  const handleRegisterSubmit = async (e) => {
     e.preventDefault();
     setError('');
 
@@ -184,7 +184,7 @@ export default function FarmerAuth({ initialMode = 'login' }) {
     }
 
     setLoading(true);
-    const result = registerFarmer({
+    const result = await registerFarmer({
       name: regName,
       mobile: trimmedMobile,
       village: finalVillage,

@@ -76,8 +76,8 @@ export default function MerchantAuth({ initialMode = 'login' }) {
     setError('');
   };
 
-  // Handle Login Submit
-  const handleLoginSubmit = (e) => {
+  // Handle Login Submit — async for Supabase
+  const handleLoginSubmit = async (e) => {
     e.preventDefault();
     setError('');
 
@@ -93,7 +93,7 @@ export default function MerchantAuth({ initialMode = 'login' }) {
     }
 
     setLoading(true);
-    const result = loginMerchant({
+    const result = await loginMerchant({
       identifier: trimmedId,
       password: loginPassword,
     });
@@ -106,8 +106,8 @@ export default function MerchantAuth({ initialMode = 'login' }) {
     }
   };
 
-  // Handle Register Submit
-  const handleRegisterSubmit = (e) => {
+  // Handle Register Submit — async for Supabase
+  const handleRegisterSubmit = async (e) => {
     e.preventDefault();
     setError('');
 
@@ -144,7 +144,7 @@ export default function MerchantAuth({ initialMode = 'login' }) {
     }
 
     setLoading(true);
-    const result = registerMerchant({
+    const result = await registerMerchant({
       firmName,
       licenseNo: trimmedLicense,
       mobile: trimmedMobile,
@@ -156,6 +156,12 @@ export default function MerchantAuth({ initialMode = 'login' }) {
     setLoading(false);
 
     if (result.success) {
+      // If PENDING, stay on login page with advisory message
+      if (result.user?.status === 'PENDING') {
+        switchMode('login');
+        setError('नोंदणी यशस्वी! आपला परवाना ॲडमिन पडताळणीसाठी प्रलंबित आहे. मंजुरीनंतर लॉगिन करता येईल.');
+        return;
+      }
       navigate('/merchant', { replace: true });
     } else {
       setError(result.error);

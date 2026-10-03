@@ -1,222 +1,144 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
-import {
-  fetchSupabaseMerchants,
-  updateSupabaseMerchantStatus,
-} from '../services/supabaseService';
 
 const AuthContext = createContext(null);
 
-const FARMERS_STORAGE_KEY = 'krushimitra_farmers';
-const FARMER_SESSION_KEY = 'krushimitra_farmer_session';
-
-const MERCHANTS_STORAGE_KEY = 'krushimitra_merchants';
+// Session storage keys (localStorage for persistence across reloads)
+const FARMER_SESSION_KEY   = 'krushimitra_farmer_session';
 const MERCHANT_SESSION_KEY = 'krushimitra_active_merchant';
+const ADMIN_SESSION_KEY    = 'krushimitra_admin_session';
 
-const ADMIN_SESSION_KEY = 'krushimitra_admin_session';
+// ─── Helper: map a Supabase profiles row → normalized merchant object ───────
+function rowToMerchant(m) {
+  return {
+    id:            m.id,
+    name:          m.full_name || '',
+    firmName:      m.firm_name  || m.full_name || '',
+    licenseNo:     m.license_no || '',
+    mobile:        m.mobile || '',
+    operatingYard: m.yard   || 'मंगळवार पेठ (मुख्य मार्केट)',
+    merchantType:  m.merchant_type || 'अडत व्यापारी (Commission Agent)',
+    status:        m.status  || 'APPROVED',
+    registeredAt:  m.created_at || new Date().toISOString(),
+  };
+}
 
-const ALLOWED_ADMIN_IDS = [
-  'admin',
-  'apmc-admin',
-  'apmc-slp-admin',
-  'admin@solapurapmc.gov.in',
-  'slp-admin',
-  'slp_admin',
-];
+// ─── Helper: map a Supabase profiles row → normalized farmer session ─────────
+function rowToFarmer(r) {
+  return {
+    id:          r.id,
+    name:        r.full_name || '',
+    mobile:      r.mobile || '',
+    village:     r.village || '',
+    taluka:      r.taluka || '',
+    status:      r.status || 'APPROVED',
+    registeredAt: r.created_at || new Date().toISOString(),
+  };
+}
 
-const ALLOWED_ADMIN_PASSWORDS = [
-  'admin',
-  'apmc@2026',
-  'admin123',
-  'apmc2026',
-];
+// ─── Helper: map a Supabase profiles row → normalized admin session ──────────
+function rowToAdmin(r) {
+  return {
+    id:           r.id,
+    mobile:       r.mobile,
+    name:         r.full_name || 'सोलापूर APMC प्रशासकीय अधिकारी',
+    officerTitle: 'मुख्य बाजार निरीक्षक (Chief Market Inspector)',
+    role:         'APMC प्रशासक (Super Admin)',
+    yard:         r.yard || 'सोलापूर मुख्य प्रशासकीय नियंत्रण कक्ष',
+    loginAt:      new Date().toISOString(),
+  };
+}
 
-const DEFAULT_SEEDED_MERCHANTS = [
-  {
-    id: 'MERCHANT_SLP_8841',
-    firmName: 'सोलापूर ॲग्रो ट्रेडर्स (Solapur Agro Traders)',
-    licenseNo: 'APMC/SLP/TRD-8841',
-    mobile: '9822154321',
-    gstPan: '27AABCS1429B1Z8',
-    operatingYard: 'मंगळवार पेठ (मुख्य मार्केट)',
-    merchantType: 'अडत व्यापारी (Commission Agent)',
-    status: 'APPROVED', // 'APPROVED' | 'PENDING' | 'SUSPENDED'
-    password: 'password123',
-    registeredAt: new Date().toISOString(),
-  },
-  {
-    id: 'MERCHANT_SLP_7720',
-    firmName: 'सिद्धेश्वर ग्रेन मर्चंट्स',
-    licenseNo: 'APMC/SLP/TRD-7720',
-    mobile: '9890123456',
-    gstPan: '27XYZPA9876C1Z4',
-    operatingYard: 'कुमठा नाका यार्ड',
-    merchantType: 'थेट खरेदीदार (Direct Buyer)',
-    status: 'APPROVED',
-    password: 'password123',
-    registeredAt: new Date().toISOString(),
-  },
-];
+// ─── Helper: map a Supabase profiles row → normalized merchant session ───────
+function rowToMerchantSession(r) {
+  return {
+    id:            r.id,
+    name:          r.full_name || '',
+    firmName:      r.firm_name  || r.full_name || '',
+    licenseNo:     r.license_no || '',
+    mobile:        r.mobile || '',
+    operatingYard: r.yard   || 'मंगळवार पेठ (मुख्य मार्केट)',
+    merchantType:  r.merchant_type || 'अडत व्यापारी (Commission Agent)',
+    status:        r.status  || 'APPROVED',
+    registeredAt:  r.created_at || new Date().toISOString(),
+  };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 
 export function AuthProvider({ children }) {
+
+  // ── Rehydrate sessions from localStorage so reloads don't log users out ──
   const [farmerUser, setFarmerUser] = useState(() => {
-    try {
-      const saved = localStorage.getItem(FARMER_SESSION_KEY);
-      return saved ? JSON.parse(saved) : null;
-    } catch {
-      return null;
-    }
+    try { const s = localStorage.getItem(FARMER_SESSION_KEY); return s ? JSON.parse(s) : null; }
+    catch { return null; }
   });
 
   const [merchantUser, setMerchantUser] = useState(() => {
-    try {
-      const saved = localStorage.getItem(MERCHANT_SESSION_KEY);
-      return saved ? JSON.parse(saved) : null;
-    } catch {
-      return null;
-    }
+    try { const s = localStorage.getItem(MERCHANT_SESSION_KEY); return s ? JSON.parse(s) : null; }
+    catch { return null; }
   });
 
   const [adminUser, setAdminUser] = useState(() => {
-    try {
-      const saved = localStorage.getItem(ADMIN_SESSION_KEY);
-      return saved ? JSON.parse(saved) : null;
-    } catch {
-      return null;
-    }
+    try { const s = localStorage.getItem(ADMIN_SESSION_KEY); return s ? JSON.parse(s) : null; }
+    catch { return null; }
   });
 
-  const [merchants, setMerchants] = useState(() => {
-    try {
-      const data = localStorage.getItem(MERCHANTS_STORAGE_KEY);
-      if (data) {
-        const parsed = JSON.parse(data);
-        return parsed.map((m) => ({
-          ...m,
-          status: m.status || 'APPROVED',
-        }));
-      }
-      localStorage.setItem(MERCHANTS_STORAGE_KEY, JSON.stringify(DEFAULT_SEEDED_MERCHANTS));
-      return DEFAULT_SEEDED_MERCHANTS;
-    } catch {
-      return DEFAULT_SEEDED_MERCHANTS;
-    }
-  });
+  // Merchant list for Admin dashboard — fetched from profiles where role='merchant'
+  const [merchants, setMerchants] = useState([]);
 
   const [loading, setLoading] = useState(false);
 
-  // Helper to get registered farmers from localStorage
-  const getRegisteredFarmers = () => {
-    try {
-      const data = localStorage.getItem(FARMERS_STORAGE_KEY);
-      return data ? JSON.parse(data) : [];
-    } catch {
-      return [];
-    }
-  };
-
-  // Helper to get registered merchants from localStorage (seeded if empty)
-  const getRegisteredMerchants = () => {
-    try {
-      const data = localStorage.getItem(MERCHANTS_STORAGE_KEY);
-      if (data) {
-        return JSON.parse(data);
-      }
-      localStorage.setItem(MERCHANTS_STORAGE_KEY, JSON.stringify(DEFAULT_SEEDED_MERCHANTS));
-      return DEFAULT_SEEDED_MERCHANTS;
-    } catch {
-      return DEFAULT_SEEDED_MERCHANTS;
-    }
-  };
-
-  // Update merchant status (APPROVED, PENDING, SUSPENDED)
-  const updateMerchantStatus = (merchantId, newStatus) => {
-    setMerchants((prev) => {
-      const updated = prev.map((m) =>
-        m.id === merchantId || m.licenseNo === merchantId ? { ...m, status: newStatus } : m
-      );
-      try {
-        localStorage.setItem(MERCHANTS_STORAGE_KEY, JSON.stringify(updated));
-      } catch (e) {
-        console.error('Error saving updated merchants:', e);
-      }
-      return updated;
-    });
-
-    // Asynchronously update Supabase merchants table
-    updateSupabaseMerchantStatus(merchantId, newStatus);
-  };
-
-  // Initialize merchants from Supabase and subscribe to Realtime updates
+  // ── Load + subscribe to merchant profiles for Admin dashboard ────────────
   useEffect(() => {
     let isMounted = true;
 
-    async function loadMerchantsFromSupabase() {
+    async function loadMerchants() {
       try {
-        const dbMerchants = await fetchSupabaseMerchants();
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('role', 'merchant')
+          .order('created_at', { ascending: false });
+
         if (!isMounted) return;
-        if (dbMerchants && dbMerchants.length > 0) {
-          const mapped = dbMerchants.map((m) => ({
-            id: m.id,
-            firmName: m.firm_name,
-            licenseNo: m.license_no,
-            mobile: m.mobile,
-            status: m.status || 'APPROVED',
-            operatingYard: m.yard || 'मंगळवार पेठ (मुख्य मार्केट)',
-            merchantType: m.merchant_type || 'अडत व्यापारी (Commission Agent)',
-            registeredAt: m.created_at || new Date().toISOString(),
-          }));
-          setMerchants(mapped);
-        }
+        if (error) { console.warn('[Supabase] loadMerchants:', error.message); return; }
+        setMerchants((data || []).map(rowToMerchant));
       } catch (err) {
-        console.warn('[Supabase] Error loading merchants:', err);
+        console.warn('[Supabase] loadMerchants error:', err);
       }
     }
 
-    loadMerchantsFromSupabase();
+    loadMerchants();
 
-    // Supabase Realtime channel for merchants table
+    // Realtime: react to insert/update in profiles for merchants
     const channel = supabase
-      .channel('merchants-realtime-channel')
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'merchants' },
-        (payload) => {
-          if (payload.eventType === 'UPDATE' && payload.new) {
-            setMerchants((prev) =>
-              prev.map((m) =>
-                m.id === payload.new.id || m.licenseNo === payload.new.license_no
-                  ? { ...m, status: payload.new.status }
-                  : m
-              )
-            );
-          } else if (payload.eventType === 'INSERT' && payload.new) {
-            setMerchants((prev) => {
-              if (prev.some((m) => m.id === payload.new.id || m.licenseNo === payload.new.license_no)) return prev;
-              const newM = {
-                id: payload.new.id,
-                firmName: payload.new.firm_name,
-                licenseNo: payload.new.license_no,
-                mobile: payload.new.mobile,
-                status: payload.new.status || 'APPROVED',
-                operatingYard: payload.new.yard || 'मंगळवार पेठ (मुख्य मार्केट)',
-                merchantType: payload.new.merchant_type || 'अडत व्यापारी (Commission Agent)',
-                registeredAt: payload.new.created_at || new Date().toISOString(),
-              };
-              return [...prev, newM];
-            });
-          }
-        }
-      )
-      .subscribe();
+      .channel('profiles-merchants-channel')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, (payload) => {
+        const row = payload.new || payload.old;
+        if (!row || row.role !== 'merchant') return;
 
-    try {
-      if (!localStorage.getItem(MERCHANTS_STORAGE_KEY)) {
-        localStorage.setItem(MERCHANTS_STORAGE_KEY, JSON.stringify(DEFAULT_SEEDED_MERCHANTS));
-      }
-    } catch (e) {
-      console.error('Error initializing merchants storage:', e);
-    }
+        if (payload.eventType === 'INSERT') {
+          setMerchants((prev) => {
+            if (prev.some((m) => m.id === row.id)) return prev;
+            return [rowToMerchant(row), ...prev];
+          });
+        } else if (payload.eventType === 'UPDATE') {
+          setMerchants((prev) =>
+            prev.map((m) => m.id === row.id ? rowToMerchant(row) : m)
+          );
+          // Also keep merchantUser session in sync if it's the logged-in merchant
+          setMerchantUser((prev) => {
+            if (!prev || prev.id !== row.id) return prev;
+            const updated = rowToMerchantSession(row);
+            localStorage.setItem(MERCHANT_SESSION_KEY, JSON.stringify(updated));
+            return updated;
+          });
+        } else if (payload.eventType === 'DELETE' && payload.old) {
+          setMerchants((prev) => prev.filter((m) => m.id !== payload.old.id));
+        }
+      })
+      .subscribe();
 
     return () => {
       isMounted = false;
@@ -224,207 +146,349 @@ export function AuthProvider({ children }) {
     };
   }, []);
 
-  // Farmer registration
-  const registerFarmer = ({ name, mobile, village, taluka, district, password }) => {
+  // ═══════════════════════════════════════════════════════════════════════════
+  // FARMER REGISTRATION  →  Supabase profiles (role='farmer', status='APPROVED')
+  // ═══════════════════════════════════════════════════════════════════════════
+  const registerFarmer = async ({ name, mobile, village, taluka, district, password }) => {
     const cleanMobile = mobile.trim();
-    const farmers = getRegisteredFarmers();
+    setLoading(true);
+    try {
+      // 1. Check for duplicate mobile
+      const { data: existing } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('mobile', cleanMobile)
+        .eq('role', 'farmer')
+        .maybeSingle();
 
-    const existing = farmers.find((f) => f.mobile === cleanMobile);
-    if (existing) {
-      return {
-        success: false,
-        error: 'हा मोबाईल नंबर आधीच नोंदणीकृत आहे. कृपया लॉगिन करा.',
-      };
+      if (existing) {
+        setLoading(false);
+        return { success: false, error: 'हा मोबाईल नंबर आधीच नोंदणीकृत आहे. कृपया लॉगिन करा.' };
+      }
+
+      // 2. Insert new farmer
+      const { data, error } = await supabase
+        .from('profiles')
+        .insert([{
+          role:      'farmer',
+          full_name: name.trim(),
+          mobile:    cleanMobile,
+          password:  password,
+          village:   village.trim(),
+          taluka:    taluka.trim(),
+          status:    'APPROVED',
+        }])
+        .select()
+        .single();
+
+      if (error) {
+        setLoading(false);
+        return { success: false, error: 'नोंदणी अयशस्वी झाली. कृपया पुन्हा प्रयत्न करा.' };
+      }
+
+      // 3. Persist session
+      const session = rowToFarmer(data);
+      localStorage.setItem(FARMER_SESSION_KEY, JSON.stringify(session));
+      setFarmerUser(session);
+      setLoading(false);
+      return { success: true, user: session };
+
+    } catch (err) {
+      console.error('[Auth] registerFarmer error:', err);
+      setLoading(false);
+      return { success: false, error: 'नेटवर्क किंवा सर्व्हर त्रुटी. कृपया पुन्हा प्रयत्न करा.' };
     }
-
-    const newFarmer = {
-      id: 'FARMER_' + Date.now(),
-      name: name.trim(),
-      mobile: cleanMobile,
-      village: village.trim(),
-      taluka: taluka.trim(),
-      district: district.trim(),
-      password,
-      registeredAt: new Date().toISOString(),
-    };
-
-    const updatedFarmers = [...farmers, newFarmer];
-    localStorage.setItem(FARMERS_STORAGE_KEY, JSON.stringify(updatedFarmers));
-
-    // Save active session
-    localStorage.setItem(FARMER_SESSION_KEY, JSON.stringify(newFarmer));
-    setFarmerUser(newFarmer);
-
-    return { success: true, user: newFarmer };
   };
 
-  // Farmer login
-  const loginFarmer = ({ mobile, password }) => {
+  // ═══════════════════════════════════════════════════════════════════════════
+  // FARMER LOGIN  →  Supabase profiles query
+  // ═══════════════════════════════════════════════════════════════════════════
+  const loginFarmer = async ({ mobile, password }) => {
     const cleanMobile = mobile.trim();
-    const farmers = getRegisteredFarmers();
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('mobile', cleanMobile)
+        .eq('password', password)
+        .eq('role', 'farmer')
+        .maybeSingle();
 
-    const matched = farmers.find(
-      (f) => f.mobile === cleanMobile && f.password === password
-    );
+      if (error || !data) {
+        setLoading(false);
+        return { success: false, error: 'चुकीचा मोबाईल किंवा पासवर्ड! कृपया तपासा किंवा नवीन नोंदणी करा.' };
+      }
 
-    if (!matched) {
-      return {
-        success: false,
-        error: 'मोबाईल नंबर किंवा पासवर्ड चुकीचा आहे. कृपया तपासा किंवा नवीन नोंदणी करा.',
-      };
+      const session = rowToFarmer(data);
+      localStorage.setItem(FARMER_SESSION_KEY, JSON.stringify(session));
+      setFarmerUser(session);
+      setLoading(false);
+      return { success: true, user: session };
+
+    } catch (err) {
+      console.error('[Auth] loginFarmer error:', err);
+      setLoading(false);
+      return { success: false, error: 'नेटवर्क किंवा सर्व्हर त्रुटी. कृपया पुन्हा प्रयत्न करा.' };
     }
-
-    // Save active session
-    localStorage.setItem(FARMER_SESSION_KEY, JSON.stringify(matched));
-    setFarmerUser(matched);
-
-    return { success: true, user: matched };
   };
 
-  // Farmer logout
   const logoutFarmer = () => {
     localStorage.removeItem(FARMER_SESSION_KEY);
     setFarmerUser(null);
   };
 
-  // Merchant registration
-  const registerMerchant = ({
-    firmName,
-    licenseNo,
-    mobile,
-    gstPan,
-    operatingYard,
-    merchantType,
-    password,
+  // ═══════════════════════════════════════════════════════════════════════════
+  // MERCHANT REGISTRATION  →  Supabase profiles (role='merchant', status='PENDING')
+  // ═══════════════════════════════════════════════════════════════════════════
+  const registerMerchant = async ({
+    firmName, licenseNo, mobile, gstPan, operatingYard, merchantType, password,
   }) => {
-    const cleanMobile = mobile.trim();
+    const cleanMobile  = mobile.trim();
     const cleanLicense = licenseNo.trim().toUpperCase();
-    const merchants = getRegisteredMerchants();
+    setLoading(true);
+    try {
+      // 1. Check duplicate mobile
+      const { data: existMobile } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('mobile', cleanMobile)
+        .eq('role', 'merchant')
+        .maybeSingle();
 
-    // Check for existing mobile
-    const existingMobile = merchants.find((m) => m.mobile === cleanMobile);
-    if (existingMobile) {
-      return {
-        success: false,
-        error: 'हा मोबाईल नंबर आधीच एका व्यापाऱ्यासाठी नोंदणीकृत आहे. कृपया लॉगिन करा.',
-      };
+      if (existMobile) {
+        setLoading(false);
+        return { success: false, error: 'हा मोबाईल नंबर आधीच एका व्यापाऱ्यासाठी नोंदणीकृत आहे. कृपया लॉगिन करा.' };
+      }
+
+      // 2. Check duplicate license
+      const { data: existLic } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('license_no', cleanLicense)
+        .eq('role', 'merchant')
+        .maybeSingle();
+
+      if (existLic) {
+        setLoading(false);
+        return { success: false, error: 'हा APMC परवाना क्रमांक आधीच नोंदणीकृत आहे. कृपया तपासा.' };
+      }
+
+      // 3. Insert new merchant (status: PENDING — Admin must approve)
+      const { data, error } = await supabase
+        .from('profiles')
+        .insert([{
+          role:         'merchant',
+          full_name:    firmName.trim(),
+          firm_name:    firmName.trim(),
+          license_no:   cleanLicense,
+          mobile:       cleanMobile,
+          yard:         operatingYard || 'मंगळवार पेठ (मुख्य मार्केट यार्ड, सोलापूर)',
+          merchant_type: merchantType || 'अडत व्यापारी (Commission Agent)',
+          password:     password,
+          status:       'PENDING',
+        }])
+        .select()
+        .single();
+
+      if (error) {
+        console.error('[Auth] registerMerchant Supabase error:', error);
+        setLoading(false);
+        return { success: false, error: 'नोंदणी अयशस्वी झाली. कृपया पुन्हा प्रयत्न करा.' };
+      }
+
+      // 4. Store session (status PENDING — user sees pending message)
+      const session = rowToMerchantSession(data);
+      localStorage.setItem(MERCHANT_SESSION_KEY, JSON.stringify(session));
+      setMerchantUser(session);
+
+      // 5. Also update local merchants list
+      setMerchants((prev) => [rowToMerchant(data), ...prev]);
+
+      setLoading(false);
+      return { success: true, user: session };
+
+    } catch (err) {
+      console.error('[Auth] registerMerchant error:', err);
+      setLoading(false);
+      return { success: false, error: 'नेटवर्क किंवा सर्व्हर त्रुटी. कृपया पुन्हा प्रयत्न करा.' };
     }
-
-    // Check for existing license
-    const existingLicense = merchants.find(
-      (m) => m.licenseNo && m.licenseNo.trim().toUpperCase() === cleanLicense
-    );
-    if (existingLicense) {
-      return {
-        success: false,
-        error: 'हा APMC परवाना क्रमांक आधीच नोंदणीकृत आहे. कृपया तपासा.',
-      };
-    }
-
-    const newMerchant = {
-      id: 'MERCHANT_' + Date.now(),
-      firmName: firmName.trim(),
-      licenseNo: cleanLicense,
-      mobile: cleanMobile,
-      gstPan: gstPan ? gstPan.trim().toUpperCase() : '',
-      operatingYard: operatingYard || 'मंगळवार पेठ (मुख्य मार्केट)',
-      merchantType: merchantType || 'अडत व्यापारी (Commission Agent)',
-      status: 'APPROVED',
-      password,
-      registeredAt: new Date().toISOString(),
-    };
-
-    const updatedMerchants = [...merchants, newMerchant];
-    setMerchants(updatedMerchants);
-    localStorage.setItem(MERCHANTS_STORAGE_KEY, JSON.stringify(updatedMerchants));
-
-    // Save active session
-    localStorage.setItem(MERCHANT_SESSION_KEY, JSON.stringify(newMerchant));
-    setMerchantUser(newMerchant);
-
-    return { success: true, user: newMerchant };
   };
 
-  // Merchant login
-  const loginMerchant = ({ identifier, password }) => {
-    const cleanId = identifier.trim().toLowerCase();
-    const merchants = getRegisteredMerchants();
+  // ═══════════════════════════════════════════════════════════════════════════
+  // MERCHANT LOGIN  →  Supabase profiles query (mobile + password + role)
+  // ═══════════════════════════════════════════════════════════════════════════
+  const loginMerchant = async ({ identifier, password }) => {
+    const cleanId = identifier.trim();
+    setLoading(true);
+    try {
+      // Match by mobile (primary) or license_no (secondary)
+      const { data: byMobile } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('mobile', cleanId)
+        .eq('password', password)
+        .eq('role', 'merchant')
+        .maybeSingle();
 
-    const matched = merchants.find((m) => {
-      const matchMobile = m.mobile && m.mobile.toLowerCase() === cleanId;
-      const matchLicense = m.licenseNo && m.licenseNo.toLowerCase() === cleanId;
-      return (matchMobile || matchLicense) && m.password === password;
-    });
+      let row = byMobile;
 
-    if (!matched) {
-      return {
-        success: false,
-        error: 'नोंदणीकृत मोबाईल नंबर / परवाना क्रमांक किंवा पासवर्ड चुकीचा आहे. कृपया योग्य माहिती भरा.',
-      };
+      if (!row) {
+        const { data: byLic } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('license_no', cleanId.toUpperCase())
+          .eq('password', password)
+          .eq('role', 'merchant')
+          .maybeSingle();
+        row = byLic;
+      }
+
+      if (!row) {
+        setLoading(false);
+        return {
+          success: false,
+          error: 'नोंदणीकृत मोबाईल नंबर / परवाना क्रमांक किंवा पासवर्ड चुकीचा आहे. कृपया योग्य माहिती भरा.',
+        };
+      }
+
+      // Check status: PENDING → reject with advisory message
+      if (row.status === 'PENDING') {
+        setLoading(false);
+        return {
+          success: false,
+          error: 'आपला परवाना ॲडमिन पडताळणीसाठी प्रलंबित आहे. मंजुरीनंतर लॉगिन करता येईल.',
+        };
+      }
+
+      if (row.status === 'SUSPENDED') {
+        setLoading(false);
+        return {
+          success: false,
+          error: 'आपला व्यापारी परवाना तात्पुरता निलंबित केला आहे. APMC कार्यालयाशी संपर्क करा.',
+        };
+      }
+
+      const session = rowToMerchantSession(row);
+      localStorage.setItem(MERCHANT_SESSION_KEY, JSON.stringify(session));
+      setMerchantUser(session);
+      setLoading(false);
+      return { success: true, user: session };
+
+    } catch (err) {
+      console.error('[Auth] loginMerchant error:', err);
+      setLoading(false);
+      return { success: false, error: 'नेटवर्क किंवा सर्व्हर त्रुटी. कृपया पुन्हा प्रयत्न करा.' };
     }
-
-    // Save active session
-    localStorage.setItem(MERCHANT_SESSION_KEY, JSON.stringify(matched));
-    setMerchantUser(matched);
-
-    return { success: true, user: matched };
   };
 
-  // Merchant logout
   const logoutMerchant = () => {
     localStorage.removeItem(MERCHANT_SESSION_KEY);
     setMerchantUser(null);
   };
 
-  // Admin login
-  const loginAdmin = ({ identifier, password }) => {
-    const cleanId = (identifier || '').trim().toLowerCase();
-    const cleanPass = (password || '').trim();
+  // ═══════════════════════════════════════════════════════════════════════════
+  // ADMIN LOGIN  →  Supabase profiles where role='admin'
+  // ═══════════════════════════════════════════════════════════════════════════
+  const loginAdmin = async ({ identifier, password }) => {
+    const cleanId   = (identifier || '').trim();
+    const cleanPass = (password  || '').trim();
+    setLoading(true);
+    try {
+      // Query by mobile (primary identifier for admins)
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('mobile', cleanId)
+        .eq('password', cleanPass)
+        .eq('role', 'admin')
+        .maybeSingle();
 
-    const isIdValid = ALLOWED_ADMIN_IDS.some((id) => id.toLowerCase() === cleanId);
-    const isPassValid = ALLOWED_ADMIN_PASSWORDS.some((p) => p === cleanPass);
+      // Fallback: also accept legacy hard-coded IDs for backwards compatibility
+      const LEGACY_IDS  = ['admin', 'apmc-admin', 'apmc-slp-admin', 'admin@solapurapmc.gov.in', 'slp-admin', 'slp_admin', 'apmc-admin'];
+      const LEGACY_PASS = ['admin', 'apmc@2026', 'admin123', 'apmc2026'];
+      const isLegacy    = LEGACY_IDS.includes(cleanId.toLowerCase()) && LEGACY_PASS.includes(cleanPass);
 
-    if (!isIdValid || !isPassValid) {
-      return {
-        success: false,
-        error: 'अवैध प्रशासक आयडी किंवा पासवर्ड! केवळ अधिकृत बाजार समिती अधिकाऱ्यांना प्रवेश आहे.',
-      };
+      if ((error || !data) && !isLegacy) {
+        setLoading(false);
+        return {
+          success: false,
+          error: 'अवैध प्रशासक आयडी किंवा पासवर्ड! केवळ अधिकृत बाजार समिती अधिकाऱ्यांना प्रवेश आहे.',
+        };
+      }
+
+      const adminSession = data
+        ? rowToAdmin(data)
+        : {
+            id:           cleanId.toUpperCase(),
+            name:         'सोलापूर APMC प्रशासकीय अधिकारी',
+            mobile:       cleanId,
+            officerTitle: 'मुख्य बाजार निरीक्षक (Chief Market Inspector)',
+            role:         'APMC प्रशासक (Super Admin)',
+            yard:         'सोलापूर मुख्य प्रशासकीय नियंत्रण कक्ष',
+            loginAt:      new Date().toISOString(),
+          };
+
+      localStorage.setItem(ADMIN_SESSION_KEY, JSON.stringify(adminSession));
+      setAdminUser(adminSession);
+      setLoading(false);
+      return { success: true, user: adminSession };
+
+    } catch (err) {
+      console.error('[Auth] loginAdmin error:', err);
+      setLoading(false);
+      return { success: false, error: 'नेटवर्क किंवा सर्व्हर त्रुटी. कृपया पुन्हा प्रयत्न करा.' };
     }
-
-    const adminSession = {
-      id: cleanId.toUpperCase(),
-      name: 'सोलापूर APMC प्रशासकीय अधिकारी',
-      officerTitle: 'मुख्य बाजार निरीक्षक (Chief Market Inspector)',
-      role: 'APMC प्रशासक (Super Admin)',
-      yard: 'सोलापूर मुख्य प्रशासकीय नियंत्रण कक्ष',
-      loginAt: new Date().toISOString(),
-    };
-
-    localStorage.setItem(ADMIN_SESSION_KEY, JSON.stringify(adminSession));
-    setAdminUser(adminSession);
-
-    return { success: true, user: adminSession };
   };
 
-  // Admin logout
   const logoutAdmin = () => {
     localStorage.removeItem(ADMIN_SESSION_KEY);
     setAdminUser(null);
   };
 
+  // ═══════════════════════════════════════════════════════════════════════════
+  // ADMIN: Update Merchant Status in Supabase profiles
+  // ═══════════════════════════════════════════════════════════════════════════
+  const updateMerchantStatus = async (merchantId, newStatus) => {
+    // Optimistic local update
+    setMerchants((prev) =>
+      prev.map((m) => m.id === merchantId ? { ...m, status: newStatus } : m)
+    );
+
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ status: newStatus })
+        .eq('id', merchantId);
+
+      if (error) {
+        console.warn('[Supabase] updateMerchantStatus error:', error.message);
+        // Revert on error
+        setMerchants((prev) =>
+          prev.map((m) => m.id === merchantId ? { ...m, status: m.status } : m)
+        );
+      }
+    } catch (err) {
+      console.error('[Auth] updateMerchantStatus error:', err);
+    }
+  };
+
   const value = {
+    // Farmer
     farmerUser,
     isFarmerAuthenticated: !!farmerUser,
     registerFarmer,
     loginFarmer,
     logoutFarmer,
+    // Merchant
     merchantUser,
     merchants,
-    updateMerchantStatus,
     isMerchantAuthenticated: !!merchantUser,
     registerMerchant,
     loginMerchant,
     logoutMerchant,
+    updateMerchantStatus,
+    // Admin
     adminUser,
     isAdminAuthenticated: !!adminUser,
     loginAdmin,
@@ -437,8 +501,6 @@ export function AuthProvider({ children }) {
 
 export function useAuth() {
   const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
+  if (!context) throw new Error('useAuth must be used within an AuthProvider');
   return context;
 }
