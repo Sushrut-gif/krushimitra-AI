@@ -103,10 +103,11 @@ export default function MerchantMarketplaceFeed() {
     return list;
   }, [filteredLots, sortBy]);
 
-  // Compute feed summary statistics
+  // Compute feed summary statistics strictly from real active farmer listings
   const totalActiveLots = activeLots.length;
   const totalQuintals = activeLots.reduce((acc, curr) => acc + (Number(curr.quantity) || 0), 0);
   const avgBidHike = useMemo(() => {
+    if (activeLots.length === 0) return '०%';
     let hikes = [];
     activeLots.forEach((item) => {
       if (item.bids && item.bids.length > 0 && item.basePrice > 0) {
@@ -115,7 +116,7 @@ export default function MerchantMarketplaceFeed() {
         hikes.push(diff);
       }
     });
-    if (hikes.length === 0) return '+१२%';
+    if (hikes.length === 0) return '-';
     const avg = hikes.reduce((a, b) => a + b, 0) / hikes.length;
     return `+${avg.toFixed(1)}%`;
   }, [activeLots]);
@@ -281,15 +282,17 @@ export default function MerchantMarketplaceFeed() {
           </div>
           <div className="space-y-1.5">
             <h3 className="text-base sm:text-lg font-bold text-gray-900">
-              सध्या लिलावात कोणताही शेतमाल उपलब्ध नाही
+              {activeLots.length === 0
+                ? 'सध्या बाजारात लिलावासाठी माल उपलब्ध नाही.'
+                : 'निवडलेल्या फिल्टरनुसार कोणताही माल उपलब्ध नाही.'}
             </h3>
             <p className="text-xs sm:text-sm text-gray-500 leading-relaxed">
-              {searchQuery || selectedCategory !== 'सर्व'
-                ? 'आपण निवडलेल्या फिल्टरनुसार कोणताही लॉट सापडला नाही. कृपया इतर निकष वापरून तपासा.'
-                : 'शेतकऱ्यांनी माल नोंदवल्यावर येथे थेट दिसेल.'}
+              {activeLots.length === 0
+                ? 'शेतकऱ्यांनी सोलापूर APMC मध्ये माल नोंदवताच येथे थेट ई-लिलावासाठी दिसेल.'
+                : 'कृपया शोध शब्द बदला किंवा इतर वर्ग निवडून तपासा.'}
             </p>
           </div>
-          {(searchQuery || selectedCategory !== 'सर्व') && (
+          {activeLots.length > 0 && (searchQuery || selectedCategory !== 'सर्व') && (
             <button
               type="button"
               onClick={() => {
