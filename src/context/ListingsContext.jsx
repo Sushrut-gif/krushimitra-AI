@@ -316,6 +316,29 @@ export function ListingsProvider({ children }) {
   };
 
   /**
+   * Mark payment released for a sold listing
+   */
+  const markPaymentReleased = (listingId, paymentInfo = {}) => {
+    let updatedItem = null;
+    const nowStr = new Date().toISOString();
+    setListings((prev) =>
+      prev.map((item) => {
+        if (item.id === listingId) {
+          updatedItem = {
+            ...item,
+            paymentStatus: 'खात्यात जमा (Completed)',
+            utr: paymentInfo.utr || `UTR20261003${Math.floor(100000 + Math.random() * 900000)}`,
+            paidAt: paymentInfo.paidAt || nowStr,
+          };
+          return updatedItem;
+        }
+        return item;
+      })
+    );
+    return updatedItem;
+  };
+
+  /**
    * Get listings for a specific farmer
    */
   const getFarmerListings = (farmerMobile) => {
@@ -335,6 +358,7 @@ export function ListingsProvider({ children }) {
     addListing,
     acceptBid,
     placeBid,
+    markPaymentReleased,
     getFarmerListings,
     removeListing,
   };

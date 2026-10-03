@@ -240,6 +240,79 @@ export function PaymentsProvider({ children }) {
     }
   };
 
+  /**
+   * Mark a settlement as settled by merchant releasing payment
+   */
+  const markSettlementSettled = (listingId, utrNo, listingObj) => {
+    const nowStr = new Date().toISOString();
+    setSettlements((prev) => {
+      const existingIdx = prev.findIndex((s) => s.listingId === listingId);
+      if (existingIdx !== -1) {
+        return prev.map((item) => {
+          if (item.listingId === listingId) {
+            const finalUtr = utrNo || item.utr;
+            return {
+              ...item,
+              utr: finalUtr,
+              status: 'settled',
+              statusStep: 3,
+              statusLabel: 'खात्यात जमा (Completed / Settled)',
+              statusDescription: 'थेट DBT / NEFT द्वारे रक्कम बँक खात्यात जमा झाली.',
+              settledAt: nowStr,
+              smsAlert: `Dear SBI Customer, your A/C ${item.accountMasked} is credited by INR ${item.netAmount.toLocaleString('en-IN')}.00 on 03-Oct-26 by APMC Solapur e-Payment. Ref: ${finalUtr}. Avail Bal: INR ${(item.netAmount + 165000).toLocaleString('en-IN')}.00 - SBI`,
+            };
+          }
+          return item;
+        });
+      }
+
+      // If not present in settlements yet, create it as settled directly
+      if (listingObj) {
+        const qty = Number(listingObj.quantity) || 1;
+        const rate = Number(listingObj.winningPrice || listingObj.basePrice) || 0;
+        const gross = Math.round(qty * rate);
+        const apmcCess = Math.round(gross * 0.0105);
+        const handlingFee = Math.round(gross * 0.005);
+        const net = gross - (apmcCess + handlingFee);
+        const uniqueSuffix = listingId.replace('KM-', '') || Date.now().toString().slice(-5);
+        const finalUtr = utrNo || `UTR20261003${uniqueSuffix}`;
+
+        const newRecord = {
+          id: `SETTL_${uniqueSuffix}`,
+          listingId: listingId,
+          receiptId: listingObj.receiptId || `APMC-SLP-2026-${uniqueSuffix}`,
+          utr: finalUtr,
+          cropName: listingObj.cropName,
+          variety: listingObj.variety || (listingObj.qualityGrade ? `${listingObj.qualityGrade} ग्रेड` : 'स्थानिक प्रत'),
+          quantity: qty,
+          unit: listingObj.unit || 'क्विंटल',
+          winningMerchant: listingObj.winningMerchant || 'सोलापूर ॲग्रो ट्रेडर्स',
+          merchantLicense: listingObj.merchantLicense || 'APMC-SLP-TR-4182',
+          winningPrice: rate,
+          grossAmount: gross,
+          apmcCess: apmcCess,
+          handlingFee: handlingFee,
+          netAmount: net,
+          status: 'settled',
+          statusStep: 3,
+          statusLabel: 'खात्यात जमा (Completed / Settled)',
+          statusDescription: 'थेट DBT / NEFT द्वारे रक्कम बँक खात्यात जमा झाली.',
+          paymentMethod: 'Direct Bank Transfer (DBT / APMC e-Payment)',
+          bankName: 'State Bank of India',
+          accountMasked: '****5678',
+          ifsc: 'SBIN0001234',
+          branch: 'सोलापूर मुख्य शाखा (मंगळवार पेठ)',
+          createdAt: listingObj.dealFinalizedAt || nowStr,
+          settledAt: nowStr,
+          smsAlert: `Dear SBI Customer, your A/C ****5678 is credited by INR ${net.toLocaleString('en-IN')}.00 on 03-Oct-26 by APMC Solapur e-Payment. Ref: ${finalUtr}. Avail Bal: INR ${(net + 165000).toLocaleString('en-IN')}.00 - SBI`,
+        };
+        return [newRecord, ...prev];
+      }
+
+      return prev;
+    });
+  };
+
   // Compute live totals
   const totalReceived = settlements
     .filter((s) => s.status === 'settled')
@@ -265,6 +338,7 @@ export function PaymentsProvider({ children }) {
     createSettlementForListing,
     updateSettlementStatus,
     advanceSettlementLifecycle,
+    markSettlementSettled,
   };
 
   return <PaymentsContext.Provider value={value}>{children}</PaymentsContext.Provider>;

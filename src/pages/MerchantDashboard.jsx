@@ -1,12 +1,19 @@
-import React from 'react';
+import React, { useState } from 'react';
 import DashboardLayout from '../components/DashboardLayout';
-import { Store, TrendingUp, ShieldCheck, MapPin, FileText, Radio } from 'lucide-react';
+import { Store, TrendingUp, ShieldCheck, MapPin, FileText, Radio, CheckCircle2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useListings } from '../context/ListingsContext';
 import MerchantMarketplaceFeed from '../components/MerchantMarketplaceFeed';
+import MerchantWonDeals from '../components/MerchantWonDeals';
 
 export default function MerchantDashboard() {
   const { merchantUser } = useAuth();
+  const { listings } = useListings();
+  const [activeTab, setActiveTab] = useState('feed'); // 'feed' | 'won_deals'
+
+  // Count won deals
+  const wonCount = listings.filter((item) => item.status && item.status.includes('विक्री पूर्ण')).length;
 
   return (
     <DashboardLayout role="merchant">
@@ -56,8 +63,48 @@ export default function MerchantDashboard() {
           </div>
         </div>
 
-        {/* Primary Marketplace Feed (Live Lots, Search, Category Pills, Inspection & Bidding Cards) */}
-        <MerchantMarketplaceFeed />
+        {/* Tab Navigation: Live Auction Feed vs Won Deals & Invoices */}
+        <div className="bg-gray-100/80 p-1.5 rounded-2xl border border-gray-200/90 max-w-xl flex gap-1">
+          <button
+            type="button"
+            onClick={() => setActiveTab('feed')}
+            className={`flex-1 py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 ${
+              activeTab === 'feed'
+                ? 'bg-white text-indigo-950 shadow-sm ring-1 ring-black/5'
+                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-200/50'
+            }`}
+          >
+            <Radio className={`w-4 h-4 ${activeTab === 'feed' ? 'text-indigo-600' : 'text-gray-400'}`} />
+            <span>सक्रिय शेतमाल ई-लिलाव (Live Feed)</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab('won_deals')}
+            className={`flex-1 py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 ${
+              activeTab === 'won_deals'
+                ? 'bg-white text-indigo-950 shadow-sm ring-1 ring-black/5'
+                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-200/50'
+            }`}
+          >
+            <FileText className={`w-4 h-4 ${activeTab === 'won_deals' ? 'text-indigo-600' : 'text-gray-400'}`} />
+            <span>माझे जिंकलेले सौदे (Won Deals)</span>
+            <span className={`px-2 py-0.5 rounded-full text-[11px] font-extrabold ${
+              activeTab === 'won_deals'
+                ? 'bg-emerald-600 text-white'
+                : 'bg-gray-200 text-gray-700'
+            }`}>
+              {wonCount}
+            </span>
+          </button>
+        </div>
+
+        {/* Tab Content Rendering */}
+        {activeTab === 'feed' ? (
+          <MerchantMarketplaceFeed onSwitchToWonDeals={() => setActiveTab('won_deals')} />
+        ) : (
+          <MerchantWonDeals onSwitchToFeed={() => setActiveTab('feed')} />
+        )}
       </div>
     </DashboardLayout>
   );
