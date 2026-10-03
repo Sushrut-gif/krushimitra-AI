@@ -8,6 +8,7 @@ import FarmerProtectedRoute from './components/FarmerProtectedRoute';
 import FarmerDashboard from './pages/FarmerDashboard';
 import MerchantDashboard from './pages/MerchantDashboard';
 import AdminDashboard from './pages/AdminDashboard';
+import AIAssistant from './components/AIAssistant';
 
 export default function App() {
   return (
@@ -40,6 +41,9 @@ export default function App() {
             {/* Catch-all redirect to role selection */}
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
+
+          {/* Global Multi-Lingual AI Farming Assistant (Voice & Chat) */}
+          <AIAssistant />
         </BrowserRouter>
       </ListingsProvider>
     </AuthProvider>
