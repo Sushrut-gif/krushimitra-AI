@@ -4,7 +4,9 @@ import { useAuth } from '../context/AuthContext';
 import CropQualityAssessment from '../components/CropQualityAssessment';
 import ProduceListingModal from '../components/ProduceListingModal';
 import FarmerActiveListings from '../components/FarmerActiveListings';
-import { Clock, MapPin, Phone, Layers } from 'lucide-react';
+import SolapurMandiRatesBanner from '../components/SolapurMandiRatesBanner';
+import SolapurMandiRatesModal from '../components/SolapurMandiRatesModal';
+import { Clock, MapPin, Phone, Layers, BarChart3, CheckCircle2 } from 'lucide-react';
 
 export default function FarmerDashboard() {
   const { farmerUser } = useAuth();
@@ -12,6 +14,9 @@ export default function FarmerDashboard() {
   // Produce Listing Modal state
   const [isListingModalOpen, setIsListingModalOpen] = useState(false);
   const [listingInitialData, setListingInitialData] = useState({});
+
+  // Solapur APMC Mandi Rates Modal state
+  const [isMandiRatesOpen, setIsMandiRatesOpen] = useState(false);
 
   const handleOpenListingModal = (data = {}) => {
     setListingInitialData(data);
@@ -28,7 +33,7 @@ export default function FarmerDashboard() {
 
   return (
     <DashboardLayout role="farmer">
-      <div className="space-y-8">
+      <div className="space-y-7">
         {/* Header section with Farmer info */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-gray-200">
           <div>
@@ -58,12 +63,22 @@ export default function FarmerDashboard() {
           </div>
 
           <div className="flex items-center gap-3">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-emerald-50 text-emerald-800 border border-emerald-200">
-              <Clock className="w-3.5 h-3.5" />
-              सोलापूर APMC बाजार: सक्रिय
-            </span>
+            <button
+              onClick={() => setIsMandiRatesOpen(true)}
+              className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold bg-emerald-50 text-emerald-900 border border-emerald-300 hover:bg-emerald-100 hover:border-emerald-400 transition-all shadow-2xs cursor-pointer group"
+              title="सोलापूर APMC थेट बाजारभाव पहा"
+            >
+              <BarChart3 className="w-4 h-4 text-emerald-700 group-hover:scale-110 transition-transform" />
+              <span>सोलापूर APMC थेट दर पहा</span>
+              <span className="w-2 h-2 rounded-full bg-emerald-600 animate-pulse"></span>
+            </button>
           </div>
         </div>
+
+        {/* COMPREHENSIVE SOLAPUR MANDI RATES BANNER & QUICK TICKER */}
+        <section aria-label="Solapur APMC Live Mandi Rates">
+          <SolapurMandiRatesBanner onOpenMandiModal={() => setIsMandiRatesOpen(true)} />
+        </section>
 
         {/* PROMINENT AI CROP QUALITY ASSESSMENT SECTION */}
         <section aria-label="AI Crop Quality Assessment">
@@ -75,27 +90,46 @@ export default function FarmerDashboard() {
           <FarmerActiveListings onOpenNewListing={() => handleOpenListingModal({})} />
         </section>
 
-        {/* Future Modules Overview Shell */}
+        {/* System Overview / Modules Shell */}
         <div className="bg-white rounded-2xl border border-gray-200/80 p-6 sm:p-7 shadow-2xs space-y-4">
-          <div className="flex items-center gap-2.5 text-gray-900 font-bold text-base">
-            <div className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center text-gray-600">
-              <Layers className="w-4 h-4" />
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2.5 text-gray-900 font-bold text-base">
+              <div className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center text-gray-600">
+                <Layers className="w-4 h-4" />
+              </div>
+              <span>डिजिटल कृषिमित्र प्रणाली स्थिती (System Features)</span>
             </div>
-            <span>पुढील टप्प्यातील आगामी सुविधा (Upcoming Features)</span>
+            <span className="text-xs text-emerald-700 font-bold bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200 flex items-center gap-1">
+              <CheckCircle2 className="w-3.5 h-3.5" /> सोलापूर APMC लाइव्ह
+            </span>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-1">
-            <div className="p-4 rounded-xl bg-gray-50 border border-gray-200 space-y-1">
-              <div className="text-xs font-bold text-gray-800">📊 थेट APMC बाजारभाव</div>
-              <p className="text-[11px] text-gray-500">सोलापूर व इतर मुख्य बाजार समित्यांचे दैनंदिन आवक व दर.</p>
+            <div
+              onClick={() => setIsMandiRatesOpen(true)}
+              className="p-4 rounded-xl bg-emerald-50/50 border border-emerald-200 hover:border-emerald-300 transition-all cursor-pointer space-y-1 group"
+            >
+              <div className="flex items-center justify-between text-xs font-bold text-emerald-950">
+                <span>📊 थेट APMC बाजारभाव</span>
+                <span className="text-[10px] text-emerald-700 font-semibold bg-emerald-100 px-1.5 py-0.5 rounded">सक्रिय</span>
+              </div>
+              <p className="text-[11px] text-gray-600">
+                धान्य, भाजीपाला, फळे, तेलबिया व गुळाचे दैनिक अधिकृत आवक व दर.
+              </p>
             </div>
             <div className="p-4 rounded-xl bg-gray-50 border border-gray-200 space-y-1">
-              <div className="text-xs font-bold text-gray-800">⚖️ डिजिटल लिलाव पावती</div>
-              <p className="text-[11px] text-gray-500">व्यापारी सौदे व थेट बोली पावतीची त्वरित डिजिटल नोंद.</p>
+              <div className="flex items-center justify-between text-xs font-bold text-gray-800">
+                <span>⚖️ डिजिटल लिलाव पावती व QR</span>
+                <span className="text-[10px] text-emerald-700 font-semibold bg-emerald-100 px-1.5 py-0.5 rounded">सक्रिय</span>
+              </div>
+              <p className="text-[11px] text-gray-500">बोली स्वीकारताच अधिकृत डिजिटल पावती व गेट पास निर्मिती.</p>
             </div>
             <div className="p-4 rounded-xl bg-gray-50 border border-gray-200 space-y-1">
-              <div className="text-xs font-bold text-gray-800">🚜 गेट पास व आवक नोंदणी</div>
-              <p className="text-[11px] text-gray-500">बाजार समिती आवार प्रवेशासाठी थेट डिजिटल QR पास.</p>
+              <div className="flex items-center justify-between text-xs font-bold text-gray-800">
+                <span>🤖 AI गुणवत्ता तपासणी (Vision)</span>
+                <span className="text-[10px] text-emerald-700 font-semibold bg-emerald-100 px-1.5 py-0.5 rounded">सक्रिय</span>
+              </div>
+              <p className="text-[11px] text-gray-500">कॅमेरा फोटोवरून AI द्वारे प्रतवारी, रोग लक्षणे व अपेक्षित दर अंदाज.</p>
             </div>
           </div>
         </div>
@@ -106,6 +140,13 @@ export default function FarmerDashboard() {
           onClose={() => setIsListingModalOpen(false)}
           initialData={listingInitialData}
           onListingSuccess={handleListingSuccess}
+        />
+
+        {/* Solapur APMC Mandi Rates Modal */}
+        <SolapurMandiRatesModal
+          isOpen={isMandiRatesOpen}
+          onClose={() => setIsMandiRatesOpen(false)}
+          onSelectCropForListing={handleOpenListingModal}
         />
       </div>
     </DashboardLayout>
