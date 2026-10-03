@@ -14,9 +14,10 @@ import {
   Sparkles,
   ShieldCheck,
   Tag,
+  Printer,
 } from 'lucide-react';
 
-export default function LiveBidsModal({ isOpen, onClose, listing }) {
+export default function LiveBidsModal({ isOpen, onClose, listing, onOpenReceipt }) {
   const { acceptBid } = useListings();
 
   // Confirmation dialog state: null | bidObject
@@ -45,13 +46,24 @@ export default function LiveBidsModal({ isOpen, onClose, listing }) {
   const handleConfirmAccept = () => {
     if (!confirmingBid) return;
 
-    acceptBid(listing.id, confirmingBid);
+    const updated = acceptBid(listing.id, confirmingBid);
     setConfirmingBid(null);
-    setSuccessMessage('बोली स्वीकारली! डिजिटल पावती तयार केली जात आहे.');
+    setSuccessMessage('बोली स्वीकारली! डिजिटल पावती व गेट पास तयार केला जात आहे...');
 
     setTimeout(() => {
       setSuccessMessage('');
-    }, 3500);
+      onClose();
+      if (onOpenReceipt) {
+        onOpenReceipt(
+          updated || {
+            ...listing,
+            status: 'विक्री पूर्ण (Deal Finalized / Sold)',
+            winningMerchant: confirmingBid.merchantName,
+            winningPrice: confirmingBid.amount,
+          }
+        );
+      }
+    }, 1300);
   };
 
   return (
@@ -154,12 +166,29 @@ export default function LiveBidsModal({ isOpen, onClose, listing }) {
 
           {/* Deal Finalized Banner (if sold) */}
           {isFinalized && (
-            <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-emerald-50 to-white border-2 border-emerald-400 space-y-2 shadow-xs">
-              <div className="flex items-center gap-2 text-emerald-900 font-extrabold text-sm sm:text-base">
-                <Award className="w-5 h-5 text-emerald-600" />
-                <span>हा लिलाव सौदा निश्चित झाला आहे!</span>
+            <div className="p-5 rounded-2xl bg-gradient-to-br from-emerald-50 to-white border-2 border-emerald-400 space-y-3 shadow-xs">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="flex items-center gap-2 text-emerald-900 font-extrabold text-sm sm:text-base">
+                  <Award className="w-5 h-5 text-emerald-600" />
+                  <span>हा लिलाव सौदा निश्चित झाला आहे!</span>
+                </div>
+
+                {onOpenReceipt && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onClose();
+                      onOpenReceipt(listing);
+                    }}
+                    className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs shadow-xs"
+                  >
+                    <Printer className="w-3.5 h-3.5" />
+                    <span>डिजिटल पावती व गेट पास &rarr;</span>
+                  </button>
+                )}
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs text-emerald-950 pt-1">
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs text-emerald-950 pt-1 border-t border-emerald-200/80">
                 <div>
                   <span className="text-gray-500 block">खरेदीदार व्यापारी:</span>
                   <span className="font-bold text-sm text-gray-900">
@@ -222,7 +251,7 @@ export default function LiveBidsModal({ isOpen, onClose, listing }) {
                   <p className="text-xs text-amber-900 leading-relaxed">
                     तुम्ही <strong>"{confirmingBid.merchantName}"</strong> यांची{' '}
                     <strong>₹{confirmingBid.amount.toLocaleString('en-IN')} / {listing.unit}</strong> रुपयांची बोली स्वीकारत आहात का?
-                    सौदा पक्का झाल्यानंतर हा माल विक्री पूर्ण म्हणून नोंदवला जाईल.
+                    सौदा पक्का झाल्यानंतर हा माल विक्री पूर्ण म्हणून नोंदवला जाईल व डिजिटल पावती तयार होईल.
                   </p>
                 </div>
               </div>

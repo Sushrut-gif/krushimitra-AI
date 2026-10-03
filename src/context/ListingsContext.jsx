@@ -112,21 +112,28 @@ export function ListingsProvider({ children }) {
    * Accept a specific merchant bid and finalize deal
    */
   const acceptBid = (listingId, bid) => {
+    let updatedItem = null;
     setListings((prev) =>
       prev.map((item) => {
         if (item.id === listingId) {
-          return {
+          const receiptId = item.receiptId || `APMC-SLP-2026-${item.id.replace('KM-', '')}`;
+          const merchantLicense = bid.merchantLicense || `APMC-SLP-TR-${Math.floor(1000 + Math.random() * 9000)}`;
+          updatedItem = {
             ...item,
             status: 'विक्री पूर्ण (Deal Finalized / Sold)',
             winningMerchant: bid.merchantName,
+            merchantLicense: merchantLicense,
             winningPrice: bid.amount,
             winningBidId: bid.id,
+            receiptId: receiptId,
             dealFinalizedAt: new Date().toISOString(),
           };
+          return updatedItem;
         }
         return item;
       })
     );
+    return updatedItem;
   };
 
   /**
