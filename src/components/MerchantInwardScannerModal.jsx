@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   X,
   Camera,
+  CameraOff,
   CheckCircle2,
   AlertTriangle,
   QrCode,
@@ -12,11 +13,12 @@ import {
   ArrowRight,
   Sparkles,
   Zap,
+  RefreshCw,
 } from 'lucide-react';
 
 /**
  * Merchant APMC Inward Gate Pass Scanner & Verification Modal
- * Validates real lot ID against entered code or simulated camera scan.
+ * Validates real lot ID against entered code or WebRTC camera scan.
  * On success, updates status to 'यार्डात प्राप्त (Delivered at Yard)'.
  */
 export default function MerchantInwardScannerModal({
@@ -26,24 +28,80 @@ export default function MerchantInwardScannerModal({
   onVerificationSuccess,
 }) {
   const [gatePassCodeInput, setGatePassCodeInput] = useState('');
-  const [isScanningActive, setIsScanningActive] = useState(true);
   const [errorMsg, setErrorMsg] = useState('');
   const [isVerifying, setIsVerifying] = useState(false);
   const [successPayload, setSuccessPayload] = useState(null);
 
+  // WebRTC camera states
+  const [cameraError, setCameraError] = useState('');
+  const [isCameraActive, setIsCameraActive] = useState(false);
+  const [isCameraLoading, setIsCameraLoading] = useState(false);
+
+  const videoRef = useRef(null);
+  const streamRef = useRef(null);
+
+  // Helper to stop all camera tracks
+  const stopCameraStream = () => {
+    if (streamRef.current) {
+      try {
+        streamRef.current.getTracks().forEach((track) => track.stop());
+      } catch {
+        // ignore track stop error
+      }
+      streamRef.current = null;
+    }
+    if (videoRef.current) {
+      videoRef.current.srcObject = null;
+    }
+    setIsCameraActive(false);
+    setIsCameraLoading(false);
+  };
+
+  // Safe gate pass ID calculation (avoid GP-SLP-GP-SLP duplicate prefix)
+  const rawId = lot?.id || '';
+  const expectedPassId = rawId.startsWith('GP-SLP-') ? rawId : `GP-SLP-${rawId}`;
+
+  // WebRTC Camera stream initialization
   useEffect(() => {
-    if (isOpen && lot) {
+    if (isOpen && lot && !successPayload) {
       setGatePassCodeInput('');
       setErrorMsg('');
       setIsVerifying(false);
       setSuccessPayload(null);
-      setIsScanningActive(true);
+      setCameraError('');
+
+      // Initialize camera with facingMode environment
+      if (navigator?.mediaDevices?.getUserMedia) {
+        setIsCameraLoading(true);
+        navigator.mediaDevices
+          .getUserMedia({ video: { facingMode: 'environment' } })
+          .then((stream) => {
+            streamRef.current = stream;
+            if (videoRef.current) {
+              videoRef.current.srcObject = stream;
+              videoRef.current.play().catch(() => {});
+            }
+            setIsCameraActive(true);
+            setIsCameraLoading(false);
+          })
+          .catch((err) => {
+            console.warn('Camera stream could not start:', err);
+            setCameraError('कॅमेरा सुरू करता आला नाही, खालील कोड वापरून पडताळणी करा');
+            setIsCameraActive(false);
+            setIsCameraLoading(false);
+          });
+      } else {
+        setCameraError('कॅमेरा सुरू करता आला नाही, खालील कोड वापरून पडताळणी करा');
+      }
     }
-  }, [isOpen, lot]);
+
+    return () => {
+      stopCameraStream();
+    };
+  }, [isOpen, lot, successPayload]);
 
   if (!isOpen || !lot) return null;
 
-  const expectedPassId = `GP-SLP-${lot.id}`;
   const quantity = lot.quantity || 1;
   const unit = lot.unit || 'क्विंटल';
   const cropName = lot.cropName || lot.crop || 'शेतमाल';
@@ -56,7 +114,7 @@ export default function MerchantInwardScannerModal({
     setTimeout(() => {
       const trimmed = gatePassCodeInput.trim();
 
-      // Check if input matches lot.id or GP-SLP-{lot.id} or JSON payload containing passId
+      // Check if input matches lot.id or expectedPassId or JSON payload containing passId
       let matched = false;
 
       if (
@@ -79,6 +137,7 @@ export default function MerchantInwardScannerModal({
       }
 
       if (matched) {
+        stopCameraStream();
         const timestamp = new Date().toISOString();
         const payload = {
           verifiedLotId: lot.id,
@@ -98,19 +157,28 @@ export default function MerchantInwardScannerModal({
         setIsVerifying(false);
         setErrorMsg(`अवैध गेट पास कोड! कृपया या शेतमालाचा खरा गेट पास (${expectedPassId}) प्रविष्ट करा.`);
       }
-    }, 400);
+    }, 350);
   };
 
   // Quick auto-fill helper for smooth testing
-  const handleQuickFill = () => {
+  const handleQuickFill = (e) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
     setGatePassCodeInput(expectedPassId);
     setErrorMsg('');
+  };
+
+  const handleCloseModal = () => {
+    stopCameraStream();
+    onClose();
   };
 
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-sm overflow-y-auto"
-      onClick={onClose}
+      onClick={handleCloseModal}
     >
       <div
         className="bg-white rounded-3xl shadow-2xl max-w-lg w-full overflow-hidden border border-indigo-400 relative my-6 animate-in fade-in-50 zoom-in-95 duration-200"
@@ -139,7 +207,7 @@ export default function MerchantInwardScannerModal({
 
             <button
               type="button"
-              onClick={onClose}
+              onClick={handleCloseModal}
               className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
             >
               <X className="w-5 h-5" />
@@ -192,7 +260,7 @@ export default function MerchantInwardScannerModal({
               <div className="pt-2">
                 <button
                   type="button"
-                  onClick={onClose}
+                  onClick={handleCloseModal}
                   className="w-full py-3 px-4 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs sm:text-sm shadow-md transition-all cursor-pointer"
                 >
                   पूर्ण करा व पेमेंट रिलीज करा
@@ -201,29 +269,58 @@ export default function MerchantInwardScannerModal({
             </div>
           ) : (
             <>
-              {/* Camera Scanner Simulation Viewfinder */}
-              <div className="relative rounded-2xl overflow-hidden bg-slate-950 border-2 border-indigo-500/80 p-6 text-center space-y-3">
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                  {/* Viewfinder Reticle */}
-                  <div className="w-48 h-48 border-2 border-dashed border-emerald-400 rounded-2xl relative">
-                    <span className="absolute -top-1 -left-1 w-4 h-4 border-t-2 border-l-2 border-emerald-400" />
-                    <span className="absolute -top-1 -right-1 w-4 h-4 border-t-2 border-r-2 border-emerald-400" />
-                    <span className="absolute -bottom-1 -left-1 w-4 h-4 border-b-2 border-l-2 border-emerald-400" />
-                    <span className="absolute -bottom-1 -right-1 w-4 h-4 border-b-2 border-r-2 border-emerald-400" />
-                    {/* Scanning Line Animation */}
-                    <div className="w-full h-1 bg-gradient-to-r from-transparent via-emerald-400 to-transparent absolute top-1/2 -translate-y-1/2 animate-pulse" />
-                  </div>
-                </div>
+              {/* WebRTC Camera Viewfinder / Clean Fallback Card */}
+              <div className="relative rounded-2xl overflow-hidden bg-slate-950 border-2 border-indigo-500/80 aspect-video flex items-center justify-center text-center">
+                {isCameraActive ? (
+                  <>
+                    {/* Live WebRTC Video Stream */}
+                    <video
+                      ref={videoRef}
+                      autoPlay
+                      playsInline
+                      muted
+                      className="absolute inset-0 w-full h-full object-cover"
+                    />
 
-                <div className="relative z-10 py-6 space-y-2">
-                  <Camera className="w-8 h-8 text-emerald-400 mx-auto" />
-                  <div className="text-xs font-bold text-white">
-                    कॅमेरा व्ह्यू: शेतकऱ्याचा डिजिटल गेट पास QR कोड फ्रेममध्ये धरा
+                    {/* Viewfinder Reticle Overlay */}
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                      <div className="w-44 h-44 border-2 border-dashed border-emerald-400 rounded-2xl relative shadow-lg">
+                        <span className="absolute -top-1 -left-1 w-4 h-4 border-t-2 border-l-2 border-emerald-400" />
+                        <span className="absolute -top-1 -right-1 w-4 h-4 border-t-2 border-r-2 border-emerald-400" />
+                        <span className="absolute -bottom-1 -left-1 w-4 h-4 border-b-2 border-l-2 border-emerald-400" />
+                        <span className="absolute -bottom-1 -right-1 w-4 h-4 border-b-2 border-r-2 border-emerald-400" />
+                        {/* Animated Scanning Beam */}
+                        <div className="w-full h-1 bg-gradient-to-r from-transparent via-emerald-400 to-transparent absolute top-1/2 -translate-y-1/2 animate-pulse" />
+                      </div>
+                    </div>
+
+                    <div className="absolute bottom-2 left-0 right-0 text-center pointer-events-none">
+                      <span className="bg-black/70 text-emerald-300 font-bold text-[11px] px-3 py-1 rounded-full backdrop-blur-xs">
+                        QR कोड फ्रेममध्ये धरून स्कॅन करा
+                      </span>
+                    </div>
+                  </>
+                ) : isCameraLoading ? (
+                  <div className="p-6 space-y-2 text-center text-white">
+                    <div className="w-8 h-8 rounded-full border-2 border-emerald-400 border-t-transparent animate-spin mx-auto" />
+                    <p className="text-xs font-semibold text-slate-300">
+                      कॅमेरा सुरू केला जात आहे...
+                    </p>
                   </div>
-                  <p className="text-[11px] text-slate-400">
-                    किंवा खालील बॉक्समध्ये गेट पास कोड टाईप करा
-                  </p>
-                </div>
+                ) : (
+                  /* Clean Fallback if camera is unavailable or blocked */
+                  <div className="p-6 space-y-2 text-center text-white relative z-10 max-w-sm">
+                    <div className="w-12 h-12 rounded-2xl bg-amber-500/20 border border-amber-400/40 text-amber-400 flex items-center justify-center mx-auto mb-1">
+                      <CameraOff className="w-6 h-6" />
+                    </div>
+                    <div className="text-xs font-bold text-amber-300 leading-snug">
+                      {cameraError || 'कॅमेरा सुरू करता आला नाही, खालील कोड वापरून पडताळणी करा'}
+                    </div>
+                    <p className="text-[11px] text-slate-400 leading-relaxed">
+                      शेतकऱ्याच्या मोबाईलवरील किंवा छापील पावतीवरील <strong className="text-amber-200">GP-SLP</strong> कोड खालील बॉक्समध्ये टाईप करा.
+                    </p>
+                  </div>
+                )}
               </div>
 
               {/* Code Input Form */}
@@ -233,7 +330,7 @@ export default function MerchantInwardScannerModal({
                   <button
                     type="button"
                     onClick={handleQuickFill}
-                    className="text-indigo-600 hover:text-indigo-800 text-[11px] font-semibold underline cursor-pointer"
+                    className="text-indigo-600 hover:text-indigo-800 text-[11px] font-semibold underline cursor-pointer active:scale-95"
                   >
                     चाचणीसाठी कोड भरा ({expectedPassId})
                   </button>
@@ -252,7 +349,9 @@ export default function MerchantInwardScannerModal({
                       setErrorMsg('');
                     }}
                     onKeyDown={(e) => {
-                      if (e.key === 'Enter') handleVerify();
+                      if (e.key === 'Enter' && gatePassCodeInput.trim()) {
+                        handleVerify();
+                      }
                     }}
                     placeholder={`उदा. ${expectedPassId}`}
                     className="block w-full pl-10 pr-3 py-3 border-2 border-gray-300 rounded-xl text-sm font-mono uppercase font-bold text-gray-900 focus:outline-none focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600"
@@ -267,7 +366,7 @@ export default function MerchantInwardScannerModal({
                 )}
               </div>
 
-              {/* Action Button */}
+              {/* Action Button: Immediately enabled once code is populated */}
               <div className="pt-2">
                 <button
                   type="button"
@@ -275,10 +374,17 @@ export default function MerchantInwardScannerModal({
                   disabled={!gatePassCodeInput.trim() || isVerifying}
                   className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-indigo-700 to-indigo-900 hover:from-indigo-600 hover:to-indigo-800 active:scale-98 text-white font-bold text-sm shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <PackageCheck className="w-5 h-5" />
-                  <span>
-                    {isVerifying ? 'पडताळणी सुरू आहे...' : 'पडताळणी करा व माल जमा करा (Verify & Receive)'}
-                  </span>
+                  {isVerifying ? (
+                    <>
+                      <RefreshCw className="w-5 h-5 animate-spin" />
+                      <span>पडताळणी सुरू आहे...</span>
+                    </>
+                  ) : (
+                    <>
+                      <PackageCheck className="w-5 h-5" />
+                      <span>पडताळणी करा व माल जमा करा (Verify & Receive)</span>
+                    </>
+                  )}
                 </button>
               </div>
             </>
