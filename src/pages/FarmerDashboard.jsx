@@ -17,6 +17,7 @@ import {
   Landmark,
   CreditCard,
   FileCheck,
+  ArrowRight,
 } from 'lucide-react';
 
 export default function FarmerDashboard() {
