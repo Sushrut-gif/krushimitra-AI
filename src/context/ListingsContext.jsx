@@ -42,25 +42,375 @@ export function generateSampleBids(basePrice = 2000) {
   ];
 }
 
+export const DEFAULT_SOLAPUR_LISTINGS = [
+  {
+    id: 'KM-88401',
+    farmerId: 'FARMER_101',
+    farmerName: 'विष्णू महादेव गायकवाड',
+    farmerMobile: '9822012345',
+    cropName: 'कांदा (लाल गावरान)',
+    category: 'भाजीपाला',
+    variety: 'नाशिक लाल / सोलापूर गावरान',
+    qualityGrade: 'Grade A',
+    aiScore: 95,
+    moisture: '11.4%',
+    quantity: 85,
+    unit: 'क्विंटल',
+    basePrice: 1650,
+    location: 'कुर्डूवाडी, ता. माढा (सोलापूर)',
+    listingDate: new Date().toISOString().split('T')[0],
+    image: 'https://images.unsplash.com/photo-1618512496248-a07fe83aa8cb?w=600&auto=format&fit=crop&q=80',
+    status: 'बोली सुरू (Active Bidding)',
+    createdAt: new Date(Date.now() - 40 * 60000).toISOString(),
+    notes: 'सुपर सुका माल, एकसारखा ५५ मिमी+ आकार, कोणताही डाग किंवा सड नाही.',
+    estimatedMarketPrice: '₹१,७०० - ₹२,१०० / क्विंटल',
+    bids: [
+      {
+        id: 'BID_99101',
+        merchantName: 'श्री सिद्धेश्वर व्हेजिटेबल कंपनी',
+        merchantPhone: '9423456789',
+        merchantLocation: 'बाजार समिती गाळा क्र. १२',
+        amount: 1780,
+        timestamp: new Date(Date.now() - 25 * 60000).toISOString(),
+        timeFormatted: '२५ मिनिटांपूर्वी',
+      },
+      {
+        id: 'BID_99102',
+        merchantName: 'महादेव व्हेजिटेबल सप्लायर्स',
+        merchantPhone: '9765432100',
+        merchantLocation: 'नवीन कांदा मार्केट यार्ड',
+        amount: 1920,
+        timestamp: new Date(Date.now() - 6 * 60000).toISOString(),
+        timeFormatted: '६ मिनिटांपूर्वी',
+      },
+    ],
+  },
+  {
+    id: 'KM-88402',
+    farmerId: 'FARMER_102',
+    farmerName: 'समाधान रामचंद्र शिंदे',
+    farmerMobile: '9850123789',
+    cropName: 'डाळिंब (भगवा सुपर)',
+    category: 'फळे',
+    variety: 'सोलापूर भगवा (Export Quality)',
+    qualityGrade: 'Grade A',
+    aiScore: 98,
+    moisture: '16.5° Brix Sugar',
+    quantity: 40,
+    unit: 'क्विंटल',
+    basePrice: 7200,
+    location: 'सांगोला, जि. सोलापूर',
+    listingDate: new Date().toISOString().split('T')[0],
+    image: 'https://images.unsplash.com/photo-1615485290382-441e4d049cb5?w=600&auto=format&fit=crop&q=80',
+    status: 'बोली सुरू (Active Bidding)',
+    createdAt: new Date(Date.now() - 65 * 60000).toISOString(),
+    notes: '२५०-३०० ग्रॅम प्रति नग, गर्द लाल रंगाचे दाणे, उत्तम गोडी व टिकाऊपणा.',
+    estimatedMarketPrice: '₹७,५०० - ₹८,५०० / क्विंटल',
+    bids: [
+      {
+        id: 'BID_99201',
+        merchantName: 'सोलापूर ॲग्रो ट्रेडर्स',
+        merchantPhone: '9822154321',
+        merchantLocation: 'सोलापूर APMC मार्केट यार्ड',
+        amount: 7600,
+        timestamp: new Date(Date.now() - 35 * 60000).toISOString(),
+        timeFormatted: '३५ मिनिटांपूर्वी',
+      },
+      {
+        id: 'BID_99202',
+        merchantName: 'अपेक्स फ्रुट एक्स्पोर्टर्स',
+        merchantPhone: '9822889900',
+        merchantLocation: 'कुमठा नाका फ्रुट टर्मिनल',
+        amount: 8150,
+        timestamp: new Date(Date.now() - 8 * 60000).toISOString(),
+        timeFormatted: '८ मिनिटांपूर्वी',
+      },
+    ],
+  },
+  {
+    id: 'KM-88403',
+    farmerId: 'FARMER_103',
+    farmerName: 'तानाजी बाबुराव माने',
+    farmerMobile: '9890456123',
+    cropName: 'मालदांडी ज्वारी (M 35-1)',
+    category: 'धान्य व कडधान्ये',
+    variety: 'मालदांडी मोती दाणा',
+    qualityGrade: 'Grade A',
+    aiScore: 96,
+    moisture: '10.2%',
+    quantity: 120,
+    unit: 'क्विंटल',
+    basePrice: 3400,
+    location: 'मोहोळ, जि. सोलापूर',
+    listingDate: new Date().toISOString().split('T')[0],
+    image: 'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=600&auto=format&fit=crop&q=80',
+    status: 'बोली सुरू (Active Bidding)',
+    createdAt: new Date(Date.now() - 110 * 60000).toISOString(),
+    notes: 'गावरान मालदांडी ज्वारी, चमकणारा पांढरा मोत्यासारखा दाणा, भुसा नसलेला स्वच्छ माल.',
+    estimatedMarketPrice: '₹३,५०० - ₹३,९०० / क्विंटल',
+    bids: [
+      {
+        id: 'BID_99301',
+        merchantName: 'सिद्धेश्वर ग्रेन मर्चंट्स',
+        merchantPhone: '9890123456',
+        merchantLocation: 'मंगळवार पेठ यार्ड',
+        amount: 3620,
+        timestamp: new Date(Date.now() - 40 * 60000).toISOString(),
+        timeFormatted: '४० मिनिटांपूर्वी',
+      },
+      {
+        id: 'BID_99302',
+        merchantName: 'श्री लक्ष्मी ट्रेडिंग कंपनी',
+        merchantPhone: '9422055667',
+        merchantLocation: 'धान्य बाजार गाळा क्र. ४',
+        amount: 3780,
+        timestamp: new Date(Date.now() - 15 * 60000).toISOString(),
+        timeFormatted: '१५ मिनिटांपूर्वी',
+      },
+    ],
+  },
+  {
+    id: 'KM-88404',
+    farmerId: 'FARMER_104',
+    farmerName: 'भारत तुकाराम भोसले',
+    farmerMobile: '9764512398',
+    cropName: 'सोयाबीन (पिवळे JS 335)',
+    category: 'तेलबिया',
+    variety: 'JS 335 बोल्ड',
+    qualityGrade: 'Grade B+',
+    aiScore: 91,
+    moisture: '10.8%',
+    quantity: 65,
+    unit: 'क्विंटल',
+    basePrice: 4150,
+    location: 'बार्शी, जि. सोलापूर',
+    listingDate: new Date().toISOString().split('T')[0],
+    image: 'https://images.unsplash.com/photo-1599940824399-b87987ceb72a?w=600&auto=format&fit=crop&q=80',
+    status: 'बोली सुरू (Active Bidding)',
+    createdAt: new Date(Date.now() - 140 * 60000).toISOString(),
+    notes: 'तेल प्रमाण १९.५%+, ओलावा १०.८%, स्वच्छ चाळलेला माल.',
+    estimatedMarketPrice: '₹४,२०० - ₹४,५५० / क्विंटल',
+    bids: [
+      {
+        id: 'BID_99401',
+        merchantName: 'सोलापूर ऑइल इंडस्ट्रीज',
+        merchantPhone: '9823112233',
+        merchantLocation: 'एमआयडीसी, सोलापूर',
+        amount: 4320,
+        timestamp: new Date(Date.now() - 50 * 60000).toISOString(),
+        timeFormatted: '५० मिनिटांपूर्वी',
+      },
+      {
+        id: 'BID_99402',
+        merchantName: 'किसान ॲग्रो ऑइल मिल्स',
+        merchantPhone: '9850998877',
+        merchantLocation: 'बाजार समिती आवक शेड',
+        amount: 4450,
+        timestamp: new Date(Date.now() - 12 * 60000).toISOString(),
+        timeFormatted: '१२ मिनिटांपूर्वी',
+      },
+    ],
+  },
+  {
+    id: 'KM-88405',
+    farmerId: 'FARMER_105',
+    farmerName: 'अंकुश नारायण पवार',
+    farmerMobile: '9921345670',
+    cropName: 'द्राक्षे (शरद सीडलेस)',
+    category: 'फळे',
+    variety: 'काळी शरद सीडलेस',
+    qualityGrade: 'Grade A',
+    aiScore: 94,
+    moisture: '18.2° Brix Sugar',
+    quantity: 35,
+    unit: 'क्विंटल',
+    basePrice: 5500,
+    location: 'नान्नज, ता. उत्तर सोलापूर',
+    listingDate: new Date().toISOString().split('T')[0],
+    image: 'https://images.unsplash.com/photo-1537640538966-79f369143f8f?w=600&auto=format&fit=crop&q=80',
+    status: 'बोली सुरू (Active Bidding)',
+    createdAt: new Date(Date.now() - 180 * 60000).toISOString(),
+    notes: 'मण्यांचा आकार १८ मिमी+, उत्तम गोडवा व क्रंच, थेट निर्यात किंवा स्थानिक बाजार.',
+    estimatedMarketPrice: '₹५,८०० - ₹६,४०० / क्विंटल',
+    bids: [
+      {
+        id: 'BID_99501',
+        merchantName: 'सोलापूर ॲग्रो ट्रेडर्स',
+        merchantPhone: '9822154321',
+        merchantLocation: 'सोलापूर APMC मार्केट यार्ड',
+        amount: 5900,
+        timestamp: new Date(Date.now() - 45 * 60000).toISOString(),
+        timeFormatted: '४५ मिनिटांपूर्वी',
+      },
+      {
+        id: 'BID_99502',
+        merchantName: 'ग्लोबल फ्रेश एक्स्पोर्ट्स',
+        merchantPhone: '9822776655',
+        merchantLocation: 'कोल्ड स्टोरेज संकुल',
+        amount: 6250,
+        timestamp: new Date(Date.now() - 18 * 60000).toISOString(),
+        timeFormatted: '१८ मिनिटांपूर्वी',
+      },
+    ],
+  },
+  {
+    id: 'KM-88406',
+    farmerId: 'FARMER_106',
+    farmerName: 'मल्लिकार्जुन शिवण्णा बिराजदार',
+    farmerMobile: '9421034567',
+    cropName: 'काटेरी गावरान वांगी (Brinjal)',
+    category: 'भाजीपाला',
+    variety: 'सोलापूर काटेरी वांगी',
+    qualityGrade: 'Grade A',
+    aiScore: 93,
+    moisture: 'सकाळची ताजी तोडणी',
+    quantity: 28,
+    unit: 'क्विंटल',
+    basePrice: 1800,
+    location: 'मंद्रूप, ता. दक्षिण सोलापूर',
+    listingDate: new Date().toISOString().split('T')[0],
+    image: 'https://images.unsplash.com/photo-1598170845058-32b9d6a5da37?w=600&auto=format&fit=crop&q=80',
+    status: 'बोली सुरू (Active Bidding)',
+    createdAt: new Date(Date.now() - 75 * 60000).toISOString(),
+    notes: 'चमकदार जांभळा रंग, काटेरी देठ, भरतासाठी अतिशय उत्तम व ताजी तोडणी.',
+    estimatedMarketPrice: '₹१,९०० - ₹२,३०० / क्विंटल',
+    bids: [
+      {
+        id: 'BID_99601',
+        merchantName: 'श्री सिद्धेश्वर व्हेजिटेबल कंपनी',
+        merchantPhone: '9423456789',
+        merchantLocation: 'बाजार समिती गाळा क्र. १२',
+        amount: 1980,
+        timestamp: new Date(Date.now() - 30 * 60000).toISOString(),
+        timeFormatted: '३० मिनिटांपूर्वी',
+      },
+      {
+        id: 'BID_99602',
+        merchantName: 'महादेव व्हेजिटेबल सप्लायर्स',
+        merchantPhone: '9765432100',
+        merchantLocation: 'नवीन कांदा मार्केट यार्ड',
+        amount: 2150,
+        timestamp: new Date(Date.now() - 4 * 60000).toISOString(),
+        timeFormatted: '४ मिनिटांपूर्वी',
+      },
+    ],
+  },
+];
+
+export function getCropCategory(cropName = '', currentCategory = '') {
+  if (currentCategory && currentCategory !== 'सर्व') return currentCategory;
+  const name = (cropName || '').toLowerCase();
+  if (
+    name.includes('कांदा') ||
+    name.includes('onion') ||
+    name.includes('बटाटा') ||
+    name.includes('potato') ||
+    name.includes('टोमॅटो') ||
+    name.includes('tomato') ||
+    name.includes('वांगी') ||
+    name.includes('brinjal') ||
+    name.includes('भेंडी') ||
+    name.includes('okra') ||
+    name.includes('लसूण') ||
+    name.includes('garlic') ||
+    name.includes('मिरची') ||
+    name.includes('chilli') ||
+    name.includes('कोबी') ||
+    name.includes('cabbage') ||
+    name.includes('फ्लॉवर') ||
+    name.includes('cauliflower') ||
+    name.includes('भाजी')
+  ) {
+    return 'भाजीपाला';
+  }
+  if (
+    name.includes('डाळिंब') ||
+    name.includes('pomegranate') ||
+    name.includes('द्राक्ष') ||
+    name.includes('grape') ||
+    name.includes('बोर') ||
+    name.includes('पेरू') ||
+    name.includes('guava') ||
+    name.includes('केळी') ||
+    name.includes('banana') ||
+    name.includes('पपई') ||
+    name.includes('papaya') ||
+    name.includes('आंबा') ||
+    name.includes('mango') ||
+    name.includes('संत्री') ||
+    name.includes('orange') ||
+    name.includes('मोसंबी') ||
+    name.includes('कलिंगड') ||
+    name.includes('watermelon') ||
+    name.includes('फळ')
+  ) {
+    return 'फळे';
+  }
+  if (
+    name.includes('ज्वारी') ||
+    name.includes('jowar') ||
+    name.includes('sorghum') ||
+    name.includes('गहू') ||
+    name.includes('wheat') ||
+    name.includes('बाजरी') ||
+    name.includes('bajra') ||
+    name.includes('मका') ||
+    name.includes('maize') ||
+    name.includes('तूर') ||
+    name.includes('tur') ||
+    name.includes('हरभरा') ||
+    name.includes('chana') ||
+    name.includes('उडीद') ||
+    name.includes('udid') ||
+    name.includes('मूग') ||
+    name.includes('moong') ||
+    name.includes('धान्य') ||
+    name.includes('कडधान्य')
+  ) {
+    return 'धान्य व कडधान्ये';
+  }
+  if (
+    name.includes('सोयाबीन') ||
+    name.includes('soybean') ||
+    name.includes('सूर्यफूल') ||
+    name.includes('sunflower') ||
+    name.includes('भुईमूग') ||
+    name.includes('groundnut') ||
+    name.includes('करडई') ||
+    name.includes('safflower') ||
+    name.includes('तीळ') ||
+    name.includes('sesame') ||
+    name.includes('तेलबिया')
+  ) {
+    return 'तेलबिया';
+  }
+  return 'भाजीपाला';
+}
+
 export function ListingsProvider({ children }) {
   const [listings, setListings] = useState(() => {
     try {
       const saved = localStorage.getItem(LISTINGS_STORAGE_KEY);
       const parsed = saved ? JSON.parse(saved) : [];
 
-      // Ensure every listing has realistic bids array populated
+      if (!parsed || parsed.length === 0) {
+        localStorage.setItem(LISTINGS_STORAGE_KEY, JSON.stringify(DEFAULT_SOLAPUR_LISTINGS));
+        return DEFAULT_SOLAPUR_LISTINGS;
+      }
+
+      // Ensure every listing has realistic bids array and category populated
       return parsed.map((item) => {
-        if (!item.bids || item.bids.length === 0) {
-          return {
-            ...item,
-            bids: generateSampleBids(item.basePrice),
-          };
-        }
-        return item;
+        const withBids = !item.bids || item.bids.length === 0
+          ? { ...item, bids: generateSampleBids(item.basePrice) }
+          : item;
+        return {
+          ...withBids,
+          category: withBids.category || getCropCategory(withBids.cropName),
+        };
       });
     } catch (e) {
       console.error('Failed to load listings from localStorage:', e);
-      return [];
+      return DEFAULT_SOLAPUR_LISTINGS;
     }
   });
 
@@ -86,6 +436,7 @@ export function ListingsProvider({ children }) {
       farmerName: listingData.farmerName || 'शेतकरी',
       farmerMobile: listingData.farmerMobile || '',
       cropName: listingData.cropName.trim(),
+      category: listingData.category || getCropCategory(listingData.cropName),
       qualityGrade: listingData.qualityGrade || 'मध्यम',
       quantity: Number(listingData.quantity) || 1,
       unit: listingData.unit || 'क्विंटल',
