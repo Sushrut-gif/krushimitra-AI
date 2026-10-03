@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowLeftRight, Sprout, Store, Landmark, User, LogOut } from 'lucide-react';
+import { ArrowLeftRight, Sprout, Store, Landmark, User, LogOut, ShieldCheck } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 const roleConfig = {
