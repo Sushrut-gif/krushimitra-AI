@@ -1,4 +1,9 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { supabase } from '../lib/supabaseClient';
+import {
+  fetchSupabaseMerchants,
+  updateSupabaseMerchantStatus,
+} from '../services/supabaseService';
 
 const AuthContext = createContext(null);
 
@@ -137,10 +142,74 @@ export function AuthProvider({ children }) {
       }
       return updated;
     });
+
+    // Asynchronously update Supabase merchants table
+    updateSupabaseMerchantStatus(merchantId, newStatus);
   };
 
-  // Initialize merchants storage on mount if absent
+  // Initialize merchants from Supabase and subscribe to Realtime updates
   useEffect(() => {
+    let isMounted = true;
+
+    async function loadMerchantsFromSupabase() {
+      try {
+        const dbMerchants = await fetchSupabaseMerchants();
+        if (!isMounted) return;
+        if (dbMerchants && dbMerchants.length > 0) {
+          const mapped = dbMerchants.map((m) => ({
+            id: m.id,
+            firmName: m.firm_name,
+            licenseNo: m.license_no,
+            mobile: m.mobile,
+            status: m.status || 'APPROVED',
+            operatingYard: m.yard || 'मंगळवार पेठ (मुख्य मार्केट)',
+            merchantType: m.merchant_type || 'अडत व्यापारी (Commission Agent)',
+            registeredAt: m.created_at || new Date().toISOString(),
+          }));
+          setMerchants(mapped);
+        }
+      } catch (err) {
+        console.warn('[Supabase] Error loading merchants:', err);
+      }
+    }
+
+    loadMerchantsFromSupabase();
+
+    // Supabase Realtime channel for merchants table
+    const channel = supabase
+      .channel('merchants-realtime-channel')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'merchants' },
+        (payload) => {
+          if (payload.eventType === 'UPDATE' && payload.new) {
+            setMerchants((prev) =>
+              prev.map((m) =>
+                m.id === payload.new.id || m.licenseNo === payload.new.license_no
+                  ? { ...m, status: payload.new.status }
+                  : m
+              )
+            );
+          } else if (payload.eventType === 'INSERT' && payload.new) {
+            setMerchants((prev) => {
+              if (prev.some((m) => m.id === payload.new.id || m.licenseNo === payload.new.license_no)) return prev;
+              const newM = {
+                id: payload.new.id,
+                firmName: payload.new.firm_name,
+                licenseNo: payload.new.license_no,
+                mobile: payload.new.mobile,
+                status: payload.new.status || 'APPROVED',
+                operatingYard: payload.new.yard || 'मंगळवार पेठ (मुख्य मार्केट)',
+                merchantType: payload.new.merchant_type || 'अडत व्यापारी (Commission Agent)',
+                registeredAt: payload.new.created_at || new Date().toISOString(),
+              };
+              return [...prev, newM];
+            });
+          }
+        }
+      )
+      .subscribe();
+
     try {
       if (!localStorage.getItem(MERCHANTS_STORAGE_KEY)) {
         localStorage.setItem(MERCHANTS_STORAGE_KEY, JSON.stringify(DEFAULT_SEEDED_MERCHANTS));
@@ -148,6 +217,11 @@ export function AuthProvider({ children }) {
     } catch (e) {
       console.error('Error initializing merchants storage:', e);
     }
+
+    return () => {
+      isMounted = false;
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   // Farmer registration

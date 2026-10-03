@@ -71,8 +71,11 @@ export default function AdminDashboard() {
   const activeAuctions = useMemo(() => {
     return listings.filter(
       (item) =>
-        item.status !== 'विक्री पूर्ण (Sold)' &&
-        item.status !== 'विक्री पूर्ण (Deal Finalized / Sold)'
+        !item.status ||
+        (!item.status.includes('विक्री पूर्ण') &&
+          !item.status.includes('यार्डात प्राप्त') &&
+          item.status !== 'विक्री पूर्ण (Sold)' &&
+          item.status !== 'विक्री पूर्ण (Deal Finalized / Sold)')
     );
   }, [listings]);
 
@@ -80,13 +83,15 @@ export default function AdminDashboard() {
     return listings.filter(
       (item) =>
         item.gatePassVerified === true ||
-        item.inwardStatus === 'यार्डात प्राप्त (Delivered at Yard)'
+        (item.status && item.status.includes('यार्डात प्राप्त')) ||
+        (item.inwardStatus && item.inwardStatus.includes('यार्डात प्राप्त'))
     );
   }, [listings]);
 
   const settledDeals = useMemo(() => {
     return listings.filter(
       (item) =>
+        (item.status && (item.status.includes('विक्री पूर्ण') || item.status.includes('यार्डात प्राप्त'))) ||
         item.status === 'विक्री पूर्ण (Sold)' ||
         item.status === 'विक्री पूर्ण (Deal Finalized / Sold)' ||
         !!item.winningPrice
