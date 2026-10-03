@@ -340,6 +340,29 @@ export function ListingsProvider({ children }) {
   };
 
   /**
+   * Admin: Flag or pause suspicious listing / unflag
+   */
+  const toggleListingFlag = (listingId, reason = '') => {
+    let updatedLot = null;
+    setListings((prev) =>
+      prev.map((item) => {
+        if (item.id === listingId) {
+          const isFlagged = !item.adminFlagged;
+          updatedLot = {
+            ...item,
+            adminFlagged: isFlagged,
+            adminFlagReason: isFlagged ? (reason || 'संशयास्पद लिलाव / बाजार समिती नियमावली पडताळणी') : null,
+            adminFlaggedAt: isFlagged ? new Date().toISOString() : null,
+          };
+          return updatedLot;
+        }
+        return item;
+      })
+    );
+    return updatedLot;
+  };
+
+  /**
    * Get listings for a specific farmer
    */
   const getFarmerListings = (farmerMobile) => {
@@ -361,6 +384,7 @@ export function ListingsProvider({ children }) {
     placeBid,
     markPaymentReleased,
     markLotInwardDelivered,
+    toggleListingFlag,
     getFarmerListings,
     removeListing,
   };

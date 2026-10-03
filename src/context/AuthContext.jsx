@@ -35,6 +35,7 @@ const DEFAULT_SEEDED_MERCHANTS = [
     gstPan: '27AABCS1429B1Z8',
     operatingYard: 'मंगळवार पेठ (मुख्य मार्केट)',
     merchantType: 'अडत व्यापारी (Commission Agent)',
+    status: 'APPROVED', // 'APPROVED' | 'PENDING' | 'SUSPENDED'
     password: 'password123',
     registeredAt: new Date().toISOString(),
   },
@@ -46,6 +47,7 @@ const DEFAULT_SEEDED_MERCHANTS = [
     gstPan: '27XYZPA9876C1Z4',
     operatingYard: 'कुमठा नाका यार्ड',
     merchantType: 'थेट खरेदीदार (Direct Buyer)',
+    status: 'APPROVED',
     password: 'password123',
     registeredAt: new Date().toISOString(),
   },
@@ -79,6 +81,23 @@ export function AuthProvider({ children }) {
     }
   });
 
+  const [merchants, setMerchants] = useState(() => {
+    try {
+      const data = localStorage.getItem(MERCHANTS_STORAGE_KEY);
+      if (data) {
+        const parsed = JSON.parse(data);
+        return parsed.map((m) => ({
+          ...m,
+          status: m.status || 'APPROVED',
+        }));
+      }
+      localStorage.setItem(MERCHANTS_STORAGE_KEY, JSON.stringify(DEFAULT_SEEDED_MERCHANTS));
+      return DEFAULT_SEEDED_MERCHANTS;
+    } catch {
+      return DEFAULT_SEEDED_MERCHANTS;
+    }
+  });
+
   const [loading, setLoading] = useState(false);
 
   // Helper to get registered farmers from localStorage
@@ -103,6 +122,21 @@ export function AuthProvider({ children }) {
     } catch {
       return DEFAULT_SEEDED_MERCHANTS;
     }
+  };
+
+  // Update merchant status (APPROVED, PENDING, SUSPENDED)
+  const updateMerchantStatus = (merchantId, newStatus) => {
+    setMerchants((prev) => {
+      const updated = prev.map((m) =>
+        m.id === merchantId || m.licenseNo === merchantId ? { ...m, status: newStatus } : m
+      );
+      try {
+        localStorage.setItem(MERCHANTS_STORAGE_KEY, JSON.stringify(updated));
+      } catch (e) {
+        console.error('Error saving updated merchants:', e);
+      }
+      return updated;
+    });
   };
 
   // Initialize merchants storage on mount if absent
@@ -221,11 +255,13 @@ export function AuthProvider({ children }) {
       gstPan: gstPan ? gstPan.trim().toUpperCase() : '',
       operatingYard: operatingYard || 'मंगळवार पेठ (मुख्य मार्केट)',
       merchantType: merchantType || 'अडत व्यापारी (Commission Agent)',
+      status: 'APPROVED',
       password,
       registeredAt: new Date().toISOString(),
     };
 
     const updatedMerchants = [...merchants, newMerchant];
+    setMerchants(updatedMerchants);
     localStorage.setItem(MERCHANTS_STORAGE_KEY, JSON.stringify(updatedMerchants));
 
     // Save active session
@@ -309,6 +345,8 @@ export function AuthProvider({ children }) {
     loginFarmer,
     logoutFarmer,
     merchantUser,
+    merchants,
+    updateMerchantStatus,
     isMerchantAuthenticated: !!merchantUser,
     registerMerchant,
     loginMerchant,
