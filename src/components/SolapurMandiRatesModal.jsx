@@ -19,6 +19,7 @@ import {
   Layers,
 } from 'lucide-react';
 import { COMMODITY_CATEGORIES, SOLAPUR_COMMODITIES } from '../data/solapurCommodities';
+import { getFormattedMarathiDate, getMarketSessionInfo } from '../utils/dateUtils';
 
 // Visual Category Config with high-contrast emojis & labels
 const CATEGORY_CONFIG = {
@@ -36,15 +37,14 @@ export default function SolapurMandiRatesModal({ isOpen, onClose, onSelectCropFo
   const [sortBy, setSortBy] = useState('max_high_low'); // 'max_high_low' | 'max_low_high' | 'avg_high_low' | 'arrivals_high_low' | 'name_asc'
   const [trendFilter, setTrendFilter] = useState('all'); // 'all' | 'up' | 'down' | 'stable'
 
-  // Current formatted date in Marathi
-  const formattedDate = useMemo(() => {
-    const today = new Date();
-    return today.toLocaleDateString('mr-IN', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric',
-    });
-  }, []);
+  // Dynamic Marathi date & market session based on current time
+  const { formattedDate, marketSession } = useMemo(() => {
+    const now = new Date();
+    return {
+      formattedDate: getFormattedMarathiDate(now),
+      marketSession: getMarketSessionInfo(now),
+    };
+  }, [isOpen]);
 
   // Filtered & Sorted Commodities
   const filteredCommodities = useMemo(() => {
@@ -149,13 +149,14 @@ export default function SolapurMandiRatesModal({ isOpen, onClose, onSelectCropFo
                     महाराष्ट्र शासन मान्यताप्राप्त
                   </span>
                   
-                  {/* Glowing Live Status Badge */}
-                  <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-950/80 border border-emerald-400/50 text-emerald-200 shadow-inner backdrop-blur-xs">
-                    <span className="relative flex h-2 w-2">
+                  {/* Glowing Live Status Badge with Dynamic Date & Session */}
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[11px] font-bold bg-emerald-950/80 border border-emerald-400/50 text-emerald-200 shadow-inner backdrop-blur-xs">
+                    <span className="relative flex h-2 w-2 shrink-0">
                       <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                       <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400"></span>
                     </span>
-                    <span>थेट अपडेट चालू (Live Market Yard)</span>
+                    <span className="hidden sm:inline">🕒 {formattedDate} | {marketSession.sessionName}</span>
+                    <span className="sm:hidden">🕒 {formattedDate} | {marketSession.shortSession}</span>
                   </div>
                 </div>
 
@@ -201,8 +202,8 @@ export default function SolapurMandiRatesModal({ isOpen, onClose, onSelectCropFo
                   </div>
                   <div className="min-w-0">
                     <span className="text-[10px] text-emerald-300 block font-semibold uppercase tracking-wider">बाजार सत्र व तारीख</span>
-                    <span className="font-bold text-white text-[11px] sm:text-xs truncate block">
-                      🕒 दि. {formattedDate} (ताजी सकाळ आवक)
+                    <span className="font-bold text-white text-[11px] sm:text-xs truncate block" title={`${formattedDate} | ${marketSession.sessionName}`}>
+                      🕒 {formattedDate} | {marketSession.sessionName}
                     </span>
                   </div>
                 </div>

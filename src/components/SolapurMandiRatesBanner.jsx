@@ -9,16 +9,16 @@ import {
   Calendar,
 } from 'lucide-react';
 import { SOLAPUR_COMMODITIES } from '../data/solapurCommodities';
+import { getFormattedMarathiDate, getMarketSessionInfo } from '../utils/dateUtils';
 
 export default function SolapurMandiRatesBanner({ onOpenMandiModal }) {
   // Highlight top 5 key staple Solapur commodities for quick glance
   const featuredIds = ['onion_red', 'pomegranate_bhagwa', 'jowar_maldandi', 'grapes_thomson', 'soybean_yellow'];
   const featuredItems = SOLAPUR_COMMODITIES.filter((item) => featuredIds.includes(item.id));
 
-  const todayStr = new Date().toLocaleDateString('mr-IN', {
-    day: 'numeric',
-    month: 'short',
-  });
+  const now = new Date();
+  const formattedDate = getFormattedMarathiDate(now);
+  const marketSession = getMarketSessionInfo(now);
 
   return (
     <div className="bg-gradient-to-r from-emerald-900 via-emerald-800 to-teal-950 rounded-2xl p-5 sm:p-6 text-white shadow-md border border-emerald-700/50 relative overflow-hidden">
@@ -31,11 +31,11 @@ export default function SolapurMandiRatesBanner({ onOpenMandiModal }) {
           <div className="flex flex-wrap items-center gap-2">
             <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-500/30 text-emerald-200 border border-emerald-400/30">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-              थेट ई-लिलाव आवक
+              {marketSession.statusText}
             </span>
             <span className="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-200/90">
               <Calendar className="w-3 h-3 text-emerald-300" />
-              आजचे भाव ({todayStr})
+              {formattedDate} • {marketSession.shortSession}
             </span>
             <span className="text-[11px] text-amber-300 font-bold bg-amber-400/20 px-2 py-0.5 rounded-md">
               सोलापूर मुख्य यार्ड
