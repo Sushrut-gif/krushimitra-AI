@@ -11,9 +11,9 @@ import {
 import { SOLAPUR_COMMODITIES } from '../data/solapurCommodities';
 import { getFormattedMarathiDate, getMarketSessionInfo } from '../utils/dateUtils';
 
-export default function SolapurMandiRatesBanner({ onOpenMandiModal }) {
+export default function SolapurMandiRatesBanner({ onOpenMandiModal, onOpenIntelligence }) {
   // Highlight top 5 key staple Solapur commodities for quick glance
-  const featuredIds = ['onion_red', 'pomegranate_bhagwa', 'jowar_maldandi', 'grapes_thomson', 'soybean_yellow'];
+  const featuredIds = ['onion_red_solapur', 'pomegranate_bhagwa', 'jowar_maldandi', 'grapes_thomson', 'soybean_yellow'];
   const featuredItems = SOLAPUR_COMMODITIES.filter((item) => featuredIds.includes(item.id));
 
   const now = new Date();
@@ -50,14 +50,24 @@ export default function SolapurMandiRatesBanner({ onOpenMandiModal }) {
           </p>
         </div>
 
-        {/* Right Side: CTA Button */}
-        <div className="shrink-0 flex items-center">
+        {/* Right Side: CTA Buttons */}
+        <div className="shrink-0 flex flex-wrap items-center gap-2">
+          {onOpenIntelligence && (
+            <button
+              onClick={onOpenIntelligence}
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs shadow-md transition-all cursor-pointer"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-slate-950" />
+              <span>AI भाव अंदाज व सल्ला</span>
+            </button>
+          )}
+
           <button
             onClick={onOpenMandiModal}
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-white text-emerald-900 font-extrabold text-sm hover:bg-emerald-50 active:scale-[0.98] transition-all shadow-lg hover:shadow-emerald-900/30 cursor-pointer"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-white text-emerald-900 font-extrabold text-xs sm:text-sm hover:bg-emerald-50 active:scale-[0.98] transition-all shadow-md cursor-pointer"
           >
             <BarChart3 className="w-4 h-4 text-emerald-700" />
-            <span>सर्व पिकांचे बाजारभाव पहा</span>
+            <span>थेट दर व आवक पहा</span>
             <ArrowRight className="w-4 h-4 text-emerald-700" />
           </button>
         </div>

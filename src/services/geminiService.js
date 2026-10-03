@@ -397,4 +397,228 @@ Please give a direct, thorough, and structured answer in ${langName}:`;
 - **सल्ला:** आपण कोणत्याही पिकाचे नाव, खताचे प्रमाण किंवा रोगाची लक्षणे विचारल्यास कृषीमित्र AI आपल्याला त्वरित अचूक मार्गदर्शन करेल.`;
 }
 
+function extractJsonFromText(text) {
+  if (!text) return null;
+  try {
+    const match = text.match(/```json\s*([\s\S]*?)\s*```/) || text.match(/\{[\s\S]*\}/);
+    if (match) {
+      return JSON.parse(match[1] || match[0]);
+    }
+  } catch (e) {}
+  return null;
+}
+
+/**
+ * Static domain expert advisory tailored for Solapur APMC commodities
+ */
+export function getSolapurStaticAdvisory(cropId = 'onion_red_solapur', cropObj = null) {
+  const crop = cropObj || SOLAPUR_COMMODITIES.find((c) => c.id === cropId) || SOLAPUR_COMMODITIES[0];
+
+  switch (cropId) {
+    case 'onion_red_solapur':
+    case 'onion_white':
+      return {
+        cropId,
+        cropName: crop.nameMr,
+        variety: crop.variety,
+        forecastTrend: 'सोलापूर बाजारात कांद्याची आवक आज १५-२०% ने घटल्याने मध्यम व मोठ्या गोल्टी कांद्याला चांगली मागणी आहे. येत्या २-३ दिवसांत दरात ₹१५० ते ₹२५० प्रति क्विंटल वाढ अपेक्षित आहे.',
+        forecastBadge: 'तेजी (+₹१५०-₹२५० वाढ)',
+        trendDirection: 'up',
+        recommendation: 'टप्प्याटप्प्याने विक्री करा (Staggered Sale)',
+        recommendationType: 'stagger',
+        arrivalPressure: 'कमी आवक - तेजीचा कल',
+        arrivalPressureType: 'low',
+        detailedAnalysis: 'मंगळवार पेठ कांदा मार्केट यार्डात स्थानिक आवक सुमारे १८,५०० क्विंटल असून दक्षिण भारतातून (कर्नाटक व तामिळनाडू) खरेदीदार सक्रिय आहेत. चांगल्या दर्जेदार लाल कांद्याला स्पर्धात्मक बोली मिळत आहे.',
+        gradingTip: 'कांदा काढणीनंतर पूर्णपणे सुकवून (मान सुकलेली) आणि ४५mm+ आकाराची स्वतंत्र प्रतवारी केल्यास प्रति क्विंटल ₹२०० ते ₹३५० पर्यंत अधिक भाव मिळतो. डॅमेज व पोकल कांदा वेगळा करावा.',
+        keyDrivers: [
+          'दक्षिण भारतातील बाजारांतून मजबूत मागणी',
+          'स्थानिक आवक मर्यादित राहिल्याने पुरवठा घट',
+          'सुपर गोल्टी व मोठ्या गोला कांद्याला व्यापाऱ्यांची पसंती',
+        ],
+      };
+
+    case 'pomegranate_bhagwa':
+      return {
+        cropId,
+        cropName: crop.nameMr,
+        variety: crop.variety,
+        forecastTrend: 'भगवा डाळिंबाला परराज्यातून (बंगळुरू, दिल्ली, गुजरात) निर्यात मागणी जोरदार असल्याने दर ₹१३,५०० ते ₹१७,५०० च्या उच्च पातळीवर टिकून राहतील.',
+        forecastBadge: 'उच्चांकी दर (स्थिर/तेजी)',
+        trendDirection: 'up',
+        recommendation: 'लिलावात त्वरित विक्री करा (Sell Now)',
+        recommendationType: 'sell_now',
+        arrivalPressure: 'मध्यम आवक - दर स्थिर',
+        arrivalPressureType: 'medium',
+        detailedAnalysis: 'कुमठा नाका फळ यार्डात डाळिंबाची दैनिक आवक ३,२०० क्विंटल असून ४००+ ग्रॅम आकाराच्या भगवा एक्सपोर्ट क्वॉलिटी डाळिंबाची खरेदी जोरात सुरू आहे.',
+        gradingTip: 'काळे डाग किंवा तेल्या नसलेले, चमकदार लाल आरक्ता रंग असलेले डाळिंब स्वतंत्र क्रेट्समध्ये पॅक करून ई-लिलावात सादर करावे.',
+        keyDrivers: [
+          'सणासुदीच्या पार्श्वभूमीवर परराज्यातून मोठी मागणी',
+          '४००+ ग्रॅम सुपर एक्सपोर्ट फळांना प्रीमियम दर',
+          'सोलापूर APMC मध्ये थेट निर्यातदार व्यापाऱ्यांची उपस्थिती',
+        ],
+      };
+
+    case 'jowar_maldandi':
+      return {
+        cropId,
+        cropName: crop.nameMr,
+        variety: crop.variety,
+        forecastTrend: 'सोलापुरी मालदांडी M-35-1 ज्वारीचे भाव ₹४,१०० ते ₹४,६५० च्या मजबूत पातळीवर स्थिर राहतील. स्थानिक व मुंबई-पुणे बाजारातून सतत मागणी असल्याने मंदीची शक्यता नाही.',
+        forecastBadge: 'स्थिर व मजबूत (₹४,१००-₹४,६५०)',
+        trendDirection: 'stable',
+        recommendation: 'माल रोखून ठेवा (Hold for Better Price)',
+        recommendationType: 'hold',
+        arrivalPressure: 'कमी आवक - तेजीचा कल',
+        arrivalPressureType: 'low',
+        detailedAnalysis: 'मुख्य धान्य मार्केट यार्डात मालदांडी ज्वारीची आवक १,८५० क्विंटल आहे. थेट किरकोळ व्यापारी व गृहउद्योग खरेदीदार मालदांडीच्या गोडीमुळे चांगला भाव देत आहेत.',
+        gradingTip: 'ज्वारी उन्हात कडक वाळवून, बारीक खडे व भुसा चाळून स्वच्छ ५० किलो पोत्यांत भरल्यास उच्च दर मिळतो.',
+        keyDrivers: [
+          'सोलापुरी मालदांडी वाणाची उच्च ब्रँड व्हॅल्यू',
+          'घरगुती व व्यापारी साठवणुकीसाठी मागणी',
+          'आवक नियंत्रणात असल्याने दर मजबूत',
+        ],
+      };
+
+    case 'tur_red':
+      return {
+        cropId,
+        cropName: crop.nameMr,
+        variety: crop.variety,
+        forecastTrend: 'लाल तुरीला डाळ मिल्सकडून जोरदार खरेदी असून भाव ₹९,२०० ते ₹९,८०० प्रति क्विंटल दरम्यान चढे राहतील. पुढील काही दिवसांत ₹१००-₹१५० ची आणखी सुधारणा संभवते.',
+        forecastBadge: 'तेजीचा कल (+₹१००-₹१५०)',
+        trendDirection: 'up',
+        recommendation: 'टप्प्याटप्प्याने विक्री करा (Staggered Sale)',
+        recommendationType: 'stagger',
+        arrivalPressure: 'मध्यम आवक - दर स्थिर',
+        arrivalPressureType: 'medium',
+        detailedAnalysis: 'कडधान्य लिलाव शेडमध्ये स्थानिक तसेच लातूर व गुलबर्गा येथील डाळ मिलर्सची उपस्थिती आहे. सरकारी हमीभावापेक्षा तुरीला ₹२,००० अधिक दर मिळत आहे.',
+        gradingTip: 'तुरीतील आर्द्रता १२% पेक्षा कमी असावी. दाणे एकसारखे, किडमुक्त व लाल चकचकीत असल्यास व्यापारी सर्वोच्च बोली लावतात.',
+        keyDrivers: [
+          'डाळ गिरणी मालकांची वेगाने खरेदी',
+          'देशांतर्गत साठ्यात मर्यादित उपलब्धता',
+          'हमीभावापेक्षा जास्त बाजारभाव',
+        ],
+      };
+
+    case 'soybean_yellow':
+    default:
+      return {
+        cropId: crop.id || 'soybean_yellow',
+        cropName: crop.nameMr,
+        variety: crop.variety,
+        forecastTrend: 'सोयाबीन भाव ₹४,३०० ते ₹४,७५० दरम्यान राहतील. आंतरराष्ट्रीय तेलबिया बाजारातील कलानुसार दर सध्या स्थिर ते मर्यादित चढ-उतारात राहण्याची शक्यता आहे.',
+        forecastBadge: 'दर स्थिर (₹४,३००-₹४,७५०)',
+        trendDirection: 'stable',
+        recommendation: 'माल रोखून ठेवा (Hold for Better Price)',
+        recommendationType: 'hold',
+        arrivalPressure: 'भरमसाठ आवक - नरमाई',
+        arrivalPressureType: 'high',
+        detailedAnalysis: 'तेलबिया यार्डात सोयाबीनची दैनिक आवक ३,१०० क्विंटल आहे. आवक जास्त असल्याने क्रशिंग प्लांट्स सावधपणे खरेदी करत आहेत.',
+        gradingTip: 'सोयाबीनमध्ये ओलावा १०% च्या आत आणून स्वच्छ साठवणूक केल्यास पुढील काळात ₹३०० ते ₹५०० अधिक भाव मिळू शकेल.',
+        keyDrivers: [
+          'हंगामातील मुबलक स्थानिक आवक',
+          'क्रशिंग प्लांट्सची गरजेनुसार मर्यादित खरेदी',
+          'आर्द्रता कमी असलेल्या वाणाला प्राधान्य',
+        ],
+      };
+  }
+}
+
+/**
+ * AI Smart Crop Selling Advisor
+ * Leverages Gemini API or domain expert Solapur APMC model
+ */
+export async function getSolapurPriceAdvisory(cropId = 'onion_red_solapur', customCropName = '') {
+  const crop =
+    SOLAPUR_COMMODITIES.find((c) => c.id === cropId) ||
+    SOLAPUR_COMMODITIES.find((c) => customCropName && c.nameMr.includes(customCropName)) ||
+    SOLAPUR_COMMODITIES[0];
+
+  const rawKey = import.meta.env.VITE_GEMINI_API_KEY;
+  const apiKey = rawKey ? rawKey.trim() : '';
+
+  const cropName = crop?.nameMr || customCropName || 'सोलापूर कांदा';
+  const arrivals = crop?.arrivals ? `${crop.arrivals.toLocaleString('en-IN')} ${crop.unit}` : 'मध्यम आवक';
+  const minPrice = crop?.minPrice ? `₹${crop.minPrice.toLocaleString('en-IN')}` : '₹१,६००';
+  const maxPrice = crop?.maxPrice ? `₹${crop.maxPrice.toLocaleString('en-IN')}` : '₹२,८५०';
+  const avgPrice = crop?.avgPrice ? `₹${crop.avgPrice.toLocaleString('en-IN')}` : '₹२,४००';
+  const yard = crop?.yard || 'सोलापूर APMC मार्केट यार्ड';
+
+  const promptText = `You are the chief APMC Solapur Mandi intelligence analyst and agricultural economist.
+Analyze current Solapur market arrivals and price dynamics for: ${cropName}.
+Current Market Data:
+- यार्ड: ${yard} (मंगळवार पेठ / कुमठा नाका)
+- आजची आवक: ${arrivals}
+- किमान भाव: ${minPrice} प्रति ${crop?.unit || 'क्विंटल'}
+- कमाल भाव: ${maxPrice} प्रति ${crop?.unit || 'क्विंटल'}
+- सरासरी मोडल भाव: ${avgPrice} प्रति ${crop?.unit || 'क्विंटल'}
+- चालू कल: ${crop?.trend || 'तेजी'} (${crop?.changePercent || '+३%'})
+
+Provide an expert, actionable market advisory in Marathi for farmers and traders.
+Respond ONLY with a valid JSON block:
+\`\`\`json
+{
+  "cropName": "${cropName}",
+  "forecastTrend": "येत्या २ ते ४ दिवसांत दरात काय बदल अपेक्षित आहे (वाढ/घट/स्थिर आणि किती ₹)",
+  "forecastBadge": "तेजी (+₹१५०-₹२५०) / स्थिर / नरमाई",
+  "trendDirection": "up",
+  "recommendation": "माल रोखून ठेवा (Hold) / टप्प्याटप्प्याने विक्री करा (Staggered Sale) / त्वरित विक्री करा (Sell Now)",
+  "recommendationType": "stagger",
+  "arrivalPressure": "कमी आवक - तेजीचा कल",
+  "arrivalPressureType": "low",
+  "detailedAnalysis": "सोलापूर यार्डातील आवक, परराज्यातील मागणी (उदा. दक्षिण भारत, गुजरात) व स्थानिक कारणांचे सविस्तर विश्लेषण.",
+  "gradingTip": "शेतकऱ्याला लिलावात सर्वोच्च भाव मिळण्यासाठी प्रतवारी, ओलावा, व पॅकिंगचा सल्ला.",
+  "keyDrivers": [
+    "घटक १",
+    "घटक २",
+    "घटक ३"
+  ]
+}
+\`\`\``;
+
+  if (apiKey && apiKey !== 'your_gemini_api_key_here') {
+    try {
+      const genAI = new GoogleGenerativeAI(apiKey);
+      const model = genAI.getGenerativeModel({ model: 'gemini-flash-latest' });
+      const result = await model.generateContent(promptText);
+      const text = (await result.response).text();
+      const parsed = extractJsonFromText(text);
+      if (parsed && parsed.forecastTrend) {
+        return {
+          ...parsed,
+          cropId: crop.id,
+          variety: crop.variety,
+        };
+      }
+    } catch (e) {
+      console.warn('Gemini advisory SDK error, attempting REST fallback:', e?.message);
+      try {
+        const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${apiKey}`;
+        const res = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ contents: [{ parts: [{ text: promptText }] }] }),
+        });
+        if (res.ok) {
+          const data = await res.json();
+          const candidate = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+          const parsed = extractJsonFromText(candidate);
+          if (parsed && parsed.forecastTrend) {
+            return {
+              ...parsed,
+              cropId: crop.id,
+              variety: crop.variety,
+            };
+          }
+        }
+      } catch (restErr) {
+        console.warn('Gemini REST error, using static advisory:', restErr?.message);
+      }
+    }
+  }
+
+  return getSolapurStaticAdvisory(cropId, crop);
+}
+
+
 

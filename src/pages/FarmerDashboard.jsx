@@ -7,6 +7,7 @@ import FarmerActiveListings from '../components/FarmerActiveListings';
 import SolapurMandiRatesBanner from '../components/SolapurMandiRatesBanner';
 import SolapurMandiRatesModal from '../components/SolapurMandiRatesModal';
 import FarmerPaymentTracker from '../components/FarmerPaymentTracker';
+import SolapurMarketIntelligence from '../components/SolapurMarketIntelligence';
 import {
   Clock,
   MapPin,
@@ -18,12 +19,13 @@ import {
   CreditCard,
   FileCheck,
   ArrowRight,
+  Sparkles,
 } from 'lucide-react';
 
 export default function FarmerDashboard() {
   const { farmerUser } = useAuth();
 
-  // Primary active dashboard view: 'produce' (listings & bidding) | 'payments' (settlements & banking)
+  // Primary active dashboard view: 'produce' (listings & bidding) | 'intelligence' (APMC rates & AI advice) | 'payments' (settlements & banking)
   const [activeDashboardTab, setActiveDashboardTab] = useState('produce');
 
   // Produce Listing Modal state
@@ -92,17 +94,21 @@ export default function FarmerDashboard() {
             </button>
 
             <button
-              onClick={() => setIsMandiRatesOpen(true)}
-              className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold bg-emerald-50 text-emerald-900 border border-emerald-300 hover:bg-emerald-100 hover:border-emerald-400 transition-all shadow-2xs cursor-pointer group"
-              title="सोलापूर APMC थेट बाजारभाव पहा"
+              onClick={() => setActiveDashboardTab(activeDashboardTab === 'intelligence' ? 'produce' : 'intelligence')}
+              className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all shadow-2xs cursor-pointer group ${
+                activeDashboardTab === 'intelligence'
+                  ? 'bg-emerald-800 text-white shadow-xs ring-2 ring-emerald-600'
+                  : 'bg-emerald-50 text-emerald-900 border border-emerald-300 hover:bg-emerald-100 hover:border-emerald-400'
+              }`}
+              title="सोलापूर APMC थेट बाजारभाव व AI सल्ला"
             >
-              <BarChart3 className="w-4 h-4 text-emerald-700 group-hover:scale-110 transition-transform" />
-              <span>सोलापूर APMC थेट दर पहा</span>
+              <Sparkles className="w-4 h-4 text-amber-500 group-hover:scale-110 transition-transform" />
+              <span>थेट दर व AI सल्ला</span>
             </button>
           </div>
         </div>
 
-        {/* PRIMARY NAVIGATION TABS (PRODUCE vs PAYMENTS) */}
+        {/* PRIMARY NAVIGATION TABS (PRODUCE vs INTELLIGENCE vs PAYMENTS) */}
         <div className="flex items-center gap-2 border-b border-gray-200 pb-3 overflow-x-auto scrollbar-none">
           <button
             onClick={() => setActiveDashboardTab('produce')}
@@ -117,6 +123,19 @@ export default function FarmerDashboard() {
           </button>
 
           <button
+            onClick={() => setActiveDashboardTab('intelligence')}
+            className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-extrabold transition-all cursor-pointer whitespace-nowrap ${
+              activeDashboardTab === 'intelligence'
+                ? 'bg-emerald-800 text-white shadow-xs ring-2 ring-emerald-600/30'
+                : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-100 hover:text-gray-900'
+            }`}
+          >
+            <BarChart3 className="w-4 h-4 text-emerald-600" />
+            <span>📊 APMC थेट दर व AI विक्री सल्ला (Market Intelligence)</span>
+            <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+          </button>
+
+          <button
             onClick={() => setActiveDashboardTab('payments')}
             className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-extrabold transition-all cursor-pointer whitespace-nowrap ${
               activeDashboardTab === 'payments'
@@ -125,8 +144,7 @@ export default function FarmerDashboard() {
             }`}
           >
             <Landmark className="w-4 h-4" />
-            <span>💳 माझे पेमेंट्स व बँक खाती (Payment Tracker & Settlements)</span>
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+            <span>💳 माझे पेमेंट्स व बँक खाती (Payment Tracker)</span>
           </button>
         </div>
 
@@ -137,12 +155,22 @@ export default function FarmerDashboard() {
           </section>
         )}
 
-        {/* VIEW 2: PRODUCE, MANDI RATES & ACTIVE LISTINGS VIEW */}
+        {/* VIEW 2: APMC LIVE MARKET INTELLIGENCE & AI SELLING ADVISORY */}
+        {activeDashboardTab === 'intelligence' && (
+          <section aria-label="Solapur APMC Market Intelligence and AI Advisor">
+            <SolapurMarketIntelligence onSelectCropForListing={handleOpenListingModal} />
+          </section>
+        )}
+
+        {/* VIEW 3: PRODUCE, MANDI RATES & ACTIVE LISTINGS VIEW */}
         {activeDashboardTab === 'produce' && (
           <>
             {/* COMPREHENSIVE SOLAPUR MANDI RATES BANNER & QUICK TICKER */}
             <section aria-label="Solapur APMC Live Mandi Rates">
-              <SolapurMandiRatesBanner onOpenMandiModal={() => setIsMandiRatesOpen(true)} />
+              <SolapurMandiRatesBanner
+                onOpenMandiModal={() => setIsMandiRatesOpen(true)}
+                onOpenIntelligence={() => setActiveDashboardTab('intelligence')}
+              />
             </section>
 
             {/* PROMINENT AI CROP QUALITY ASSESSMENT SECTION */}

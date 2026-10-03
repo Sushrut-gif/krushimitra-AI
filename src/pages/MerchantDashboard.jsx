@@ -1,16 +1,17 @@
 import React, { useState } from 'react';
 import DashboardLayout from '../components/DashboardLayout';
-import { Store, TrendingUp, ShieldCheck, MapPin, FileText, Radio, CheckCircle2 } from 'lucide-react';
+import { Store, TrendingUp, ShieldCheck, MapPin, FileText, Radio, CheckCircle2, BarChart3, Sparkles } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useListings } from '../context/ListingsContext';
 import MerchantMarketplaceFeed from '../components/MerchantMarketplaceFeed';
 import MerchantWonDeals from '../components/MerchantWonDeals';
+import SolapurMarketIntelligence from '../components/SolapurMarketIntelligence';
 
 export default function MerchantDashboard() {
   const { merchantUser } = useAuth();
   const { listings } = useListings();
-  const [activeTab, setActiveTab] = useState('feed'); // 'feed' | 'won_deals'
+  const [activeTab, setActiveTab] = useState('feed'); // 'feed' | 'won_deals' | 'intelligence'
 
   // Count won deals
   const wonCount = listings.filter((item) => item.status && item.status.includes('विक्री पूर्ण')).length;
@@ -63,32 +64,32 @@ export default function MerchantDashboard() {
           </div>
         </div>
 
-        {/* Tab Navigation: Live Auction Feed vs Won Deals & Invoices */}
-        <div className="bg-gray-100/80 p-1.5 rounded-2xl border border-gray-200/90 max-w-xl flex gap-1">
+        {/* Tab Navigation: Live Auction Feed vs Won Deals vs Market Intelligence */}
+        <div className="bg-gray-100/80 p-1.5 rounded-2xl border border-gray-200/90 max-w-2xl flex flex-wrap gap-1">
           <button
             type="button"
             onClick={() => setActiveTab('feed')}
-            className={`flex-1 py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 ${
+            className={`flex-1 py-2.5 px-3.5 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-1.5 whitespace-nowrap cursor-pointer ${
               activeTab === 'feed'
                 ? 'bg-white text-indigo-950 shadow-sm ring-1 ring-black/5'
                 : 'text-gray-600 hover:text-gray-900 hover:bg-gray-200/50'
             }`}
           >
             <Radio className={`w-4 h-4 ${activeTab === 'feed' ? 'text-indigo-600' : 'text-gray-400'}`} />
-            <span>सक्रिय शेतमाल ई-लिलाव (Live Feed)</span>
+            <span>ई-लिलाव फीड (Live Feed)</span>
           </button>
 
           <button
             type="button"
             onClick={() => setActiveTab('won_deals')}
-            className={`flex-1 py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 ${
+            className={`flex-1 py-2.5 px-3.5 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-1.5 whitespace-nowrap cursor-pointer ${
               activeTab === 'won_deals'
                 ? 'bg-white text-indigo-950 shadow-sm ring-1 ring-black/5'
                 : 'text-gray-600 hover:text-gray-900 hover:bg-gray-200/50'
             }`}
           >
             <FileText className={`w-4 h-4 ${activeTab === 'won_deals' ? 'text-indigo-600' : 'text-gray-400'}`} />
-            <span>माझे जिंकलेले सौदे (Won Deals)</span>
+            <span>जिंकलेले सौदे</span>
             <span className={`px-2 py-0.5 rounded-full text-[11px] font-extrabold ${
               activeTab === 'won_deals'
                 ? 'bg-emerald-600 text-white'
@@ -97,13 +98,31 @@ export default function MerchantDashboard() {
               {wonCount}
             </span>
           </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab('intelligence')}
+            className={`flex-1 py-2.5 px-3.5 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-1.5 whitespace-nowrap cursor-pointer ${
+              activeTab === 'intelligence'
+                ? 'bg-white text-indigo-950 shadow-sm ring-1 ring-black/5'
+                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-200/50'
+            }`}
+          >
+            <BarChart3 className={`w-4 h-4 ${activeTab === 'intelligence' ? 'text-emerald-700' : 'text-gray-400'}`} />
+            <span>APMC दर व आवक इंटेलिजन्स</span>
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+          </button>
         </div>
 
         {/* Tab Content Rendering */}
-        {activeTab === 'feed' ? (
+        {activeTab === 'feed' && (
           <MerchantMarketplaceFeed onSwitchToWonDeals={() => setActiveTab('won_deals')} />
-        ) : (
+        )}
+        {activeTab === 'won_deals' && (
           <MerchantWonDeals onSwitchToFeed={() => setActiveTab('feed')} />
+        )}
+        {activeTab === 'intelligence' && (
+          <SolapurMarketIntelligence />
         )}
       </div>
     </DashboardLayout>
