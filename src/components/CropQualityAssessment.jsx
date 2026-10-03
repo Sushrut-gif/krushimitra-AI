@@ -11,7 +11,7 @@ import {
   TrendingUp,
   Lightbulb,
   ShieldCheck,
-  ChevronRight,
+  Eye,
   Info,
 } from 'lucide-react';
 import { assessCropQualityWithGemini } from '../services/geminiService';
@@ -56,12 +56,11 @@ export default function CropQualityAssessment() {
     setAssessmentResult(null);
 
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      setCameraError('आपल्या डिव्हाइसवर कॅमेरा सुविधा उपलब्ध नाही किंवा परवानगी नाकारली आहे.');
+      setCameraError('आपल्या डिव्हाइसवर कॅमेरा सुविधा उपलब्ध नाही किंवा ब्राउझरने परवानगी नाकारली आहे.');
       return;
     }
 
     try {
-      // Prefer rear/environment camera on mobile phones
       const stream = await navigator.mediaDevices.getUserMedia({
         video: { facingMode: { ideal: 'environment' } },
         audio: false,
@@ -75,9 +74,9 @@ export default function CropQualityAssessment() {
         videoRef.current.play();
       }
     } catch (err) {
-      console.error('Camera access error:', err);
+      console.error('Camera access error:', err?.message || err);
       setCameraError(
-        'कॅमेरा सुरू करता आला नाही. कृपया ब्राउझर सेटिंग्जमधून कॅमेरा परवानगी तपासा किंवा थेट फोटो अपलोड करा.'
+        'कॅमेरा सुरू करता आला नाही. कृपया ब्राउझरमध्ये कॅमेरा परवानगी तपासा किंवा थेट फोटो अपलोड करा.'
       );
       setIsCameraActive(false);
     }
@@ -87,7 +86,7 @@ export default function CropQualityAssessment() {
   useEffect(() => {
     if (isCameraActive && videoRef.current && streamRef.current) {
       videoRef.current.srcObject = streamRef.current;
-      videoRef.current.play().catch((err) => console.log('Video play interrupted:', err));
+      videoRef.current.play().catch((err) => console.log('Video play interrupted:', err?.message || err));
     }
   }, [isCameraActive]);
 
@@ -118,7 +117,6 @@ export default function CropQualityAssessment() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validate image type
     if (!file.type.startsWith('image/')) {
       setAssessmentError('कृपया फक्त इमेज (फोटो) फाईल निवडा.');
       return;
@@ -158,11 +156,13 @@ export default function CropQualityAssessment() {
       const result = await assessCropQualityWithGemini(selectedImage);
       setAssessmentResult(result);
     } catch (err) {
-      console.error('Gemini assessment error:', err);
+      // Explicitly log error.message to console for easy debugging
+      console.error('Gemini Quality Assessment Error:', err.message, err);
+
       if (err.message === 'MISSING_API_KEY') {
         setAssessmentError('MISSING_API_KEY');
       } else {
-        setAssessmentError('AI विश्लेषणामध्ये त्रुटी आली, कृपया पुन्हा प्रयत्न करा.');
+        setAssessmentError(err.message || 'AI विश्लेषणामध्ये त्रुटी आली, कृपया पुन्हा प्रयत्न करा.');
       }
     } finally {
       setIsLoading(false);
@@ -178,14 +178,14 @@ export default function CropQualityAssessment() {
         text: 'उत्तम प्रत (Grade A)',
       };
     }
-    if (lower.includes('कमी') || lower.includes('c') || lower.includes('तृतीय') || lower.includes('खराब')) {
+    if (lower.includes('सामान्य') || lower.includes('कमी') || lower.includes('c') || lower.includes('तृतीय')) {
       return {
         badge: 'bg-amber-100 text-amber-800 border-amber-300 ring-amber-600/20',
-        text: 'कमी प्रत (Grade C)',
+        text: 'सामान्य प्रत (Grade C)',
       };
     }
     return {
-      badge: 'bg-emerald-50 text-emerald-700 border-emerald-200 ring-emerald-500/20',
+      badge: 'bg-blue-50 text-blue-800 border-blue-200 ring-blue-500/20',
       text: grade || 'मध्यम प्रत (Grade B)',
     };
   };
@@ -215,9 +215,9 @@ export default function CropQualityAssessment() {
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200/80">
-                  AI व्हिजन तंत्रज्ञान
+                  Gemini 1.5 Flash व्हिजन
                 </span>
-                <span className="text-xs text-gray-500 hidden sm:inline">• सोलापूर APMC दर सुसंगत</span>
+                <span className="text-xs text-gray-500 hidden sm:inline">• सोलापूर APMC बाजारभाव सुसंगत</span>
               </div>
               <h2 className="text-xl sm:text-2xl font-bold text-gray-950 tracking-tight mt-0.5">
                 मालाची गुणवत्ता तपासा (AI Quality Assessment)
@@ -226,7 +226,7 @@ export default function CropQualityAssessment() {
           </div>
 
           <div className="text-xs text-gray-500 hidden md:block text-right">
-            फोटोवरून स्वयंचलित प्रतवारी, वैशिष्ट्ये व अपेक्षित दर
+            फोटोवरून स्वयंचलित प्रतवारी, रंग-आकार व अंदाजे बाजारभाव
           </div>
         </div>
       </div>
@@ -390,10 +390,10 @@ export default function CropQualityAssessment() {
                 <div className="p-5 rounded-2xl bg-emerald-50/70 border border-emerald-200/80 space-y-2">
                   <div className="flex items-center gap-2 text-emerald-800 font-bold text-sm">
                     <Sparkles className="w-4 h-4 text-emerald-600" />
-                    <span>Google Gemini व्हिजन विश्लेषण</span>
+                    <span>Gemini 1.5 Flash कृषी व्हिजन मॉडेल</span>
                   </div>
                   <p className="text-xs text-gray-600 leading-relaxed">
-                    हा फोटो अत्याधुनिक AI मॉडेलकडे पाठवला जाईल आणि सोलापूर APMC च्या ताज्या दरांसह प्रतवारी अहवाल तयार होईल.
+                    शेतमालाच्या फोटोचे सविस्तर विश्लेषण करून सोलापूर APMC संदर्भात अचूक प्रतवारी, रंग-आकार स्थिती, चालू बाजारभाव आणि सल्ला दिला जाईल.
                   </p>
                 </div>
 
@@ -435,11 +435,16 @@ export default function CropQualityAssessment() {
                             <span className="font-bold">Gemini API Key आढळली नाही!</span>
                             <p className="text-xs text-red-700">
                               कृपया प्रोजेक्टच्या <code className="bg-red-100 px-1.5 py-0.5 rounded font-mono">.env</code> फाईलमध्ये{' '}
-                              <code className="bg-red-100 px-1.5 py-0.5 rounded font-mono">VITE_GEMINI_API_KEY</code> जोडा आणि सर्व्हर पुन्हा सुरू करा.
+                              <code className="bg-red-100 px-1.5 py-0.5 rounded font-mono">VITE_GEMINI_API_KEY</code> टाका आणि सर्व्हर पुन्हा सुरू करा.
                             </p>
                           </div>
                         ) : (
-                          <span className="font-medium">{assessmentError}</span>
+                          <div className="space-y-1">
+                            <span className="font-semibold">AI विश्लेषणामध्ये त्रुटी आली, कृपया पुन्हा प्रयत्न करा.</span>
+                            <p className="text-[11px] text-red-600 font-mono break-all">
+                              {assessmentError}
+                            </p>
+                          </div>
                         )}
                       </div>
                     </div>
@@ -464,7 +469,7 @@ export default function CropQualityAssessment() {
                     <span>AI गुणवत्ता व बाजारभाव विश्लेषण अहवाल</span>
                   </div>
                   <span className="text-xs font-medium text-gray-500 bg-gray-100 px-2.5 py-1 rounded-full">
-                    सोलापूर APMC विश्लेषण
+                    सोलापूर APMC संदर्भ
                   </span>
                 </div>
 
@@ -473,7 +478,7 @@ export default function CropQualityAssessment() {
                   {/* Crop Name & Quality Grade */}
                   <div className="p-5 rounded-2xl bg-white border border-gray-200 shadow-xs space-y-3">
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-semibold text-gray-500">१. पिकाचे नाव</span>
+                      <span className="text-xs font-semibold text-gray-500">पिकाचे नाव (Crop Name)</span>
                       <Tag className="w-4 h-4 text-emerald-600" />
                     </div>
                     <h3 className="text-xl font-extrabold text-gray-950">
@@ -481,7 +486,7 @@ export default function CropQualityAssessment() {
                     </h3>
 
                     <div className="pt-2 border-t border-gray-100 flex items-center justify-between">
-                      <span className="text-xs font-semibold text-gray-500">२. गुणवत्ता प्रत</span>
+                      <span className="text-xs font-semibold text-gray-500">गुणवत्ता प्रत (Quality Grade)</span>
                       <span
                         className={`text-xs font-bold px-3 py-1 rounded-full border ring-1 ring-inset ${
                           getGradeBadge(assessmentResult.qualityGrade).badge
@@ -495,42 +500,56 @@ export default function CropQualityAssessment() {
                   {/* Estimated APMC Price Card */}
                   <div className="p-5 rounded-2xl bg-gradient-to-br from-emerald-50 to-white border border-emerald-200 shadow-xs space-y-3">
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-semibold text-emerald-900">४. अंदाजे चालू सोलापूर APMC दर</span>
+                      <span className="text-xs font-semibold text-emerald-900">
+                        अंदाजे चालू बाजारभाव (Estimated Market Price)
+                      </span>
                       <TrendingUp className="w-4 h-4 text-emerald-700" />
                     </div>
                     <div className="text-xl sm:text-2xl font-black text-emerald-900">
                       {assessmentResult.estimatedPrice}
                     </div>
                     <p className="text-[11px] text-gray-500">
-                      * हा दर मालाची गुणवत्ता व चालू बाजार आवकेवर आधारित अंदाजे दर आहे.
+                      * सोलापूर APMC चालू आवक व दर्जानुसार अपेक्षित भाव (₹/क्विंटल).
                     </p>
                   </div>
                 </div>
 
-                {/* Key Characteristics & Features */}
-                <div className="p-5 rounded-2xl bg-white border border-gray-200 shadow-xs space-y-3">
+                {/* Physical Appearance */}
+                <div className="p-5 rounded-2xl bg-white border border-gray-200 shadow-xs space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold text-gray-700 uppercase tracking-wider">
-                      ३. प्रमुख वैशिष्ट्ये (रंग, आकार, डाग व निरीक्षण)
+                      रंग व आकार स्थिती (Physical Appearance)
                     </span>
-                    <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                    <Eye className="w-4 h-4 text-emerald-600" />
                   </div>
-                  <ul className="space-y-2 text-xs sm:text-sm text-gray-700">
-                    {assessmentResult.features.map((feature, idx) => (
-                      <li key={idx} className="flex items-start gap-2.5">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 shrink-0 mt-2" />
-                        <span className="leading-relaxed">{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
+                  <p className="text-xs sm:text-sm text-gray-700 leading-relaxed font-medium">
+                    {assessmentResult.physicalAppearance}
+                  </p>
                 </div>
+
+                {/* Additional Bullet Points if parsed */}
+                {assessmentResult.bulletPoints && assessmentResult.bulletPoints.length > 0 && (
+                  <div className="p-5 rounded-2xl bg-gray-50 border border-gray-200 shadow-xs space-y-2">
+                    <span className="text-xs font-bold text-gray-700 uppercase tracking-wider">
+                      इतर प्रमुख निरीक्षणे (Key Observations)
+                    </span>
+                    <ul className="space-y-1.5 text-xs text-gray-600">
+                      {assessmentResult.bulletPoints.map((pt, i) => (
+                        <li key={i} className="flex items-start gap-2">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 shrink-0 mt-1.5" />
+                          <span>{pt}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
 
                 {/* Farmer Advice */}
                 {assessmentResult.farmerAdvice && (
                   <div className="p-5 rounded-2xl bg-emerald-50/80 border border-emerald-300/80 text-emerald-950 space-y-2">
                     <div className="flex items-center gap-2 font-bold text-xs sm:text-sm text-emerald-900">
                       <Lightbulb className="w-4 h-4 text-emerald-700 shrink-0" />
-                      <span>५. शेतकऱ्यासाठी तज्ज्ञ सल्ला (Farmer Advice)</span>
+                      <span>शेतकऱ्यासाठी सल्ला (Actionable Farmer Advice)</span>
                     </div>
                     <p className="text-xs sm:text-sm leading-relaxed text-gray-800">
                       {assessmentResult.farmerAdvice}
