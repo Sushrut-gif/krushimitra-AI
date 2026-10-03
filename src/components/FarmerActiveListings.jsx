@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { useListings } from '../context/ListingsContext';
 import LiveBidsModal from './LiveBidsModal';
 import DigitalAuctionReceiptModal from './DigitalAuctionReceiptModal';
+import APMCGatePassModal from './APMCGatePassModal';
 import {
   PackageCheck,
   Scale,
@@ -18,15 +19,17 @@ import {
   Award,
   Printer,
   QrCode,
+  FileText,
 } from 'lucide-react';
 
 export default function FarmerActiveListings({ onOpenNewListing }) {
   const { farmerUser } = useAuth();
   const { getFarmerListings, removeListing } = useListings();
 
-  // Selected listing for live bids modal & digital receipt modal
+  // Selected listing for live bids modal, digital receipt modal, and gate pass modal
   const [selectedListingForBids, setSelectedListingForBids] = useState(null);
   const [selectedListingForReceipt, setSelectedListingForReceipt] = useState(null);
+  const [selectedListingForGatePass, setSelectedListingForGatePass] = useState(null);
 
   const myListings = getFarmerListings(farmerUser?.mobile);
 
@@ -259,31 +262,42 @@ export default function FarmerActiveListings({ onOpenNewListing }) {
                     {/* Action Button: Live Bids or Digital Bill & Gate Pass */}
                     <div className="pt-3 border-t border-gray-100 space-y-2">
                       {isSold ? (
-                        /* When Sold: Primary button to view Digital Bill & Gate Pass */
+                        /* When Sold: Action buttons for Digital Gate Pass and Official Receipt */
                         <div className="space-y-2">
                           <button
                             type="button"
-                            onClick={() => setSelectedListingForReceipt(item)}
-                            className="w-full inline-flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-bold text-xs sm:text-sm bg-emerald-700 hover:bg-emerald-800 text-white shadow-md hover:shadow-lg transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-600"
+                            onClick={() => setSelectedListingForGatePass(item)}
+                            className="w-full inline-flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl font-bold text-xs sm:text-sm bg-gradient-to-r from-emerald-700 to-teal-800 hover:from-emerald-600 hover:to-teal-700 text-white shadow-md hover:shadow-lg transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-600"
                           >
                             <QrCode className="w-4 h-4 text-emerald-200" />
-                            <span>डिजिटल पावती व गेट पास (View Digital Bill & Gate Pass)</span>
+                            <span>डिजिटल गेट पास पहा (View APMC Gate Pass)</span>
                           </button>
 
-                          <button
-                            type="button"
-                            onClick={() => setSelectedListingForBids(item)}
-                            className="w-full inline-flex items-center justify-center gap-1.5 py-1.5 text-xs font-semibold text-emerald-800 hover:text-emerald-950 hover:underline"
-                          >
-                            <span>लिलाव बोली इतिहास पहा</span>
-                          </button>
+                          <div className="flex items-center gap-2">
+                            <button
+                              type="button"
+                              onClick={() => setSelectedListingForReceipt(item)}
+                              className="flex-1 inline-flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl font-semibold text-xs bg-gray-50 hover:bg-gray-100 border border-gray-200 text-gray-800 transition-colors cursor-pointer"
+                            >
+                              <FileText className="w-3.5 h-3.5 text-indigo-600" />
+                              <span>अधिकृत पावती</span>
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={() => setSelectedListingForBids(item)}
+                              className="flex-1 inline-flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl font-semibold text-xs bg-gray-50 hover:bg-gray-100 border border-gray-200 text-gray-800 transition-colors cursor-pointer"
+                            >
+                              <span>बोली इतिहास</span>
+                            </button>
+                          </div>
                         </div>
                       ) : (
                         /* When Bidding Active: Primary button to View Live Bids */
                         <button
                           type="button"
                           onClick={() => setSelectedListingForBids(item)}
-                          className="w-full inline-flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl font-bold text-xs sm:text-sm bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white shadow-xs hover:shadow transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500"
+                          className="w-full inline-flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl font-bold text-xs sm:text-sm bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white shadow-xs hover:shadow transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 cursor-pointer"
                         >
                           <Gavel className="w-4 h-4 text-emerald-200" />
                           <span>
@@ -302,7 +316,7 @@ export default function FarmerActiveListings({ onOpenNewListing }) {
                         <button
                           type="button"
                           onClick={() => removeListing(item.id)}
-                          className="hover:text-red-600 transition-colors p-1"
+                          className="hover:text-red-600 transition-colors p-1 cursor-pointer"
                           title="नोंदणी हटवा"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
@@ -327,12 +341,21 @@ export default function FarmerActiveListings({ onOpenNewListing }) {
         />
       )}
 
-      {/* Digital Auction Bill & QR Gate Pass Modal */}
+      {/* Digital Auction Bill Modal */}
       {selectedListingForReceipt && (
         <DigitalAuctionReceiptModal
           isOpen={!!selectedListingForReceipt}
           onClose={() => setSelectedListingForReceipt(null)}
           listing={myListings.find((l) => l.id === selectedListingForReceipt.id) || selectedListingForReceipt}
+        />
+      )}
+
+      {/* APMC QR Gate Pass Modal */}
+      {selectedListingForGatePass && (
+        <APMCGatePassModal
+          isOpen={!!selectedListingForGatePass}
+          onClose={() => setSelectedListingForGatePass(null)}
+          lot={myListings.find((l) => l.id === selectedListingForGatePass.id) || selectedListingForGatePass}
         />
       )}
     </div>

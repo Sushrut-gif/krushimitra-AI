@@ -14,9 +14,11 @@ import {
   ShieldCheck,
   ChevronRight,
   Filter,
+  QrCode,
 } from 'lucide-react';
 import { usePayments } from '../context/PaymentsContext';
 import BankCreditReceiptModal from './BankCreditReceiptModal';
+import APMCGatePassModal from './APMCGatePassModal';
 
 export default function FarmerPaymentTracker() {
   const {
@@ -30,6 +32,7 @@ export default function FarmerPaymentTracker() {
 
   const [activeFilter, setActiveFilter] = useState('all'); // 'all' | 'pending' | 'in_process' | 'settled'
   const [selectedReceiptSettlement, setSelectedReceiptSettlement] = useState(null);
+  const [selectedGatePassLot, setSelectedGatePassLot] = useState(null);
   const [isReceiptModalOpen, setIsReceiptModalOpen] = useState(false);
   const [justSettledId, setJustSettledId] = useState(null);
 
@@ -336,9 +339,36 @@ export default function FarmerPaymentTracker() {
                     </div>
 
                     {/* Action Controls for Demo / Hackathon testing */}
-                    <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
+                    <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-end">
+                      {/* View APMC Gate Pass Button */}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSelectedGatePassLot({
+                            id: item.lotId || item.id,
+                            cropName: item.cropName,
+                            crop: item.cropName,
+                            quantity: item.quantity,
+                            unit: item.unit || 'क्विंटल',
+                            farmerName: item.farmerName || 'नोंदणीकृत शेतकरी',
+                            farmerMobile: item.farmerMobile || '९८XXXXXX१२',
+                            location: item.location || 'सोलापूर दक्षिण',
+                            winningMerchant: item.merchantName || 'सोलापूर ॲग्रो ट्रेडर्स',
+                            merchantLicense: item.merchantLicense || 'APMC/SLP/TRD-8841',
+                            yard: item.yard || 'कुमठा नाका मार्केट यार्ड',
+                            inwardStatus: item.inwardStatus,
+                            status: item.status,
+                          });
+                        }}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-xl border border-emerald-300 bg-emerald-50 hover:bg-emerald-100 text-emerald-900 transition-all shadow-2xs cursor-pointer"
+                      >
+                        <QrCode className="w-3.5 h-3.5 text-emerald-700" />
+                        <span>डिजिटल गेट पास (Gate Pass)</span>
+                      </button>
+
                       {/* Simulate Bank Credit Status Button */}
                       <button
+                        type="button"
                         onClick={() => handleAdvanceStep(item.id)}
                         className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-xl border border-gray-300 bg-white hover:bg-gray-100 text-gray-800 transition-all shadow-2xs cursor-pointer active:scale-95"
                         title="हॅकथॉन / डेमोसाठी पेमेंट स्टेटस बदलून पाहा"
@@ -353,6 +383,7 @@ export default function FarmerPaymentTracker() {
 
                       {/* View Bank Credit Slip & SMS */}
                       <button
+                        type="button"
                         onClick={() => handleOpenReceipt(item)}
                         className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-xl transition-all shadow-2xs cursor-pointer ${
                           isSettled
@@ -378,6 +409,15 @@ export default function FarmerPaymentTracker() {
         onClose={() => setIsReceiptModalOpen(false)}
         settlement={selectedReceiptSettlement}
       />
+
+      {/* 5. APMC QR Gate Pass Modal */}
+      {selectedGatePassLot && (
+        <APMCGatePassModal
+          isOpen={!!selectedGatePassLot}
+          onClose={() => setSelectedGatePassLot(null)}
+          lot={selectedGatePassLot}
+        />
+      )}
     </div>
   );
 }

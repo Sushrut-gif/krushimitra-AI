@@ -315,6 +315,31 @@ export function ListingsProvider({ children }) {
   };
 
   /**
+   * Mark lot verified at gate pass and delivered at yard
+   */
+  const markLotInwardDelivered = (listingId, inwardInfo = {}) => {
+    let updatedItem = null;
+    const nowStr = new Date().toISOString();
+    setListings((prev) =>
+      prev.map((item) => {
+        if (item.id === listingId || `GP-SLP-${item.id}` === listingId) {
+          updatedItem = {
+            ...item,
+            inwardStatus: 'यार्डात प्राप्त (Delivered at Yard)',
+            inwardVerifiedAt: inwardInfo.verifiedAt || nowStr,
+            gatePassVerified: true,
+            gatePassId: `GP-SLP-${item.id}`,
+            gatePassVerifiedBy: inwardInfo.verifiedBy || 'सोलापूर APMC इनवर्ड यार्ड तपासणी नाका',
+          };
+          return updatedItem;
+        }
+        return item;
+      })
+    );
+    return updatedItem;
+  };
+
+  /**
    * Get listings for a specific farmer
    */
   const getFarmerListings = (farmerMobile) => {
@@ -335,6 +360,7 @@ export function ListingsProvider({ children }) {
     acceptBid,
     placeBid,
     markPaymentReleased,
+    markLotInwardDelivered,
     getFarmerListings,
     removeListing,
   };

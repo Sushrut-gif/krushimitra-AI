@@ -23,15 +23,19 @@ import {
   Landmark,
   BadgePercent,
   Check,
+  PackageCheck,
+  Lock,
 } from 'lucide-react';
+import MerchantInwardScannerModal from './MerchantInwardScannerModal';
 
 export default function MerchantWonDeals({ onSwitchToFeed }) {
-  const { listings, markPaymentReleased } = useListings();
+  const { listings, markPaymentReleased, markLotInwardDelivered } = useListings();
   const { markSettlementSettled } = usePayments();
   const { merchantUser } = useAuth();
 
   const [selectedLotForInvoice, setSelectedLotForInvoice] = useState(null);
   const [selectedLotForPayment, setSelectedLotForPayment] = useState(null);
+  const [selectedLotForScanner, setSelectedLotForScanner] = useState(null);
   const [celebrationToast, setCelebrationToast] = useState('');
 
   // 1. Filter listings where status is 'विक्री पूर्ण (Sold)'
@@ -158,6 +162,10 @@ export default function MerchantWonDeals({ onSwitchToFeed }) {
             const netAmount = grossAmount - (apmcCess + handling);
 
             const isPaid = lot.paymentStatus === 'खात्यात जमा (Completed)';
+            const isDelivered =
+              lot.inwardStatus === 'यार्डात प्राप्त (Delivered at Yard)' ||
+              lot.status === 'यार्डात प्राप्त (Delivered at Yard)' ||
+              lot.gatePassVerified;
 
             return (
               <div
@@ -181,17 +189,29 @@ export default function MerchantWonDeals({ onSwitchToFeed }) {
                     </div>
                   </div>
 
-                  {/* Status Badge */}
-                  <div>
-                    {isPaid ? (
-                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                        <span>खात्यात जमा (Settled)</span>
+                  {/* Status Badges */}
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    {isDelivered ? (
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-900 border border-emerald-300">
+                        <CheckCircle2 className="w-3 h-3 text-emerald-700" />
+                        <span>यार्डात प्राप्त</span>
                       </span>
                     ) : (
-                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200">
-                        <Clock className="w-3.5 h-3.5 text-amber-600" />
-                        <span>पेमेंट प्रलंबित (Pending)</span>
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-100 text-amber-900 border border-amber-300 animate-pulse">
+                        <Clock className="w-3 h-3 text-amber-700" />
+                        <span>गेट पास आवक प्रलंबित</span>
+                      </span>
+                    )}
+
+                    {isPaid ? (
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
+                        <Check className="w-3 h-3 text-emerald-600" />
+                        <span>पेमेंट पूर्ण</span>
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-slate-100 text-slate-700 border border-slate-300">
+                        <Clock className="w-3 h-3 text-slate-500" />
+                        <span>पेमेंट बाकी</span>
                       </span>
                     )}
                   </div>
@@ -245,29 +265,52 @@ export default function MerchantWonDeals({ onSwitchToFeed }) {
                 </div>
 
                 {/* Card Actions */}
-                <div className="p-4 sm:p-5 pt-0 flex flex-col sm:flex-row gap-2.5">
-                  <button
-                    type="button"
-                    onClick={() => setSelectedLotForInvoice(lot)}
-                    className="flex-1 py-2.5 px-4 rounded-xl text-xs sm:text-sm font-semibold bg-white hover:bg-gray-50 border border-gray-300 text-gray-800 flex items-center justify-center gap-2 shadow-2xs transition-colors"
-                  >
-                    <FileText className="w-4 h-4 text-indigo-600" />
-                    <span>अधिकृत खरेदी पावती (View Invoice)</span>
-                  </button>
+                <div className="p-4 sm:p-5 pt-0 flex flex-col gap-2.5">
+                  <div className="flex flex-col sm:flex-row gap-2.5">
+                    <button
+                      type="button"
+                      onClick={() => setSelectedLotForInvoice(lot)}
+                      className="flex-1 py-2.5 px-4 rounded-xl text-xs sm:text-sm font-semibold bg-white hover:bg-gray-50 border border-gray-300 text-gray-800 flex items-center justify-center gap-2 shadow-2xs transition-colors cursor-pointer"
+                    >
+                      <FileText className="w-4 h-4 text-indigo-600" />
+                      <span>अधिकृत खरेदी पावती (View Invoice)</span>
+                    </button>
+
+                    {!isDelivered ? (
+                      <button
+                        type="button"
+                        onClick={() => setSelectedLotForScanner(lot)}
+                        className="py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold bg-indigo-700 hover:bg-indigo-800 active:bg-indigo-900 text-white flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer shrink-0"
+                      >
+                        <PackageCheck className="w-4 h-4" />
+                        <span>गेट पास स्कॅन व माल आवक नोंदवा</span>
+                      </button>
+                    ) : (
+                      <div className="py-2.5 px-3 rounded-xl text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200 flex items-center justify-center gap-1.5 shrink-0">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                        <span>माल यार्डात जमा</span>
+                      </div>
+                    )}
+                  </div>
 
                   {isPaid ? (
-                    <div className="py-2.5 px-4 rounded-xl text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200 flex items-center justify-center gap-1.5 shrink-0">
+                    <div className="w-full py-2.5 px-4 rounded-xl text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200 flex items-center justify-center gap-1.5">
                       <Check className="w-4 h-4 text-emerald-600" />
-                      <span>पेमेंट जमा झाले</span>
+                      <span>पेमेंट यशस्वीरीत्या शेतकऱ्याच्या खात्यात जमा झाले (Settled)</span>
+                    </div>
+                  ) : !isDelivered ? (
+                    <div className="w-full py-2.5 px-4 rounded-xl text-xs font-semibold bg-gray-100 text-gray-500 border border-gray-200 flex items-center justify-center gap-2 cursor-not-allowed">
+                      <Lock className="w-3.5 h-3.5 text-gray-400" />
+                      <span>पेमेंट रिलीज लॉक आहे: आधी वर 'गेट पास स्कॅन व माल आवक नोंदवा' वर क्लिक करा</span>
                     </div>
                   ) : (
                     <button
                       type="button"
                       onClick={() => setSelectedLotForPayment(lot)}
-                      className="py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-500 hover:to-teal-600 active:from-emerald-700 active:to-teal-800 text-white flex items-center justify-center gap-2 shadow-sm hover:shadow transition-all shrink-0"
+                      className="w-full py-2.5 px-4 rounded-xl text-xs sm:text-sm font-black bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-500 hover:to-teal-600 active:from-emerald-700 active:to-teal-800 text-white flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all cursor-pointer animate-pulse"
                     >
                       <CreditCard className="w-4 h-4" />
-                      <span>शेतकऱ्याला पेमेंट रिलीज करा</span>
+                      <span>शेतकऱ्याला पेमेंट रिलीज करा (Release Payment to Farmer)</span>
                     </button>
                   )}
                 </div>
@@ -283,6 +326,23 @@ export default function MerchantWonDeals({ onSwitchToFeed }) {
           lot={selectedLotForInvoice}
           merchantUser={merchantUser}
           onClose={() => setSelectedLotForInvoice(null)}
+        />
+      )}
+
+      {/* Merchant Inward Gate Pass Scanner Modal */}
+      {selectedLotForScanner && (
+        <MerchantInwardScannerModal
+          isOpen={!!selectedLotForScanner}
+          lot={selectedLotForScanner}
+          onClose={() => setSelectedLotForScanner(null)}
+          onVerificationSuccess={(payload) => {
+            markLotInwardDelivered(selectedLotForScanner.id, {
+              verifiedBy: merchantUser?.firmName || 'सोलापूर APMC इनवर्ड यार्ड',
+              verifiedAt: payload.verifiedAt,
+            });
+            setCelebrationToast('माल आवक यशस्वी! गेट पास पडताळणी पूर्ण झाली.');
+            setTimeout(() => setCelebrationToast(''), 5000);
+          }}
         />
       )}
 
