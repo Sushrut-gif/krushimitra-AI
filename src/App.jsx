@@ -6,6 +6,8 @@ import { PaymentsProvider } from './context/PaymentsContext';
 import RoleSelection from './pages/RoleSelection';
 import FarmerAuth from './pages/FarmerAuth';
 import FarmerProtectedRoute from './components/FarmerProtectedRoute';
+import MerchantAuth from './pages/MerchantAuth';
+import MerchantProtectedRoute from './components/MerchantProtectedRoute';
 import FarmerDashboard from './pages/FarmerDashboard';
 import MerchantDashboard from './pages/MerchantDashboard';
 import AdminDashboard from './pages/AdminDashboard';
@@ -36,8 +38,21 @@ export default function App() {
               }
             />
 
-            {/* Merchant & APMC Admin Dashboards (Step 1 Shells) */}
-            <Route path="/merchant" element={<MerchantDashboard />} />
+            {/* Merchant Authentication Routes */}
+            <Route path="/merchant/login" element={<MerchantAuth initialMode="login" />} />
+            <Route path="/merchant/register" element={<MerchantAuth initialMode="register" />} />
+
+            {/* Protected Merchant Portal */}
+            <Route
+              path="/merchant"
+              element={
+                <MerchantProtectedRoute>
+                  <MerchantDashboard />
+                </MerchantProtectedRoute>
+              }
+            />
+
+            {/* APMC Admin Dashboard (Step 1 Shell) */}
             <Route path="/admin" element={<AdminDashboard />} />
 
             {/* Catch-all redirect to role selection */}

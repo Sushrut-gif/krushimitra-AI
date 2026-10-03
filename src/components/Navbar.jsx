@@ -30,11 +30,23 @@ const roleConfig = {
 export default function Navbar({ role }) {
   const currentRole = roleConfig[role] || roleConfig.farmer;
   const RoleIcon = currentRole.icon;
-  const { farmerUser, isFarmerAuthenticated, logoutFarmer } = useAuth();
+  const {
+    farmerUser,
+    isFarmerAuthenticated,
+    logoutFarmer,
+    merchantUser,
+    isMerchantAuthenticated,
+    logoutMerchant,
+  } = useAuth();
   const navigate = useNavigate();
 
   const handleFarmerLogout = () => {
     logoutFarmer();
+    navigate('/');
+  };
+
+  const handleMerchantLogout = () => {
+    logoutMerchant();
     navigate('/');
   };
 
@@ -82,6 +94,16 @@ export default function Navbar({ role }) {
               </div>
             )}
 
+            {/* If Merchant is Logged In: Show Firm Name */}
+            {role === 'merchant' && isMerchantAuthenticated && merchantUser && (
+              <div className="flex items-center gap-1.5 text-xs font-semibold text-indigo-900 bg-indigo-50 border border-indigo-200/80 px-3 py-1.5 rounded-lg">
+                <Store className="w-3.5 h-3.5 text-indigo-700 shrink-0" />
+                <span className="max-w-[120px] sm:max-w-[180px] truncate" title={merchantUser.firmName}>
+                  {merchantUser.firmName}
+                </span>
+              </div>
+            )}
+
             {/* Switch Role Link */}
             <Link
               to="/"
@@ -100,6 +122,20 @@ export default function Navbar({ role }) {
                 onClick={handleFarmerLogout}
                 className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 border border-red-200/80 px-2.5 sm:px-3 py-1.5 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-400"
                 title="खाते लॉगआउट करा"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+                <span>लॉगआउट</span>
+                <span className="text-red-400 hidden sm:inline text-xs">(Logout)</span>
+              </button>
+            )}
+
+            {/* Logout Button (for logged-in merchant) */}
+            {role === 'merchant' && isMerchantAuthenticated && (
+              <button
+                type="button"
+                onClick={handleMerchantLogout}
+                className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 border border-red-200/80 px-2.5 sm:px-3 py-1.5 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-400"
+                title="व्यापारी खाते लॉगआउट करा"
               >
                 <LogOut className="w-3.5 h-3.5" />
                 <span>लॉगआउट</span>

@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Sprout, Store, Landmark, ArrowRight, ShieldCheck, CheckCircle2 } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 const roles = [
   {
@@ -61,6 +62,17 @@ const roles = [
 
 export default function RoleSelection() {
   const navigate = useNavigate();
+  const { isFarmerAuthenticated, isMerchantAuthenticated } = useAuth();
+
+  const handleRoleClick = (roleId) => {
+    if (roleId === 'farmer') {
+      navigate(isFarmerAuthenticated ? '/farmer' : '/farmer/login');
+    } else if (roleId === 'merchant') {
+      navigate(isMerchantAuthenticated ? '/merchant' : '/merchant/login');
+    } else {
+      navigate('/admin');
+    }
+  };
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col justify-between selection:bg-emerald-100 selection:text-emerald-900">
@@ -112,7 +124,7 @@ export default function RoleSelection() {
               return (
                 <div
                   key={role.id}
-                  onClick={() => navigate(role.path)}
+                  onClick={() => handleRoleClick(role.id)}
                   className={`group relative bg-white rounded-2xl border border-gray-200/90 p-6 sm:p-7 shadow-xs hover:shadow-xl transition-all duration-300 cursor-pointer flex flex-col justify-between ${role.accent.borderHover} ${role.accent.cardRing} ${role.accent.glow}`}
                 >
                   <div className="space-y-4">

@@ -1,9 +1,12 @@
 import React from 'react';
 import DashboardLayout from '../components/DashboardLayout';
-import { Store, Sparkles, TrendingUp, ArrowRight } from 'lucide-react';
+import { Store, Sparkles, TrendingUp, ArrowRight, ShieldCheck, MapPin, FileText } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 export default function MerchantDashboard() {
+  const { merchantUser } = useAuth();
+
   return (
     <DashboardLayout role="merchant">
       <div className="space-y-6">
@@ -17,14 +20,34 @@ export default function MerchantDashboard() {
               </span>
             </div>
             <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight mt-1">
-              व्यापारी डॅशबोर्ड
+              {merchantUser?.firmName || 'व्यापारी डॅशबोर्ड'}
             </h1>
-            <p className="text-sm text-gray-500 mt-1">
-              बाजार समिती लिलाव बोली, खरेदीदार सौदे आणि व्यापारी देयके व्यवस्थापन.
-            </p>
+            <div className="flex flex-wrap items-center gap-3 text-xs text-gray-500 mt-1">
+              {merchantUser?.licenseNo && (
+                <span className="inline-flex items-center gap-1 font-medium text-indigo-900 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-200">
+                  <FileText className="w-3 h-3 text-indigo-600" />
+                  परवाना: {merchantUser.licenseNo}
+                </span>
+              )}
+              {merchantUser?.operatingYard && (
+                <span className="inline-flex items-center gap-1">
+                  <MapPin className="w-3 h-3 text-gray-400" />
+                  {merchantUser.operatingYard}
+                </span>
+              )}
+              {merchantUser?.merchantType && (
+                <span className="inline-flex items-center gap-1 text-gray-600">
+                  • {merchantUser.merchantType}
+                </span>
+              )}
+            </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-emerald-50 text-emerald-800 border border-emerald-200">
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+              परवाना प्रमाणित
+            </span>
             <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-indigo-50 text-indigo-800 border border-indigo-200">
               <TrendingUp className="w-3.5 h-3.5" />
               लिलाव सत्र: पूर्वतयारी

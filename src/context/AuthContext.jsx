@@ -5,10 +5,47 @@ const AuthContext = createContext(null);
 const FARMERS_STORAGE_KEY = 'krushimitra_farmers';
 const FARMER_SESSION_KEY = 'krushimitra_farmer_session';
 
+const MERCHANTS_STORAGE_KEY = 'krushimitra_merchants';
+const MERCHANT_SESSION_KEY = 'krushimitra_active_merchant';
+
+const DEFAULT_SEEDED_MERCHANTS = [
+  {
+    id: 'MERCHANT_SLP_8841',
+    firmName: 'सोलापूर ॲग्रो ट्रेडर्स (Solapur Agro Traders)',
+    licenseNo: 'APMC/SLP/TRD-8841',
+    mobile: '9822154321',
+    gstPan: '27AABCS1429B1Z8',
+    operatingYard: 'मंगळवार पेठ (मुख्य मार्केट)',
+    merchantType: 'अडत व्यापारी (Commission Agent)',
+    password: 'password123',
+    registeredAt: new Date().toISOString(),
+  },
+  {
+    id: 'MERCHANT_SLP_7720',
+    firmName: 'सिद्धेश्वर ग्रेन मर्चंट्स',
+    licenseNo: 'APMC/SLP/TRD-7720',
+    mobile: '9890123456',
+    gstPan: '27XYZPA9876C1Z4',
+    operatingYard: 'कुमठा नाका यार्ड',
+    merchantType: 'थेट खरेदीदार (Direct Buyer)',
+    password: 'password123',
+    registeredAt: new Date().toISOString(),
+  },
+];
+
 export function AuthProvider({ children }) {
   const [farmerUser, setFarmerUser] = useState(() => {
     try {
       const saved = localStorage.getItem(FARMER_SESSION_KEY);
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
+  });
+
+  const [merchantUser, setMerchantUser] = useState(() => {
+    try {
+      const saved = localStorage.getItem(MERCHANT_SESSION_KEY);
       return saved ? JSON.parse(saved) : null;
     } catch {
       return null;
@@ -26,6 +63,31 @@ export function AuthProvider({ children }) {
       return [];
     }
   };
+
+  // Helper to get registered merchants from localStorage (seeded if empty)
+  const getRegisteredMerchants = () => {
+    try {
+      const data = localStorage.getItem(MERCHANTS_STORAGE_KEY);
+      if (data) {
+        return JSON.parse(data);
+      }
+      localStorage.setItem(MERCHANTS_STORAGE_KEY, JSON.stringify(DEFAULT_SEEDED_MERCHANTS));
+      return DEFAULT_SEEDED_MERCHANTS;
+    } catch {
+      return DEFAULT_SEEDED_MERCHANTS;
+    }
+  };
+
+  // Initialize merchants storage on mount if absent
+  useEffect(() => {
+    try {
+      if (!localStorage.getItem(MERCHANTS_STORAGE_KEY)) {
+        localStorage.setItem(MERCHANTS_STORAGE_KEY, JSON.stringify(DEFAULT_SEEDED_MERCHANTS));
+      }
+    } catch (e) {
+      console.error('Error initializing merchants storage:', e);
+    }
+  }, []);
 
   // Farmer registration
   const registerFarmer = ({ name, mobile, village, taluka, district, password }) => {
@@ -90,12 +152,104 @@ export function AuthProvider({ children }) {
     setFarmerUser(null);
   };
 
+  // Merchant registration
+  const registerMerchant = ({
+    firmName,
+    licenseNo,
+    mobile,
+    gstPan,
+    operatingYard,
+    merchantType,
+    password,
+  }) => {
+    const cleanMobile = mobile.trim();
+    const cleanLicense = licenseNo.trim().toUpperCase();
+    const merchants = getRegisteredMerchants();
+
+    // Check for existing mobile
+    const existingMobile = merchants.find((m) => m.mobile === cleanMobile);
+    if (existingMobile) {
+      return {
+        success: false,
+        error: 'हा मोबाईल नंबर आधीच एका व्यापाऱ्यासाठी नोंदणीकृत आहे. कृपया लॉगिन करा.',
+      };
+    }
+
+    // Check for existing license
+    const existingLicense = merchants.find(
+      (m) => m.licenseNo && m.licenseNo.trim().toUpperCase() === cleanLicense
+    );
+    if (existingLicense) {
+      return {
+        success: false,
+        error: 'हा APMC परवाना क्रमांक आधीच नोंदणीकृत आहे. कृपया तपासा.',
+      };
+    }
+
+    const newMerchant = {
+      id: 'MERCHANT_' + Date.now(),
+      firmName: firmName.trim(),
+      licenseNo: cleanLicense,
+      mobile: cleanMobile,
+      gstPan: gstPan ? gstPan.trim().toUpperCase() : '',
+      operatingYard: operatingYard || 'मंगळवार पेठ (मुख्य मार्केट)',
+      merchantType: merchantType || 'अडत व्यापारी (Commission Agent)',
+      password,
+      registeredAt: new Date().toISOString(),
+    };
+
+    const updatedMerchants = [...merchants, newMerchant];
+    localStorage.setItem(MERCHANTS_STORAGE_KEY, JSON.stringify(updatedMerchants));
+
+    // Save active session
+    localStorage.setItem(MERCHANT_SESSION_KEY, JSON.stringify(newMerchant));
+    setMerchantUser(newMerchant);
+
+    return { success: true, user: newMerchant };
+  };
+
+  // Merchant login
+  const loginMerchant = ({ identifier, password }) => {
+    const cleanId = identifier.trim().toLowerCase();
+    const merchants = getRegisteredMerchants();
+
+    const matched = merchants.find((m) => {
+      const matchMobile = m.mobile && m.mobile.toLowerCase() === cleanId;
+      const matchLicense = m.licenseNo && m.licenseNo.toLowerCase() === cleanId;
+      return (matchMobile || matchLicense) && m.password === password;
+    });
+
+    if (!matched) {
+      return {
+        success: false,
+        error: 'नोंदणीकृत मोबाईल नंबर / परवाना क्रमांक किंवा पासवर्ड चुकीचा आहे. कृपया योग्य माहिती भरा.',
+      };
+    }
+
+    // Save active session
+    localStorage.setItem(MERCHANT_SESSION_KEY, JSON.stringify(matched));
+    setMerchantUser(matched);
+
+    return { success: true, user: matched };
+  };
+
+  // Merchant logout
+  const logoutMerchant = () => {
+    localStorage.removeItem(MERCHANT_SESSION_KEY);
+    setMerchantUser(null);
+  };
+
   const value = {
     farmerUser,
     isFarmerAuthenticated: !!farmerUser,
     registerFarmer,
     loginFarmer,
     logoutFarmer,
+    merchantUser,
+    isMerchantAuthenticated: !!merchantUser,
+    registerMerchant,
+    loginMerchant,
+    logoutMerchant,
     loading,
   };
 
