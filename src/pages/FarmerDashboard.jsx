@@ -1,11 +1,30 @@
-import React from 'react';
+import React, { useState } from 'react';
 import DashboardLayout from '../components/DashboardLayout';
 import { useAuth } from '../context/AuthContext';
 import CropQualityAssessment from '../components/CropQualityAssessment';
-import { Sprout, Clock, MapPin, Phone, Layers } from 'lucide-react';
+import ProduceListingModal from '../components/ProduceListingModal';
+import FarmerActiveListings from '../components/FarmerActiveListings';
+import { Clock, MapPin, Phone, Layers } from 'lucide-react';
 
 export default function FarmerDashboard() {
   const { farmerUser } = useAuth();
+
+  // Produce Listing Modal state
+  const [isListingModalOpen, setIsListingModalOpen] = useState(false);
+  const [listingInitialData, setListingInitialData] = useState({});
+
+  const handleOpenListingModal = (data = {}) => {
+    setListingInitialData(data);
+    setIsListingModalOpen(true);
+  };
+
+  const handleListingSuccess = () => {
+    // Optionally scroll down to active listings
+    const element = document.getElementById('active-listings-section');
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
 
   return (
     <DashboardLayout role="farmer">
@@ -48,7 +67,12 @@ export default function FarmerDashboard() {
 
         {/* PROMINENT AI CROP QUALITY ASSESSMENT SECTION */}
         <section aria-label="AI Crop Quality Assessment">
-          <CropQualityAssessment />
+          <CropQualityAssessment onListProduce={handleOpenListingModal} />
+        </section>
+
+        {/* ACTIVE PRODUCE LISTINGS SECTION */}
+        <section id="active-listings-section" aria-label="Active Produce Listings">
+          <FarmerActiveListings onOpenNewListing={() => handleOpenListingModal({})} />
         </section>
 
         {/* Future Modules Overview Shell */}
@@ -75,6 +99,14 @@ export default function FarmerDashboard() {
             </div>
           </div>
         </div>
+
+        {/* Produce Listing Modal */}
+        <ProduceListingModal
+          isOpen={isListingModalOpen}
+          onClose={() => setIsListingModalOpen(false)}
+          initialData={listingInitialData}
+          onListingSuccess={handleListingSuccess}
+        />
       </div>
     </DashboardLayout>
   );

@@ -13,10 +13,11 @@ import {
   ShieldCheck,
   Eye,
   Info,
+  Gavel,
 } from 'lucide-react';
 import { assessCropQualityWithGemini } from '../services/geminiService';
 
-export default function CropQualityAssessment() {
+export default function CropQualityAssessment({ onListProduce }) {
   // Image selection state
   const [selectedImage, setSelectedImage] = useState(null); // base64 / dataUrl
   const [isCameraActive, setIsCameraActive] = useState(false);
@@ -557,15 +558,34 @@ export default function CropQualityAssessment() {
                   </div>
                 )}
 
-                {/* Action to test another sample */}
-                <div className="pt-2 flex justify-end">
+                {/* Bottom Action Bar: List for Bidding + Test Another */}
+                <div className="pt-3 border-t border-gray-100 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
                   <button
                     type="button"
                     onClick={handleChangePhoto}
-                    className="text-xs font-semibold text-emerald-700 hover:text-emerald-800 transition-colors inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-emerald-200 hover:bg-emerald-50"
+                    className="order-2 sm:order-1 text-xs font-semibold text-gray-600 hover:text-gray-900 transition-colors inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl border border-gray-200 hover:bg-gray-50"
                   >
                     <RefreshCw className="w-3.5 h-3.5" />
                     <span>दुसऱ्या मालाचा फोटो तपासा</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (onListProduce) {
+                        onListProduce({
+                          cropName: assessmentResult.cropName,
+                          qualityGrade: assessmentResult.qualityGrade,
+                          image: selectedImage,
+                          estimatedPrice: assessmentResult.estimatedPrice,
+                          notes: assessmentResult.physicalAppearance,
+                        });
+                      }
+                    }}
+                    className="order-1 sm:order-2 inline-flex items-center justify-center gap-2 py-3 px-6 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold text-sm sm:text-base rounded-xl shadow-md hover:shadow-lg transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 group"
+                  >
+                    <Gavel className="w-4 h-4 text-emerald-200 group-hover:rotate-12 transition-transform" />
+                    <span>हा माल लिलावासाठी नोंदवा (List This Produce for Bidding)</span>
                   </button>
                 </div>
               </div>
