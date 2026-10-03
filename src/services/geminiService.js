@@ -135,10 +135,10 @@ export async function assessCropQualityWithGemini(dataUrl) {
 }
 \`\`\``;
 
-  // 1. Primary: Use @google/generative-ai SDK with gemini-1.5-flash
+  // 1. Primary: Use @google/generative-ai SDK with gemini-flash-latest
   try {
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-flash-latest' });
 
     const imagePart = {
       inlineData: {
@@ -155,7 +155,7 @@ export async function assessCropQualityWithGemini(dataUrl) {
     console.warn('Gemini SDK call encountered error, attempting direct REST endpoint fallback:', sdkError?.message);
 
     // 2. Secondary fallback: Direct REST API invocation
-    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${apiKey}`;
     const payload = {
       contents: [
         {

@@ -215,7 +215,7 @@ export default function CropQualityAssessment() {
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200/80">
-                  Gemini 1.5 Flash व्हिजन
+                  Gemini Flash AI
                 </span>
                 <span className="text-xs text-gray-500 hidden sm:inline">• सोलापूर APMC बाजारभाव सुसंगत</span>
               </div>
@@ -390,7 +390,7 @@ export default function CropQualityAssessment() {
                 <div className="p-5 rounded-2xl bg-emerald-50/70 border border-emerald-200/80 space-y-2">
                   <div className="flex items-center gap-2 text-emerald-800 font-bold text-sm">
                     <Sparkles className="w-4 h-4 text-emerald-600" />
-                    <span>Gemini 1.5 Flash कृषी व्हिजन मॉडेल</span>
+                    <span>Gemini Flash कृषी व्हिजन मॉडेल</span>
                   </div>
                   <p className="text-xs text-gray-600 leading-relaxed">
                     शेतमालाच्या फोटोचे सविस्तर विश्लेषण करून सोलापूर APMC संदर्भात अचूक प्रतवारी, रंग-आकार स्थिती, चालू बाजारभाव आणि सल्ला दिला जाईल.
