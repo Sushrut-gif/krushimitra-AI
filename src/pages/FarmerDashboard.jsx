@@ -6,10 +6,24 @@ import ProduceListingModal from '../components/ProduceListingModal';
 import FarmerActiveListings from '../components/FarmerActiveListings';
 import SolapurMandiRatesBanner from '../components/SolapurMandiRatesBanner';
 import SolapurMandiRatesModal from '../components/SolapurMandiRatesModal';
-import { Clock, MapPin, Phone, Layers, BarChart3, CheckCircle2 } from 'lucide-react';
+import FarmerPaymentTracker from '../components/FarmerPaymentTracker';
+import {
+  Clock,
+  MapPin,
+  Phone,
+  Layers,
+  BarChart3,
+  CheckCircle2,
+  Landmark,
+  CreditCard,
+  FileCheck,
+} from 'lucide-react';
 
 export default function FarmerDashboard() {
   const { farmerUser } = useAuth();
+
+  // Primary active dashboard view: 'produce' (listings & bidding) | 'payments' (settlements & banking)
+  const [activeDashboardTab, setActiveDashboardTab] = useState('produce');
 
   // Produce Listing Modal state
   const [isListingModalOpen, setIsListingModalOpen] = useState(false);
@@ -33,7 +47,7 @@ export default function FarmerDashboard() {
 
   return (
     <DashboardLayout role="farmer">
-      <div className="space-y-7">
+      <div className="space-y-6">
         {/* Header section with Farmer info */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-gray-200">
           <div>
@@ -62,7 +76,20 @@ export default function FarmerDashboard() {
             )}
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-2.5">
+            <button
+              onClick={() => setActiveDashboardTab(activeDashboardTab === 'payments' ? 'produce' : 'payments')}
+              className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition-all shadow-2xs cursor-pointer ${
+                activeDashboardTab === 'payments'
+                  ? 'bg-emerald-800 text-white shadow-xs ring-2 ring-emerald-600'
+                  : 'bg-white border border-gray-300 text-gray-800 hover:bg-gray-50'
+              }`}
+            >
+              <Landmark className="w-4 h-4 text-emerald-700" />
+              <span>माझे पेमेंट्स व DBT</span>
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            </button>
+
             <button
               onClick={() => setIsMandiRatesOpen(true)}
               className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold bg-emerald-50 text-emerald-900 border border-emerald-300 hover:bg-emerald-100 hover:border-emerald-400 transition-all shadow-2xs cursor-pointer group"
@@ -70,69 +97,143 @@ export default function FarmerDashboard() {
             >
               <BarChart3 className="w-4 h-4 text-emerald-700 group-hover:scale-110 transition-transform" />
               <span>सोलापूर APMC थेट दर पहा</span>
-              <span className="w-2 h-2 rounded-full bg-emerald-600 animate-pulse"></span>
             </button>
           </div>
         </div>
 
-        {/* COMPREHENSIVE SOLAPUR MANDI RATES BANNER & QUICK TICKER */}
-        <section aria-label="Solapur APMC Live Mandi Rates">
-          <SolapurMandiRatesBanner onOpenMandiModal={() => setIsMandiRatesOpen(true)} />
-        </section>
+        {/* PRIMARY NAVIGATION TABS (PRODUCE vs PAYMENTS) */}
+        <div className="flex items-center gap-2 border-b border-gray-200 pb-3 overflow-x-auto scrollbar-none">
+          <button
+            onClick={() => setActiveDashboardTab('produce')}
+            className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-extrabold transition-all cursor-pointer whitespace-nowrap ${
+              activeDashboardTab === 'produce'
+                ? 'bg-emerald-800 text-white shadow-xs ring-2 ring-emerald-600/30'
+                : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-100 hover:text-gray-900'
+            }`}
+          >
+            <Layers className="w-4 h-4" />
+            <span>🌾 शेतमाल लिलाव व गुणवत्ता (Produce & Bidding)</span>
+          </button>
 
-        {/* PROMINENT AI CROP QUALITY ASSESSMENT SECTION */}
-        <section aria-label="AI Crop Quality Assessment">
-          <CropQualityAssessment onListProduce={handleOpenListingModal} />
-        </section>
-
-        {/* ACTIVE PRODUCE LISTINGS SECTION */}
-        <section id="active-listings-section" aria-label="Active Produce Listings">
-          <FarmerActiveListings onOpenNewListing={() => handleOpenListingModal({})} />
-        </section>
-
-        {/* System Overview / Modules Shell */}
-        <div className="bg-white rounded-2xl border border-gray-200/80 p-6 sm:p-7 shadow-2xs space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2.5 text-gray-900 font-bold text-base">
-              <div className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center text-gray-600">
-                <Layers className="w-4 h-4" />
-              </div>
-              <span>डिजिटल कृषिमित्र प्रणाली स्थिती (System Features)</span>
-            </div>
-            <span className="text-xs text-emerald-700 font-bold bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200 flex items-center gap-1">
-              <CheckCircle2 className="w-3.5 h-3.5" /> सोलापूर APMC लाइव्ह
-            </span>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-1">
-            <div
-              onClick={() => setIsMandiRatesOpen(true)}
-              className="p-4 rounded-xl bg-emerald-50/50 border border-emerald-200 hover:border-emerald-300 transition-all cursor-pointer space-y-1 group"
-            >
-              <div className="flex items-center justify-between text-xs font-bold text-emerald-950">
-                <span>📊 थेट APMC बाजारभाव</span>
-                <span className="text-[10px] text-emerald-700 font-semibold bg-emerald-100 px-1.5 py-0.5 rounded">सक्रिय</span>
-              </div>
-              <p className="text-[11px] text-gray-600">
-                धान्य, भाजीपाला, फळे, तेलबिया व गुळाचे दैनिक अधिकृत आवक व दर.
-              </p>
-            </div>
-            <div className="p-4 rounded-xl bg-gray-50 border border-gray-200 space-y-1">
-              <div className="flex items-center justify-between text-xs font-bold text-gray-800">
-                <span>⚖️ डिजिटल लिलाव पावती व QR</span>
-                <span className="text-[10px] text-emerald-700 font-semibold bg-emerald-100 px-1.5 py-0.5 rounded">सक्रिय</span>
-              </div>
-              <p className="text-[11px] text-gray-500">बोली स्वीकारताच अधिकृत डिजिटल पावती व गेट पास निर्मिती.</p>
-            </div>
-            <div className="p-4 rounded-xl bg-gray-50 border border-gray-200 space-y-1">
-              <div className="flex items-center justify-between text-xs font-bold text-gray-800">
-                <span>🤖 AI गुणवत्ता तपासणी (Vision)</span>
-                <span className="text-[10px] text-emerald-700 font-semibold bg-emerald-100 px-1.5 py-0.5 rounded">सक्रिय</span>
-              </div>
-              <p className="text-[11px] text-gray-500">कॅमेरा फोटोवरून AI द्वारे प्रतवारी, रोग लक्षणे व अपेक्षित दर अंदाज.</p>
-            </div>
-          </div>
+          <button
+            onClick={() => setActiveDashboardTab('payments')}
+            className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-extrabold transition-all cursor-pointer whitespace-nowrap ${
+              activeDashboardTab === 'payments'
+                ? 'bg-emerald-800 text-white shadow-xs ring-2 ring-emerald-600/30'
+                : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-100 hover:text-gray-900'
+            }`}
+          >
+            <Landmark className="w-4 h-4" />
+            <span>💳 माझे पेमेंट्स व बँक खाती (Payment Tracker & Settlements)</span>
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+          </button>
         </div>
+
+        {/* VIEW 1: PAYMENTS & SETTLEMENTS VIEW */}
+        {activeDashboardTab === 'payments' && (
+          <section aria-label="Farmer Payment & Bank Settlements">
+            <FarmerPaymentTracker />
+          </section>
+        )}
+
+        {/* VIEW 2: PRODUCE, MANDI RATES & ACTIVE LISTINGS VIEW */}
+        {activeDashboardTab === 'produce' && (
+          <>
+            {/* COMPREHENSIVE SOLAPUR MANDI RATES BANNER & QUICK TICKER */}
+            <section aria-label="Solapur APMC Live Mandi Rates">
+              <SolapurMandiRatesBanner onOpenMandiModal={() => setIsMandiRatesOpen(true)} />
+            </section>
+
+            {/* PROMINENT AI CROP QUALITY ASSESSMENT SECTION */}
+            <section aria-label="AI Crop Quality Assessment">
+              <CropQualityAssessment onListProduce={handleOpenListingModal} />
+            </section>
+
+            {/* ACTIVE PRODUCE LISTINGS SECTION */}
+            <section id="active-listings-section" aria-label="Active Produce Listings">
+              <FarmerActiveListings onOpenNewListing={() => handleOpenListingModal({})} />
+            </section>
+
+            {/* PAYMENTS PREVIEW STRIP IN PRODUCE VIEW */}
+            <section id="payments-section" aria-label="Farmer Payments Overview">
+              <div className="bg-emerald-50/60 rounded-2xl border border-emerald-200 p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2 text-xs font-black text-emerald-950 uppercase tracking-wider">
+                    <Landmark className="w-4 h-4 text-emerald-700" />
+                    <span>थेट बँक खाती व पेमेंट ट्रॅकर (DBT Settlements)</span>
+                  </div>
+                  <p className="text-xs text-gray-600">
+                    ई-लिलावातील सौद्यांची रक्कम थेट तुमच्या स्टेट बँक खात्यात जमा होते.
+                  </p>
+                </div>
+                <button
+                  onClick={() => setActiveDashboardTab('payments')}
+                  className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-emerald-800 text-white rounded-xl text-xs font-bold hover:bg-emerald-900 transition-colors shadow-2xs cursor-pointer shrink-0"
+                >
+                  <span>संपूर्ण पेमेंट ट्रॅकर उघडा</span>
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+              </div>
+            </section>
+
+            {/* System Overview / Modules Shell */}
+            <div className="bg-white rounded-2xl border border-gray-200/80 p-6 sm:p-7 shadow-2xs space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2.5 text-gray-900 font-bold text-base">
+                  <div className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center text-gray-600">
+                    <Layers className="w-4 h-4" />
+                  </div>
+                  <span>डिजिटल कृषिमित्र प्रणाली स्थिती (System Features)</span>
+                </div>
+                <span className="text-xs text-emerald-700 font-bold bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200 flex items-center gap-1">
+                  <CheckCircle2 className="w-3.5 h-3.5" /> सोलापूर APMC लाइव्ह
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-1">
+                <div
+                  onClick={() => setIsMandiRatesOpen(true)}
+                  className="p-4 rounded-xl bg-emerald-50/50 border border-emerald-200 hover:border-emerald-300 transition-all cursor-pointer space-y-1 group"
+                >
+                  <div className="flex items-center justify-between text-xs font-bold text-emerald-950">
+                    <span>📊 थेट APMC बाजारभाव</span>
+                    <span className="text-[10px] text-emerald-700 font-semibold bg-emerald-100 px-1.5 py-0.5 rounded">
+                      सक्रिय
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-gray-600">
+                    धान्य, भाजीपाला, फळे, तेलबिया व गुळाचे दैनिक अधिकृत आवक व दर.
+                  </p>
+                </div>
+                <div
+                  onClick={() => setActiveDashboardTab('payments')}
+                  className="p-4 rounded-xl bg-emerald-50/50 border border-emerald-200 hover:border-emerald-300 transition-all cursor-pointer space-y-1 group"
+                >
+                  <div className="flex items-center justify-between text-xs font-bold text-emerald-950">
+                    <span>💳 बँक सेटलमेंट व DBT</span>
+                    <span className="text-[10px] text-emerald-700 font-semibold bg-emerald-100 px-1.5 py-0.5 rounded">
+                      सक्रिय
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-gray-600">
+                    थेट एस्क्रो व DBT ट्रान्सफरचा रिअल-टाइम मागोवा व बँक पावती.
+                  </p>
+                </div>
+                <div className="p-4 rounded-xl bg-gray-50 border border-gray-200 space-y-1">
+                  <div className="flex items-center justify-between text-xs font-bold text-gray-800">
+                    <span>🤖 AI गुणवत्ता तपासणी (Vision)</span>
+                    <span className="text-[10px] text-emerald-700 font-semibold bg-emerald-100 px-1.5 py-0.5 rounded">
+                      सक्रिय
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-gray-500">
+                    कॅमेरा फोटोवरून AI द्वारे प्रतवारी, रोग लक्षणे व अपेक्षित दर अंदाज.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </>
+        )}
 
         {/* Produce Listing Modal */}
         <ProduceListingModal

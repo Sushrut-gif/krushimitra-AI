@@ -128,6 +128,54 @@ export function ListingsProvider({ children }) {
             receiptId: receiptId,
             dealFinalizedAt: new Date().toISOString(),
           };
+
+          // Also automatically initialize in settlements storage if not already there
+          try {
+            const settlementsKey = 'krushimitra_settlements';
+            const savedSettlements = JSON.parse(localStorage.getItem(settlementsKey) || '[]');
+            const uniqueSuffix = item.id.replace('KM-', '') || Date.now().toString().slice(-5);
+            const exists = savedSettlements.some((s) => s.listingId === item.id);
+            if (!exists) {
+              const qty = Number(item.quantity) || 1;
+              const gross = Math.round(qty * bid.amount);
+              const apmcCess = Math.round(gross * 0.01);
+              const handling = Math.round(gross * 0.005);
+              const net = gross - (apmcCess + handling);
+              const newSettlement = {
+                id: `SETTL_${uniqueSuffix}`,
+                listingId: item.id,
+                receiptId: receiptId,
+                utr: `UTR20261003${uniqueSuffix}`,
+                cropName: item.cropName,
+                variety: item.qualityGrade ? `${item.qualityGrade} प्रत` : 'स्थानिक प्रत',
+                quantity: qty,
+                unit: item.unit || 'क्विंटल',
+                winningMerchant: bid.merchantName,
+                merchantLicense: merchantLicense,
+                winningPrice: bid.amount,
+                grossAmount: gross,
+                apmcCess: apmcCess,
+                handlingFee: handling,
+                netAmount: net,
+                status: 'pending',
+                statusStep: 1,
+                statusLabel: 'पेंडिंग (Pending Verification)',
+                statusDescription: 'व्यापारी देयक व मालाची प्रत्यक्ष आवक पडताळणी सुरू आहे.',
+                paymentMethod: 'Direct Bank Transfer (DBT / APMC e-Payment)',
+                bankName: 'State Bank of India',
+                accountMasked: '****5678',
+                ifsc: 'SBIN0001234',
+                branch: 'सोलापूर मुख्य शाखा (मंगळवार पेठ)',
+                createdAt: new Date().toISOString(),
+                settledAt: null,
+                smsAlert: null,
+              };
+              localStorage.setItem(settlementsKey, JSON.stringify([newSettlement, ...savedSettlements]));
+            }
+          } catch (e) {
+            // Ignore non-critical storage error
+          }
+
           return updatedItem;
         }
         return item;

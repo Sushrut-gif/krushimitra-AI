@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { ListingsProvider } from './context/ListingsContext';
+import { PaymentsProvider } from './context/PaymentsContext';
 import RoleSelection from './pages/RoleSelection';
 import FarmerAuth from './pages/FarmerAuth';
 import FarmerProtectedRoute from './components/FarmerProtectedRoute';
@@ -14,7 +15,8 @@ export default function App() {
   return (
     <AuthProvider>
       <ListingsProvider>
-        <BrowserRouter>
+        <PaymentsProvider>
+          <BrowserRouter>
           <Routes>
             {/* Main Role Selection Portals */}
             <Route path="/" element={<RoleSelection />} />
@@ -45,6 +47,7 @@ export default function App() {
           {/* Global Multi-Lingual AI Farming Assistant (Voice & Chat) */}
           <AIAssistant />
         </BrowserRouter>
+        </PaymentsProvider>
       </ListingsProvider>
     </AuthProvider>
   );
