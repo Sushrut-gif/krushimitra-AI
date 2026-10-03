@@ -253,15 +253,16 @@ export default function AIAssistant() {
 
       setMessages((prev) => [...prev, botMsg]);
     } catch (err) {
+      console.error('Gemini API Error in KrushiMitra Chat:', err);
       const errorMsg = {
         id: (Date.now() + 1).toString(),
         sender: 'assistant',
         text:
           language === 'en'
-            ? 'Sorry, unable to get an answer right now. Please try again shortly.'
+            ? '⚠️ Could not fetch an answer from KrushiMitra AI right now. Please tap to retry your question.'
             : language === 'hi'
-            ? 'क्षमा करें, इस समय संपर्क नहीं हो पा रहा है। कृपया कुछ देर बाद पुनः पूछें।'
-            : 'क्षमस्व, सध्या AI सेवेशी संपर्क होत नाही आहे. कृपया थोड्या वेळाने पुन्हा विचारून पहा.',
+            ? '⚠️ कृषि मित्र AI से उत्तर प्राप्त नहीं हो सका। कृपया अपना प्रश्न पुनः पूछें।'
+            : '⚠️ कृषीमित्र AI कडून उत्तर मिळवण्यात अडचण आली आहे. कृपया आपला प्रश्न पुन्हा विचारून पहा.',
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       };
       setMessages((prev) => [...prev, errorMsg]);
@@ -497,10 +498,10 @@ export default function AIAssistant() {
                   <span className="w-2 h-2 rounded-full bg-emerald-500 animate-bounce [animation-delay:0.4s]"></span>
                   <span className="font-bold text-emerald-800 ml-1">
                     {language === 'en'
-                      ? 'KrushiMitra AI is analyzing...'
+                      ? 'KrushiMitra is thinking...'
                       : language === 'hi'
-                      ? 'कृषि मित्र AI उत्तर तैयार कर रहा है...'
-                      : 'कृषीमित्र AI विचार करत आहे...'}
+                      ? 'कृषि मित्र विचार कर रहा है...'
+                      : 'कृषीमित्र विचार करत आहे...'}
                   </span>
                 </div>
               </div>
@@ -609,3 +610,4 @@ export default function AIAssistant() {
     </>
   );
 }
+
