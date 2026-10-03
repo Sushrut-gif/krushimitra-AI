@@ -1,15 +1,15 @@
 import React from 'react';
 import DashboardLayout from '../components/DashboardLayout';
 import { useAuth } from '../context/AuthContext';
-import { Sprout, Sparkles, Clock, ArrowRight, MapPin, Phone } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import CropQualityAssessment from '../components/CropQualityAssessment';
+import { Sprout, Clock, MapPin, Phone, Layers } from 'lucide-react';
 
 export default function FarmerDashboard() {
   const { farmerUser } = useAuth();
 
   return (
     <DashboardLayout role="farmer">
-      <div className="space-y-6">
+      <div className="space-y-8">
         {/* Header section with Farmer info */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-gray-200">
           <div>
@@ -22,7 +22,7 @@ export default function FarmerDashboard() {
             <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight mt-1">
               {farmerUser?.name ? `नमस्कार, ${farmerUser.name}!` : 'शेतकरी डॅशबोर्ड'}
             </h1>
-            
+
             {/* Farmer registered details chips */}
             {farmerUser && (
               <div className="flex flex-wrap items-center gap-2 mt-2 text-xs text-gray-600">
@@ -41,54 +41,37 @@ export default function FarmerDashboard() {
           <div className="flex items-center gap-3">
             <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-emerald-50 text-emerald-800 border border-emerald-200">
               <Clock className="w-3.5 h-3.5" />
-              आजचा बाजार: सक्रिय
+              सोलापूर APMC बाजार: सक्रिय
             </span>
           </div>
         </div>
 
-        {/* Clean Placeholder Card */}
-        <div className="bg-white rounded-2xl border border-gray-200 shadow-xs overflow-hidden">
-          {/* Emerald accent top border */}
-          <div className="h-1.5 bg-gradient-to-r from-emerald-500 to-emerald-700 w-full" />
-          
-          <div className="p-8 sm:p-12 text-center max-w-2xl mx-auto space-y-4">
-            <div className="w-16 h-16 rounded-2xl bg-emerald-50 border border-emerald-100 text-emerald-600 mx-auto flex items-center justify-center shadow-xs">
-              <Sprout className="w-8 h-8" />
-            </div>
+        {/* PROMINENT AI CROP QUALITY ASSESSMENT SECTION */}
+        <section aria-label="AI Crop Quality Assessment">
+          <CropQualityAssessment />
+        </section>
 
-            <div className="space-y-2">
-              <div className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-md">
-                <Sparkles className="w-3.5 h-3.5" />
-                <span>मॉड्यूल लवकरच सुरू होत आहे</span>
-              </div>
-              <h2 className="text-xl font-bold text-gray-900">
-                शेतकरी सेवा केंद्र (Placeholder Shell)
-              </h2>
-              <p className="text-sm text-gray-600 leading-relaxed">
-                पुढील टप्प्यात येथे AI पीक प्रतवारी (Quality Assessment), दैनंदिन APMC बाजारभाव, थेट लिलाव पावती आणि मालाची आवक नोंदणी सुरू होईल.
-              </p>
+        {/* Future Modules Overview Shell */}
+        <div className="bg-white rounded-2xl border border-gray-200/80 p-6 sm:p-7 shadow-2xs space-y-4">
+          <div className="flex items-center gap-2.5 text-gray-900 font-bold text-base">
+            <div className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center text-gray-600">
+              <Layers className="w-4 h-4" />
             </div>
+            <span>पुढील टप्प्यातील आगामी सुविधा (Upcoming Features)</span>
+          </div>
 
-            <div className="pt-4 flex flex-wrap items-center justify-center gap-3 text-xs text-gray-500">
-              <span className="px-3 py-1.5 rounded-lg bg-gray-50 border border-gray-200">
-                🌱 AI प्रतवारी कॅमेरा
-              </span>
-              <span className="px-3 py-1.5 rounded-lg bg-gray-50 border border-gray-200">
-                📊 थेट बाजार दर
-              </span>
-              <span className="px-3 py-1.5 rounded-lg bg-gray-50 border border-gray-200">
-                📑 डिजिटल सौदे पावती
-              </span>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-1">
+            <div className="p-4 rounded-xl bg-gray-50 border border-gray-200 space-y-1">
+              <div className="text-xs font-bold text-gray-800">📊 थेट APMC बाजारभाव</div>
+              <p className="text-[11px] text-gray-500">सोलापूर व इतर मुख्य बाजार समित्यांचे दैनंदिन आवक व दर.</p>
             </div>
-
-            <div className="pt-4">
-              <Link
-                to="/"
-                className="inline-flex items-center gap-2 text-xs font-semibold text-emerald-700 hover:text-emerald-800 transition-colors"
-              >
-                <span>भूमिका बदला किंवा मुख्य पृष्ठावर जा</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </Link>
+            <div className="p-4 rounded-xl bg-gray-50 border border-gray-200 space-y-1">
+              <div className="text-xs font-bold text-gray-800">⚖️ डिजिटल लिलाव पावती</div>
+              <p className="text-[11px] text-gray-500">व्यापारी सौदे व थेट बोली पावतीची त्वरित डिजिटल नोंद.</p>
+            </div>
+            <div className="p-4 rounded-xl bg-gray-50 border border-gray-200 space-y-1">
+              <div className="text-xs font-bold text-gray-800">🚜 गेट पास व आवक नोंदणी</div>
+              <p className="text-[11px] text-gray-500">बाजार समिती आवार प्रवेशासाठी थेट डिजिटल QR पास.</p>
             </div>
           </div>
         </div>
