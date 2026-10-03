@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { useListings } from '../context/ListingsContext';
+import { useListings, generateSampleBids } from '../context/ListingsContext';
+import LiveBidsModal from './LiveBidsModal';
 import {
   PackageCheck,
   Scale,
@@ -10,13 +11,18 @@ import {
   Sparkles,
   Gavel,
   Trash2,
-  AlertCircle,
   Tag,
+  TrendingUp,
+  CheckCircle2,
+  Award,
 } from 'lucide-react';
 
 export default function FarmerActiveListings({ onOpenNewListing }) {
   const { farmerUser } = useAuth();
   const { getFarmerListings, removeListing } = useListings();
+
+  // Selected listing for live bids modal
+  const [selectedListingForBids, setSelectedListingForBids] = useState(null);
 
   const myListings = getFarmerListings(farmerUser?.mobile);
 
@@ -98,120 +104,190 @@ export default function FarmerActiveListings({ onOpenNewListing }) {
           </div>
         ) : (
           /* Grid of Listings Cards */
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {myListings.map((item) => (
-              <div
-                key={item.id}
-                className="group bg-white rounded-2xl border border-gray-200/90 shadow-2xs hover:shadow-md transition-all duration-200 flex flex-col justify-between overflow-hidden"
-              >
-                {/* Top Image & Status Tag */}
-                <div className="relative aspect-video w-full bg-gray-100 overflow-hidden border-b border-gray-100">
-                  {item.image ? (
-                    <img
-                      src={item.image}
-                      alt={item.cropName}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-emerald-50/50 text-emerald-600">
-                      <Tag className="w-10 h-10 opacity-40" />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {myListings.map((item) => {
+              const bids = item.bids && item.bids.length > 0 ? item.bids : generateSampleBids(item.basePrice);
+              const highestBid = bids.reduce((max, curr) => (curr.amount > max.amount ? curr : max), bids[0]);
+              const isSold =
+                item.status &&
+                (item.status.includes('विक्री पूर्ण') || item.status.includes('Sold') || !!item.winningMerchant);
+
+              return (
+                <div
+                  key={item.id}
+                  className={`group bg-white rounded-3xl border shadow-2xs hover:shadow-lg transition-all duration-300 flex flex-col justify-between overflow-hidden ${
+                    isSold ? 'border-emerald-300 ring-1 ring-emerald-500/20' : 'border-gray-200/90 hover:border-emerald-500/50'
+                  }`}
+                >
+                  {/* Top Image & Status Tag */}
+                  <div className="relative aspect-video w-full bg-gray-100 overflow-hidden border-b border-gray-100">
+                    {item.image ? (
+                      <img
+                        src={item.image}
+                        alt={item.cropName}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center bg-emerald-50/50 text-emerald-600">
+                        <Tag className="w-10 h-10 opacity-40" />
+                      </div>
+                    )}
+
+                    {/* Status Badge */}
+                    <div className="absolute top-2.5 left-2.5">
+                      {isSold ? (
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-emerald-600 text-white shadow-xs backdrop-blur-xs">
+                          <CheckCircle2 className="w-3.5 h-3.5" />
+                          <span>विक्री पूर्ण (Sold)</span>
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-white/95 text-emerald-800 shadow-xs border border-emerald-200 backdrop-blur-xs">
+                          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                          <span>{item.status || 'बोली सुरू - Active Bidding'}</span>
+                        </span>
+                      )}
                     </div>
-                  )}
 
-                  {/* Active Bidding Badge */}
-                  <div className="absolute top-2.5 left-2.5">
-                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-white/95 text-emerald-800 shadow-xs border border-emerald-200 backdrop-blur-xs">
-                      <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                      <span>{item.status || 'बोली सुरू - Active Bidding'}</span>
-                    </span>
-                  </div>
-
-                  {/* Listing ID Tag */}
-                  <div className="absolute top-2.5 right-2.5">
-                    <span className="text-[10px] font-mono font-bold bg-black/60 text-white px-2 py-0.5 rounded backdrop-blur-xs">
-                      #{item.id}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Card Details */}
-                <div className="p-5 space-y-4 flex-1 flex flex-col justify-between">
-                  <div className="space-y-2.5">
-                    <div className="flex items-start justify-between gap-2">
-                      <h3 className="text-lg font-bold text-gray-950 group-hover:text-emerald-800 transition-colors">
-                        {item.cropName}
-                      </h3>
-                      <span
-                        className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full border shrink-0 ${getGradeBadge(
-                          item.qualityGrade
-                        )}`}
-                      >
-                        {item.qualityGrade}
+                    {/* Listing ID Tag */}
+                    <div className="absolute top-2.5 right-2.5">
+                      <span className="text-[10px] font-mono font-bold bg-black/60 text-white px-2 py-0.5 rounded backdrop-blur-xs">
+                        #{item.id}
                       </span>
                     </div>
+                  </div>
 
-                    {/* Quantity & Base Price metrics */}
-                    <div className="grid grid-cols-2 gap-2 pt-1">
-                      <div className="p-2.5 rounded-xl bg-gray-50 border border-gray-200/80">
-                        <span className="block text-[10px] font-semibold text-gray-500">
-                          एकूण प्रमाण (Quantity)
+                  {/* Card Details */}
+                  <div className="p-5 sm:p-6 space-y-4 flex-1 flex flex-col justify-between">
+                    <div className="space-y-3">
+                      <div className="flex items-start justify-between gap-2">
+                        <h3 className="text-lg font-bold text-gray-950 group-hover:text-emerald-800 transition-colors">
+                          {item.cropName}
+                        </h3>
+                        <span
+                          className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full border shrink-0 ${getGradeBadge(
+                            item.qualityGrade
+                          )}`}
+                        >
+                          {item.qualityGrade}
                         </span>
-                        <div className="flex items-center gap-1 text-sm font-extrabold text-gray-900 mt-0.5">
-                          <Scale className="w-3.5 h-3.5 text-emerald-600" />
-                          <span>
-                            {item.quantity} {item.unit}
+                      </div>
+
+                      {/* Quantity & Base Price metrics */}
+                      <div className="grid grid-cols-2 gap-2.5 pt-1">
+                        <div className="p-3 rounded-2xl bg-gray-50 border border-gray-200/80">
+                          <span className="block text-[10px] font-semibold text-gray-500">
+                            एकूण प्रमाण (Quantity)
+                          </span>
+                          <div className="flex items-center gap-1 text-sm font-extrabold text-gray-900 mt-0.5">
+                            <Scale className="w-3.5 h-3.5 text-emerald-600" />
+                            <span>
+                              {item.quantity} {item.unit}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="p-3 rounded-2xl bg-emerald-50/70 border border-emerald-200/80">
+                          <span className="block text-[10px] font-semibold text-emerald-800">
+                            {isSold ? 'मान्य अंतिम दर' : 'किमान अपेक्षित दर'}
+                          </span>
+                          <div className="flex items-center gap-1 text-sm font-black text-emerald-900 mt-0.5">
+                            <IndianRupee className="w-3.5 h-3.5 text-emerald-700" />
+                            <span>
+                              ₹{((isSold ? item.winningPrice : item.basePrice) || item.basePrice).toLocaleString('en-IN')}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Highlight Highest Bid on Card */}
+                      {!isSold && highestBid && (
+                        <div className="p-2.5 rounded-xl bg-gradient-to-r from-emerald-50 to-emerald-100/60 border border-emerald-200 flex items-center justify-between text-xs">
+                          <span className="text-emerald-800 font-medium flex items-center gap-1">
+                            <TrendingUp className="w-3.5 h-3.5 text-emerald-600" />
+                            <span>सर्वोच्च चालू बोली:</span>
+                          </span>
+                          <span className="font-black text-emerald-900">
+                            ₹{highestBid.amount.toLocaleString('en-IN')} / {item.unit}
                           </span>
                         </div>
-                      </div>
+                      )}
 
-                      <div className="p-2.5 rounded-xl bg-emerald-50/70 border border-emerald-200/80">
-                        <span className="block text-[10px] font-semibold text-emerald-800">
-                          किमान अपेक्षित दर (Base Price)
-                        </span>
-                        <div className="flex items-center gap-1 text-sm font-black text-emerald-900 mt-0.5">
-                          <IndianRupee className="w-3.5 h-3.5 text-emerald-700" />
-                          <span>₹{item.basePrice.toLocaleString('en-IN')}</span>
+                      {/* Sold Banner on Card */}
+                      {isSold && (
+                        <div className="p-2.5 rounded-xl bg-emerald-100/70 border border-emerald-300 flex items-center justify-between text-xs">
+                          <span className="text-emerald-900 font-bold flex items-center gap-1">
+                            <Award className="w-3.5 h-3.5 text-emerald-700" />
+                            <span>खरेदीदार:</span>
+                          </span>
+                          <span className="font-extrabold text-emerald-950 truncate max-w-[140px]" title={item.winningMerchant}>
+                            {item.winningMerchant}
+                          </span>
+                        </div>
+                      )}
+
+                      {/* Location & Date */}
+                      <div className="pt-2 border-t border-gray-100 space-y-1 text-xs text-gray-500">
+                        <div className="flex items-center gap-1.5 truncate">
+                          <MapPin className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+                          <span className="truncate" title={item.location}>
+                            {item.location}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <Calendar className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+                          <span>नोंदणी दिनांक: {item.listingDate}</span>
                         </div>
                       </div>
                     </div>
 
-                    {/* Location & Date */}
-                    <div className="pt-2 border-t border-gray-100 space-y-1.5 text-xs text-gray-500">
-                      <div className="flex items-center gap-1.5 truncate">
-                        <MapPin className="w-3.5 h-3.5 text-gray-400 shrink-0" />
-                        <span className="truncate" title={item.location}>
-                          {item.location}
+                    {/* Action Button: Live Bids Trigger */}
+                    <div className="pt-3 border-t border-gray-100 space-y-2">
+                      <button
+                        type="button"
+                        onClick={() => setSelectedListingForBids(item)}
+                        className={`w-full inline-flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl font-bold text-xs sm:text-sm shadow-xs hover:shadow transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+                          isSold
+                            ? 'bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 focus:ring-emerald-500'
+                            : 'bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white focus:ring-emerald-500'
+                        }`}
+                      >
+                        <Gavel className="w-4 h-4" />
+                        <span>
+                          {isSold ? 'सौदा तपशील व बोली पहा' : `लाईव्ह बोली पहा (View Live Bids - ${bids.length})`}
                         </span>
-                      </div>
-                      <div className="flex items-center gap-1.5">
-                        <Calendar className="w-3.5 h-3.5 text-gray-400 shrink-0" />
-                        <span>नोंदणी दिनांक: {item.listingDate}</span>
+                      </button>
+
+                      <div className="flex items-center justify-between text-[11px] text-gray-400 pt-1">
+                        <span className="flex items-center gap-1">
+                          <Sparkles className="w-3 h-3 text-emerald-600" />
+                          <span>सोलापूर APMC मान्यताप्राप्त</span>
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => removeListing(item.id)}
+                          className="hover:text-red-600 transition-colors p-1"
+                          title="नोंदणी हटवा"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
                       </div>
                     </div>
                   </div>
-
-                  {/* Footer actions */}
-                  <div className="pt-3 border-t border-gray-100 flex items-center justify-between text-xs">
-                    <span className="text-emerald-700 font-semibold flex items-center gap-1">
-                      <Sparkles className="w-3 h-3" />
-                      <span>व्यापारी बोलीसाठी उपलब्ध</span>
-                    </span>
-
-                    <button
-                      type="button"
-                      onClick={() => removeListing(item.id)}
-                      className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                      title="नोंदणी रद्द करा"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
+
+      {/* Live Bids Modal */}
+      {selectedListingForBids && (
+        <LiveBidsModal
+          isOpen={!!selectedListingForBids}
+          onClose={() => setSelectedListingForBids(null)}
+          listing={myListings.find((l) => l.id === selectedListingForBids.id) || selectedListingForBids}
+        />
+      )}
     </div>
   );
 }
