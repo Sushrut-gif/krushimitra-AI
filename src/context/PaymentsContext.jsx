@@ -4,110 +4,33 @@ const PaymentsContext = createContext(null);
 
 const SETTLEMENTS_STORAGE_KEY = 'krushimitra_settlements';
 
-// Default mock settlements to showcase full banking pipeline on initial load
-const INITIAL_SETTLEMENTS = [
-  {
-    id: 'SETTL_88912',
-    listingId: 'KM-INIT-01',
-    receiptId: 'APMC-SLP-2026-88912',
-    utr: 'UTR2026100388912',
-    cropName: 'वांगी (काटेरी हिरवी)',
-    variety: 'स्पेशल सोलापुरी गावराण',
-    quantity: 100, // 100 quintal = 10 ton
-    unit: 'क्विंटल',
-    winningMerchant: 'सोलापूर ॲग्रो ट्रेडर्स',
-    merchantLicense: 'APMC-SLP-TR-4581',
-    winningPrice: 2500,
-    grossAmount: 250000,
-    apmcCess: 2500, // 1%
-    handlingFee: 1250, // 0.5%
-    netAmount: 246250,
-    status: 'settled', // 'pending' | 'in_process' | 'settled'
-    statusStep: 3,
-    statusLabel: 'खात्यात जमा (Completed / Settled)',
-    statusDescription: 'थेट DBT / NEFT द्वारे रक्कम बँक खात्यात जमा झाली.',
-    paymentMethod: 'Direct Bank Transfer (DBT / APMC e-Payment)',
-    bankName: 'State Bank of India',
-    accountMasked: '****5678',
-    ifsc: 'SBIN0001234',
-    branch: 'सोलापूर मुख्य शाखा (मंगळवार पेठ)',
-    createdAt: new Date(Date.now() - 4 * 3600000).toISOString(),
-    settledAt: new Date(Date.now() - 30 * 60000).toISOString(),
-    smsAlert:
-      'Dear SBI Customer, your A/C ****5678 is credited by INR 2,46,250.00 on 03-Oct-26 by APMC Solapur e-Payment. Ref: UTR2026100388912. Avail Bal: INR 4,12,380.00 - SBI',
-  },
-  {
-    id: 'SETTL_44589',
-    listingId: 'KM-INIT-02',
-    receiptId: 'APMC-SLP-2026-44589',
-    utr: 'UTR2026100344589',
-    cropName: 'कांदा (सोलापूर लाल)',
-    variety: 'प्रत १ - मीडियम गोला',
-    quantity: 50,
-    unit: 'क्विंटल',
-    winningMerchant: 'श्री सिद्धेश्वर व्हेजिटेबल कंपनी',
-    merchantLicense: 'APMC-SLP-TR-1290',
-    winningPrice: 2300,
-    grossAmount: 115000,
-    apmcCess: 1150,
-    handlingFee: 575,
-    netAmount: 113275,
-    status: 'in_process',
-    statusStep: 2,
-    statusLabel: 'मार्गावर (In-Process / Escrow)',
-    statusDescription: 'बाजार समिती एस्क्रो खात्यातून थेट बँक ट्रान्सफर प्रक्रिया सुरू आहे.',
-    paymentMethod: 'Direct Bank Transfer (DBT / APMC e-Payment)',
-    bankName: 'State Bank of India',
-    accountMasked: '****5678',
-    ifsc: 'SBIN0001234',
-    branch: 'सोलापूर मुख्य शाखा (मंगळवार पेठ)',
-    createdAt: new Date(Date.now() - 2 * 3600000).toISOString(),
-    settledAt: null,
-    smsAlert: null,
-  },
-  {
-    id: 'SETTL_11204',
-    listingId: 'KM-INIT-03',
-    receiptId: 'APMC-SLP-2026-11204',
-    utr: 'UTR2026100311204',
-    cropName: 'डाळिंब (भगवा एक्सपोर्ट)',
-    variety: 'सुपर ग्रेड (४००+ ग्रॅम)',
-    quantity: 25,
-    unit: 'क्विंटल',
-    winningMerchant: 'महादेव ॲग्रो एक्सपोर्ट्स',
-    merchantLicense: 'APMC-SLP-TR-7821',
-    winningPrice: 12000,
-    grossAmount: 300000,
-    apmcCess: 3000,
-    handlingFee: 1500,
-    netAmount: 295500,
-    status: 'pending',
-    statusStep: 1,
-    statusLabel: 'पेंडिंग (Pending Verification)',
-    statusDescription: 'व्यापारी देयक व मालाची प्रत्यक्ष आवक पडताळणी सुरू आहे.',
-    paymentMethod: 'Direct Bank Transfer (DBT / APMC e-Payment)',
-    bankName: 'State Bank of India',
-    accountMasked: '****5678',
-    ifsc: 'SBIN0001234',
-    branch: 'सोलापूर मुख्य शाखा (मंगळवार पेठ)',
-    createdAt: new Date(Date.now() - 45 * 60000).toISOString(),
-    settledAt: null,
-    smsAlert: null,
-  },
-];
-
 export function PaymentsProvider({ children }) {
   const [settlements, setSettlements] = useState(() => {
     try {
       const saved = localStorage.getItem(SETTLEMENTS_STORAGE_KEY);
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      const parsed = saved ? JSON.parse(saved) : [];
+
+      // Purge any previously seeded dummy/sample settlements
+      const cleanList = (parsed || []).filter((item) => {
+        const isMockId =
+          typeof item.id === 'string' &&
+          (item.id === 'SETTL_88912' || item.id === 'SETTL_44589' || item.id === 'SETTL_11204');
+        const isMockListing =
+          typeof item.listingId === 'string' &&
+          (item.listingId.startsWith('KM-INIT') || item.listingId.startsWith('KM-8840'));
+        return !isMockId && !isMockListing;
+      });
+
+      // Synchronize back to localStorage if mock items were purged
+      if (cleanList.length !== parsed.length) {
+        localStorage.setItem(SETTLEMENTS_STORAGE_KEY, JSON.stringify(cleanList));
       }
+
+      return cleanList;
     } catch (e) {
       console.error('Failed to load settlements from localStorage:', e);
+      return [];
     }
-    return INITIAL_SETTLEMENTS;
   });
 
   // Persist to localStorage

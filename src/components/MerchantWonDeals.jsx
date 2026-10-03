@@ -130,7 +130,7 @@ export default function MerchantWonDeals({ onSwitchToFeed }) {
           </div>
           <div className="space-y-1.5">
             <h3 className="text-base sm:text-lg font-bold text-gray-900">
-              अद्याप कोणताही जिंकलेला सौदा उपलब्ध नाही
+              सध्या कोणताही जिंकलेला सौदा उपलब्ध नाही.
             </h3>
             <p className="text-xs sm:text-sm text-gray-500 leading-relaxed">
               थेट लिलावात शेतीमालावर आपली बोली नोंदवा. शेतकऱ्याने आपली बोली स्वीकारताच येथे अधिकृत खरेदी बिल व पेमेंट रिलीज पर्याय दिसेल.

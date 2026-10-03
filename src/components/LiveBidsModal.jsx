@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useListings, generateSampleBids } from '../context/ListingsContext';
+import { useListings } from '../context/ListingsContext';
 import {
   X,
   Gavel,
@@ -26,11 +26,11 @@ export default function LiveBidsModal({ isOpen, onClose, listing, onOpenReceipt 
 
   if (!isOpen || !listing) return null;
 
-  // Retrieve bids or generate realistic sample fallback
-  const bids = listing.bids && listing.bids.length > 0 ? listing.bids : generateSampleBids(listing.basePrice);
+  // Retrieve strictly real merchant bids placed on this lot
+  const bids = Array.isArray(listing.bids) ? listing.bids : [];
 
   // Calculate highest bid
-  const highestBid = bids.reduce((max, curr) => (curr.amount > max.amount ? curr : max), bids[0]);
+  const highestBid = bids.length > 0 ? bids.reduce((max, curr) => (curr.amount > max.amount ? curr : max), bids[0]) : null;
 
   // Is deal already finalized?
   const isFinalized =
@@ -210,17 +210,21 @@ export default function LiveBidsModal({ isOpen, onClose, listing, onOpenReceipt 
             {/* Highest Current Bid */}
             <div className="p-5 rounded-2xl bg-gradient-to-br from-emerald-600 to-emerald-800 text-white shadow-md space-y-1">
               <div className="flex items-center justify-between text-emerald-100 text-xs font-semibold">
-                <span>सर्वोच्च चालू बोली (Highest Current Bid)</span>
+                <span>{highestBid ? 'सर्वोच्च चालू बोली (Highest Current Bid)' : 'किमान अपेक्षित दर (Base Price)'}</span>
                 <TrendingUp className="w-4 h-4 text-emerald-200" />
               </div>
               <div className="text-2xl sm:text-3xl font-black tracking-tight pt-1">
-                ₹{highestBid ? highestBid.amount.toLocaleString('en-IN') : listing.basePrice.toLocaleString('en-IN')}{' '}
+                ₹{highestBid ? highestBid.amount.toLocaleString('en-IN') : Number(listing.basePrice || 0).toLocaleString('en-IN')}{' '}
                 <span className="text-xs sm:text-sm font-normal text-emerald-100">
                   / {listing.unit}
                 </span>
               </div>
               <div className="text-[11px] text-emerald-100 pt-1">
-                व्यापारी: <strong>{highestBid?.merchantName}</strong>
+                {highestBid ? (
+                  <span>व्यापारी: <strong>{highestBid.merchantName}</strong></span>
+                ) : (
+                  <span>अद्याप कोणत्याही व्यापाऱ्याने बोली लावलेली नाही</span>
+                )}
               </div>
             </div>
 
@@ -234,7 +238,7 @@ export default function LiveBidsModal({ isOpen, onClose, listing, onOpenReceipt 
                 {bids.length} <span className="text-xs font-medium text-gray-600">व्यापारी बोली</span>
               </div>
               <div className="text-[11px] text-emerald-700 font-medium">
-                सर्व व्यापारी सोलापूर APMC अधिकृत परवानाधारक आहेत
+                {bids.length > 0 ? 'सर्व व्यापारी सोलापूर APMC अधिकृत परवानाधारक आहेत' : 'व्यापारी थेट ई-लिलावात बोली लावताच येथे दिसेल'}
               </div>
             </div>
           </div>
@@ -282,12 +286,25 @@ export default function LiveBidsModal({ isOpen, onClose, listing, onOpenReceipt 
                 सर्व व्यापारी बोलींची यादी (Live Merchant Bids)
               </h4>
               <span className="text-[11px] text-gray-500">
-                चढत्या / सर्वोच्च क्रमाने
+                {bids.length > 0 ? 'चढत्या / सर्वोच्च क्रमाने' : '0 बोली'}
               </span>
             </div>
 
-            <div className="divide-y divide-gray-100 border border-gray-200 rounded-2xl overflow-hidden bg-white shadow-2xs">
-              {bids
+            {bids.length === 0 ? (
+              <div className="p-8 rounded-2xl bg-gray-50 border border-gray-200 text-center space-y-2">
+                <div className="w-12 h-12 bg-white rounded-xl border border-gray-200 text-gray-400 flex items-center justify-center mx-auto shadow-2xs">
+                  <Gavel className="w-6 h-6" />
+                </div>
+                <h5 className="text-sm font-bold text-gray-800">
+                  अद्याप कोणत्याही व्यापाऱ्याने बोली लावलेली नाही
+                </h5>
+                <p className="text-xs text-gray-500 max-w-sm mx-auto">
+                  व्यापारी थेट लिलाव बाजारपेठेत माल पाहून बोली लावतील तेव्हा येथे रिअल-टाइम दिसेल.
+                </p>
+              </div>
+            ) : (
+              <div className="divide-y divide-gray-100 border border-gray-200 rounded-2xl overflow-hidden bg-white shadow-2xs">
+                {bids
                 .slice()
                 .sort((a, b) => b.amount - a.amount)
                 .map((bid, index) => {
@@ -371,7 +388,8 @@ export default function LiveBidsModal({ isOpen, onClose, listing, onOpenReceipt 
                     </div>
                   );
                 })}
-            </div>
+              </div>
+            )}
           </div>
         </div>
 

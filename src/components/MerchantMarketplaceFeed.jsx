@@ -310,7 +310,7 @@ export default function MerchantMarketplaceFeed() {
           <div className="space-y-1.5">
             <h3 className="text-base sm:text-lg font-bold text-gray-900">
               {activeLots.length === 0
-                ? 'सध्या बाजारात लिलावासाठी माल उपलब्ध नाही.'
+                ? 'सध्या बाजारात लिलावासाठी कोणताही शेतमाल उपलब्ध नाही. शेतकरी नोंदणी करतील तेव्हा येथे थेट दिसेल.'
                 : 'निवडलेल्या फिल्टरनुसार कोणताही माल उपलब्ध नाही.'}
             </h3>
             <p className="text-xs sm:text-sm text-gray-500 leading-relaxed">
@@ -440,7 +440,7 @@ export default function MerchantMarketplaceFeed() {
                   <div className="space-y-1.5 pt-1">
                     <div className="flex items-baseline justify-between text-xs">
                       <span className="text-gray-500 font-medium">शेतकरी मूळ दर:</span>
-                      <span className="font-semibold text-gray-700 line-through">
+                      <span className={`font-semibold text-gray-700 ${bids.length > 0 ? 'line-through text-gray-400' : ''}`}>
                         ₹{lot.basePrice?.toLocaleString('en-IN')} / {lot.unit || 'क्विंटल'}
                       </span>
                     </div>
@@ -449,9 +449,9 @@ export default function MerchantMarketplaceFeed() {
                     <div className="flex items-center justify-between p-2.5 rounded-xl bg-gradient-to-r from-indigo-50 to-blue-50 border border-indigo-200/80">
                       <div>
                         <div className="flex items-center gap-1.5">
-                          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                          <span className={`w-2 h-2 rounded-full ${bids.length > 0 ? 'bg-emerald-500 animate-pulse' : 'bg-indigo-400'}`} />
                           <span className="text-[11px] font-bold text-indigo-900 uppercase tracking-tight">
-                            चालू सर्वोच्च बोली:
+                            {bids.length > 0 ? 'चालू सर्वोच्च बोली:' : 'किमान मूळ दर (लिलाव सुरू):'}
                           </span>
                         </div>
                         <div className="text-base sm:text-lg font-black text-indigo-950 mt-0.5">
@@ -461,12 +461,20 @@ export default function MerchantMarketplaceFeed() {
                       </div>
 
                       <div className="text-right">
-                        <span className="inline-block px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
-                          +{bidPercentIncrease}% वाढ
-                        </span>
-                        <span className="block text-[10px] text-indigo-700 font-medium mt-0.5">
-                          {bids.length} व्यापारी बोली
-                        </span>
+                        {bids.length > 0 ? (
+                          <>
+                            <span className="inline-block px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
+                              +{bidPercentIncrease}% वाढ
+                            </span>
+                            <span className="block text-[10px] text-indigo-700 font-medium mt-0.5">
+                              {bids.length} व्यापारी बोली
+                            </span>
+                          </>
+                        ) : (
+                          <span className="inline-block px-2 py-0.5 rounded text-[10px] font-semibold bg-indigo-100/70 text-indigo-800 border border-indigo-200">
+                            0 बोली प्राप्त
+                          </span>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -548,8 +556,13 @@ function LotInspectionModal({ lotId, initialLot, onClose }) {
       return;
     }
 
-    if (amountNum <= highestBid) {
-      setErrorHelper(`बोली चालू सर्वोच्च बोलीपेक्षा (₹${highestBid.toLocaleString('en-IN')}) जास्त असणे आवश्यक आहे.`);
+    const minRequired = bids.length > 0 ? highestBid : (basePrice - 1);
+    if (amountNum <= minRequired) {
+      setErrorHelper(
+        bids.length > 0
+          ? `बोली चालू सर्वोच्च बोलीपेक्षा (₹${highestBid.toLocaleString('en-IN')}) जास्त असणे आवश्यक आहे.`
+          : `बोली मूळ किमतीपेक्षा (₹${basePrice.toLocaleString('en-IN')}) जास्त किंवा समान असणे आवश्यक आहे.`
+      );
       return;
     }
 
@@ -771,7 +784,7 @@ function LotInspectionModal({ lotId, initialLot, onClose }) {
                 <div className="flex items-center justify-between">
                   <span className="text-[11px] text-emerald-300 font-semibold flex items-center gap-1.5">
                     <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                    चालू सर्वोच्च बोली (Current Highest Bid)
+                    {bids.length > 0 ? 'चालू सर्वोच्च बोली (Current Highest Bid)' : 'किमान मूळ बोली (Base Price)'}
                   </span>
                   <span className="text-[10px] text-emerald-400 font-bold bg-emerald-900/60 px-1.5 py-0.5 rounded">
                     {bids.length} बोलीदार
@@ -792,7 +805,9 @@ function LotInspectionModal({ lotId, initialLot, onClose }) {
                     आपली नवीन बोली रक्कम प्रविष्ट करा:
                   </label>
                   <span className="text-[11px] font-semibold text-emerald-400 bg-emerald-950/80 px-2 py-0.5 rounded border border-emerald-700/60 self-start sm:self-auto">
-                    चालू सर्वोच्च बोली: ₹{highestBid.toLocaleString('en-IN')} प्रति {lot.unit || 'क्विंटल'}
+                    {bids.length > 0
+                      ? `चालू सर्वोच्च बोली: ₹${highestBid.toLocaleString('en-IN')} प्रति ${lot.unit || 'क्विंटल'}`
+                      : `किमान मूळ दर: ₹${basePrice.toLocaleString('en-IN')} प्रति ${lot.unit || 'क्विंटल'}`}
                   </span>
                 </div>
                 <div className="relative rounded-xl shadow-xs">
@@ -801,7 +816,7 @@ function LotInspectionModal({ lotId, initialLot, onClose }) {
                   </div>
                   <input
                     type="number"
-                    min={highestBid + 1}
+                    min={bids.length > 0 ? highestBid + 1 : basePrice}
                     step="10"
                     value={bidAmount}
                     onChange={(e) => {

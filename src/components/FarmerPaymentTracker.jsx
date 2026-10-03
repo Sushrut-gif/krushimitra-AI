@@ -188,12 +188,22 @@ export default function FarmerPaymentTracker() {
 
         {/* 3. SETTLEMENT CARDS STREAM */}
         {filteredSettlements.length === 0 ? (
-          <div className="text-center py-10 px-4 space-y-2">
-            <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto text-gray-400">
-              <IndianRupee className="w-6 h-6" />
+          <div className="text-center py-12 px-4 space-y-3 bg-gray-50/60 rounded-2xl border border-gray-200">
+            <div className="w-14 h-14 bg-white rounded-2xl border border-gray-200 flex items-center justify-center mx-auto text-emerald-700 shadow-2xs">
+              <IndianRupee className="w-7 h-7" />
             </div>
-            <h4 className="text-sm font-bold text-gray-800">या वर्गवारीत कोणताही व्यवहार नाही</h4>
-            <p className="text-xs text-gray-500">सर्व व्यवहार पाहण्यासाठी 'सर्व' टॅबवर क्लिक करा.</p>
+            <div className="space-y-1">
+              <h4 className="text-base font-bold text-gray-900">
+                {settlements.length === 0
+                  ? 'सध्या कोणतेही व्यवहार किंवा पेमेंट्स उपलब्ध नाहीत.'
+                  : 'या वर्गवारीत कोणताही व्यवहार नाही.'}
+              </h4>
+              <p className="text-xs text-gray-500 max-w-md mx-auto leading-relaxed">
+                {settlements.length === 0
+                  ? 'शेतमाल लिलाव पूर्ण होऊन व्यापाऱ्याने बोली स्वीकारल्यानंतर थेट बँक सेटलमेंट येथे दिसेल.'
+                  : "सर्व व्यवहार पाहण्यासाठी 'सर्व' टॅबवर क्लिक करा."}
+              </p>
+            </div>
           </div>
         ) : (
           <div className="space-y-4 pt-1">

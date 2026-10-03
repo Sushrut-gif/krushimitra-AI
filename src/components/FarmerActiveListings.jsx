@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { useListings, generateSampleBids } from '../context/ListingsContext';
+import { useListings } from '../context/ListingsContext';
 import LiveBidsModal from './LiveBidsModal';
 import DigitalAuctionReceiptModal from './DigitalAuctionReceiptModal';
 import {
@@ -90,7 +90,7 @@ export default function FarmerActiveListings({ onOpenNewListing }) {
             </div>
             <div className="space-y-1.5">
               <h3 className="text-base font-bold text-gray-900">
-                सध्या कोणताही माल लिलावासाठी नोंदवलेला नाही
+                आपण अद्याप कोणताही शेतमाल विक्रीसाठी नोंदवला नाही.
               </h3>
               <p className="text-xs text-gray-500 leading-relaxed">
                 वर दिलेल्या AI कॅमेरा तपासणीद्वारे आपल्या शेतमालाची गुणवत्ता तपासा आणि एका क्लिकवर थेट सोलापूर APMC लिलावात माल नोंदवा.
@@ -110,8 +110,8 @@ export default function FarmerActiveListings({ onOpenNewListing }) {
           /* Grid of Listings Cards */
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {myListings.map((item) => {
-              const bids = item.bids && item.bids.length > 0 ? item.bids : generateSampleBids(item.basePrice);
-              const highestBid = bids.reduce((max, curr) => (curr.amount > max.amount ? curr : max), bids[0]);
+              const bids = Array.isArray(item.bids) ? item.bids : [];
+              const highestBid = bids.length > 0 ? bids.reduce((max, curr) => (curr.amount > max.amount ? curr : max), bids[0]) : null;
               const isSold =
                 item.status &&
                 (item.status.includes('विक्री पूर्ण') || item.status.includes('Sold') || !!item.winningMerchant);
@@ -216,6 +216,18 @@ export default function FarmerActiveListings({ onOpenNewListing }) {
                         </div>
                       )}
 
+                      {!isSold && !highestBid && (
+                        <div className="p-2.5 rounded-xl bg-gray-50 border border-gray-200 flex items-center justify-between text-xs text-gray-500">
+                          <span className="flex items-center gap-1">
+                            <Clock className="w-3.5 h-3.5 text-gray-400" />
+                            <span>बोली स्थिती:</span>
+                          </span>
+                          <span className="font-semibold text-gray-600">
+                            अद्याप बोली प्राप्त नाही
+                          </span>
+                        </div>
+                      )}
+
                       {/* Sold Banner on Card (when sold) */}
                       {isSold && (
                         <div className="p-2.5 rounded-xl bg-emerald-100/70 border border-emerald-300 flex items-center justify-between text-xs">
@@ -274,7 +286,11 @@ export default function FarmerActiveListings({ onOpenNewListing }) {
                           className="w-full inline-flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl font-bold text-xs sm:text-sm bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white shadow-xs hover:shadow transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500"
                         >
                           <Gavel className="w-4 h-4 text-emerald-200" />
-                          <span>लाईव्ह बोली पहा (View Live Bids - {bids.length})</span>
+                          <span>
+                            {bids.length > 0
+                              ? `लाईव्ह बोली पहा (View Live Bids - ${bids.length})`
+                              : 'लिलाव बोली ट्रॅकर (0 बोली)'}
+                          </span>
                         </button>
                       )}
 

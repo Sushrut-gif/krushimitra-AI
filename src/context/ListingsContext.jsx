@@ -7,39 +7,8 @@ const LISTINGS_STORAGE_KEY = 'krushimitra_listings';
 /**
  * Generate 2-3 realistic sample merchant bids for active bidding simulation
  */
-export function generateSampleBids(basePrice = 2000) {
-  const price = Number(basePrice) || 2000;
-  const now = Date.now();
-
-  return [
-    {
-      id: 'BID_' + (now - 3600000).toString().slice(-6),
-      merchantName: 'सोलापूर ॲग्रो ट्रेडर्स',
-      merchantPhone: '9822154321',
-      merchantLocation: 'सोलापूर APMC मार्केट यार्ड',
-      amount: Math.round(price * 1.05 / 10) * 10, // +5%
-      timestamp: new Date(now - 45 * 60000).toISOString(),
-      timeFormatted: '४५ मिनिटांपूर्वी',
-    },
-    {
-      id: 'BID_' + (now - 1800000).toString().slice(-6),
-      merchantName: 'श्री सिद्धेश्वर व्हेजिटेबल कंपनी',
-      merchantPhone: '9423456789',
-      merchantLocation: 'बाजार समिती गाळा क्र. १२',
-      amount: Math.round(price * 1.10 / 10) * 10, // +10%
-      timestamp: new Date(now - 20 * 60000).toISOString(),
-      timeFormatted: '२० मिनिटांपूर्वी',
-    },
-    {
-      id: 'BID_' + now.toString().slice(-6),
-      merchantName: 'महादेव व्हेजिटेबल सप्लायर्स',
-      merchantPhone: '9765432100',
-      merchantLocation: 'नवीन कांदा मार्केट, सोलापूर',
-      amount: Math.round(price * 1.15 / 10) * 10, // +15%
-      timestamp: new Date(now - 5 * 60000).toISOString(),
-      timeFormatted: '५ मिनिटांपूर्वी',
-    },
-  ];
+export function generateSampleBids() {
+  return [];
 }
 
 export function getCropCategory(cropName = '', currentCategory = '') {
@@ -138,24 +107,32 @@ export function ListingsProvider({ children }) {
       const saved = localStorage.getItem(LISTINGS_STORAGE_KEY);
       const parsed = saved ? JSON.parse(saved) : [];
 
-      // Purge any previously seeded dummy items (e.g. KM-88401 to KM-88406 or mock farmer IDs)
-      const cleanList = (parsed || []).filter((item) => {
-        const isMockId = typeof item.id === 'string' && item.id.startsWith('KM-8840');
-        const isMockFarmer = typeof item.farmerId === 'string' && item.farmerId.startsWith('FARMER_10');
-        return !isMockId && !isMockFarmer;
-      });
+      // Purge any previously seeded dummy items (e.g. KM-88401 to KM-88406, KM-INIT, or mock farmer IDs)
+      const cleanList = (parsed || [])
+        .filter((item) => {
+          const isMockId = typeof item.id === 'string' && (item.id.startsWith('KM-8840') || item.id.startsWith('KM-INIT'));
+          const isMockFarmer = typeof item.farmerId === 'string' && item.farmerId.startsWith('FARMER_10');
+          return !isMockId && !isMockFarmer;
+        })
+        .map((item) => {
+          // Strip out old mock/simulated bids that have mock merchant names and lack valid merchant license
+          const mockMerchantNames = ['सोलापूर ॲग्रो ट्रेडर्स', 'श्री सिद्धेश्वर व्हेजिटेबल कंपनी', 'महादेव व्हेजिटेबल सप्लायर्स'];
+          const realBids = Array.isArray(item.bids)
+            ? item.bids.filter((b) => b.merchantLicense || !mockMerchantNames.includes(b.merchantName))
+            : [];
+          return {
+            ...item,
+            bids: realBids,
+            category: item.category || getCropCategory(item.cropName),
+          };
+        });
 
-      // Synchronize back to localStorage if mock items were purged
-      if (cleanList.length !== parsed.length) {
+      // Synchronize back to localStorage if mock items or bids were purged
+      if (cleanList.length !== parsed.length || JSON.stringify(cleanList) !== saved) {
         localStorage.setItem(LISTINGS_STORAGE_KEY, JSON.stringify(cleanList));
       }
 
-      return cleanList.map((item) => {
-        return {
-          ...item,
-          category: item.category || getCropCategory(item.cropName),
-        };
-      });
+      return cleanList;
     } catch (e) {
       console.error('Failed to load listings from localStorage:', e);
       return [];
@@ -176,7 +153,6 @@ export function ListingsProvider({ children }) {
    */
   const addListing = (listingData) => {
     const basePriceNum = Number(listingData.basePrice) || 0;
-    const initialBids = generateSampleBids(basePriceNum);
 
     const newListing = {
       id: 'KM-' + Date.now().toString().slice(-6),
@@ -196,7 +172,7 @@ export function ListingsProvider({ children }) {
       createdAt: new Date().toISOString(),
       notes: listingData.notes || '',
       estimatedMarketPrice: listingData.estimatedMarketPrice || '',
-      bids: initialBids,
+      bids: [], // Start with empty array for strictly real merchant bids
       winningMerchant: null,
       winningPrice: null,
       winningBidId: null,
