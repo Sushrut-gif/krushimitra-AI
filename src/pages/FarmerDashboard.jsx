@@ -1,27 +1,41 @@
 import React from 'react';
 import DashboardLayout from '../components/DashboardLayout';
-import { Sprout, Sparkles, Clock, ArrowRight } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import { Sprout, Sparkles, Clock, ArrowRight, MapPin, Phone } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export default function FarmerDashboard() {
+  const { farmerUser } = useAuth();
+
   return (
     <DashboardLayout role="farmer">
       <div className="space-y-6">
-        {/* Header section */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2 border-b border-gray-200">
+        {/* Header section with Farmer info */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-gray-200">
           <div>
             <div className="flex items-center gap-2">
-              <span className="inline-block w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+              <span className="inline-block w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
               <span className="text-xs font-semibold uppercase tracking-wider text-emerald-700">
                 शेतकरी पोर्टल • Farmer Portal
               </span>
             </div>
             <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight mt-1">
-              शेतकरी डॅशबोर्ड
+              {farmerUser?.name ? `नमस्कार, ${farmerUser.name}!` : 'शेतकरी डॅशबोर्ड'}
             </h1>
-            <p className="text-sm text-gray-500 mt-1">
-              आपल्या पिकांची नोंद, अचूक प्रतवारी आणि APMC बाजारभाव एकाच ठिकाणी.
-            </p>
+            
+            {/* Farmer registered details chips */}
+            {farmerUser && (
+              <div className="flex flex-wrap items-center gap-2 mt-2 text-xs text-gray-600">
+                <span className="inline-flex items-center gap-1 bg-white px-2.5 py-1 rounded-md border border-gray-200 font-medium">
+                  <MapPin className="w-3 h-3 text-emerald-600" />
+                  {farmerUser.village}, ता. {farmerUser.taluka}, जि. {farmerUser.district}
+                </span>
+                <span className="inline-flex items-center gap-1 bg-white px-2.5 py-1 rounded-md border border-gray-200 font-medium">
+                  <Phone className="w-3 h-3 text-emerald-600" />
+                  +91 {farmerUser.mobile}
+                </span>
+              </div>
+            )}
           </div>
 
           <div className="flex items-center gap-3">

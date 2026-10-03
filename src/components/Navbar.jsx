@@ -1,6 +1,7 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
-import { ArrowLeftRight, Sprout, Store, Landmark, ShieldCheck } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { ArrowLeftRight, Sprout, Store, Landmark, User, LogOut } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 const roleConfig = {
   farmer: {
@@ -29,6 +30,13 @@ const roleConfig = {
 export default function Navbar({ role }) {
   const currentRole = roleConfig[role] || roleConfig.farmer;
   const RoleIcon = currentRole.icon;
+  const { farmerUser, isFarmerAuthenticated, logoutFarmer } = useAuth();
+  const navigate = useNavigate();
+
+  const handleFarmerLogout = () => {
+    logoutFarmer();
+    navigate('/');
+  };
 
   return (
     <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-200 shadow-[0_1px_3px_0_rgba(0,0,0,0.02)]">
@@ -54,26 +62,50 @@ export default function Navbar({ role }) {
             </div>
           </Link>
 
-          {/* Active Role Badge & Switch Role Action */}
-          <div className="flex items-center gap-3 sm:gap-4">
+          {/* Right Section: Active Role Badge, Logged In User & Actions */}
+          <div className="flex items-center gap-2 sm:gap-3">
             {/* Active Role Indicator */}
-            <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold border ring-1 ring-inset ${currentRole.badgeClass}`}>
+            <div className={`hidden md:inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold border ring-1 ring-inset ${currentRole.badgeClass}`}>
               <span className={`w-2 h-2 rounded-full ${currentRole.dotClass} animate-pulse`} />
               <RoleIcon className="w-3.5 h-3.5" />
               <span>सक्रिय कक्ष: {currentRole.label}</span>
-              <span className="text-gray-400 font-normal hidden md:inline">({currentRole.labelEn})</span>
+              <span className="text-gray-400 font-normal hidden lg:inline">({currentRole.labelEn})</span>
             </div>
+
+            {/* If Farmer is Logged In: Show Name */}
+            {role === 'farmer' && isFarmerAuthenticated && farmerUser && (
+              <div className="flex items-center gap-1.5 text-xs font-semibold text-gray-800 bg-emerald-50/80 border border-emerald-200/80 px-3 py-1.5 rounded-lg">
+                <User className="w-3.5 h-3.5 text-emerald-700 shrink-0" />
+                <span className="max-w-[120px] sm:max-w-[160px] truncate" title={farmerUser.name}>
+                  {farmerUser.name}
+                </span>
+              </div>
+            )}
 
             {/* Switch Role Link */}
             <Link
               to="/"
-              className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-medium text-gray-600 hover:text-gray-900 bg-gray-50 hover:bg-gray-100 border border-gray-200 px-3 py-1.5 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400"
+              className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-medium text-gray-600 hover:text-gray-900 bg-gray-50 hover:bg-gray-100 border border-gray-200 px-2.5 sm:px-3 py-1.5 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400"
               title="भूमिका निवड पृष्ठावर परत जा"
             >
               <ArrowLeftRight className="w-3.5 h-3.5 text-gray-500" />
               <span>भूमिका बदला</span>
-              <span className="text-gray-400 hidden sm:inline text-xs">(Switch Role)</span>
+              <span className="text-gray-400 hidden sm:inline text-xs">(Switch)</span>
             </Link>
+
+            {/* Logout Button (for logged-in farmer) */}
+            {role === 'farmer' && isFarmerAuthenticated && (
+              <button
+                type="button"
+                onClick={handleFarmerLogout}
+                className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 border border-red-200/80 px-2.5 sm:px-3 py-1.5 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-400"
+                title="खाते लॉगआउट करा"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+                <span>लॉगआउट</span>
+                <span className="text-red-400 hidden sm:inline text-xs">(Logout)</span>
+              </button>
+            )}
           </div>
         </div>
       </div>
