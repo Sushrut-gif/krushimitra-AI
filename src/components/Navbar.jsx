@@ -37,6 +37,9 @@ export default function Navbar({ role }) {
     merchantUser,
     isMerchantAuthenticated,
     logoutMerchant,
+    adminUser,
+    isAdminAuthenticated,
+    logoutAdmin,
   } = useAuth();
   const navigate = useNavigate();
 
@@ -48,6 +51,11 @@ export default function Navbar({ role }) {
   const handleMerchantLogout = () => {
     logoutMerchant();
     navigate('/');
+  };
+
+  const handleAdminLogout = () => {
+    logoutAdmin();
+    navigate('/admin/login');
   };
 
   return (
@@ -104,6 +112,16 @@ export default function Navbar({ role }) {
               </div>
             )}
 
+            {/* If Admin is Logged In: Show Admin Officer Badge */}
+            {role === 'admin' && isAdminAuthenticated && adminUser && (
+              <div className="flex items-center gap-1.5 text-xs font-bold text-slate-900 bg-slate-100 border border-slate-300 px-3 py-1.5 rounded-lg shadow-2xs">
+                <ShieldCheck className="w-3.5 h-3.5 text-slate-700 shrink-0" />
+                <span className="max-w-[120px] sm:max-w-[180px] truncate" title={adminUser.name}>
+                  {adminUser.officerTitle || 'प्रशासक'}
+                </span>
+              </div>
+            )}
+
             {/* Switch Role Link */}
             <Link
               to="/"
@@ -140,6 +158,19 @@ export default function Navbar({ role }) {
                 <LogOut className="w-3.5 h-3.5" />
                 <span>लॉगआउट</span>
                 <span className="text-red-400 hidden sm:inline text-xs">(Logout)</span>
+              </button>
+            )}
+
+            {/* Logout Button (for logged-in admin) */}
+            {role === 'admin' && isAdminAuthenticated && (
+              <button
+                type="button"
+                onClick={handleAdminLogout}
+                className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 border border-red-200/80 px-2.5 sm:px-3 py-1.5 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-400 cursor-pointer"
+                title="प्रशासक खाते लॉगआउट करा"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+                <span>बाहेर पडा (Admin Logout)</span>
               </button>
             )}
           </div>

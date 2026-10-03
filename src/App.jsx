@@ -8,6 +8,8 @@ import FarmerAuth from './pages/FarmerAuth';
 import FarmerProtectedRoute from './components/FarmerProtectedRoute';
 import MerchantAuth from './pages/MerchantAuth';
 import MerchantProtectedRoute from './components/MerchantProtectedRoute';
+import AdminAuth from './pages/AdminAuth';
+import AdminProtectedRoute from './components/AdminProtectedRoute';
 import FarmerDashboard from './pages/FarmerDashboard';
 import MerchantDashboard from './pages/MerchantDashboard';
 import AdminDashboard from './pages/AdminDashboard';
@@ -52,8 +54,18 @@ export default function App() {
               }
             />
 
-            {/* APMC Admin Dashboard (Step 1 Shell) */}
-            <Route path="/admin" element={<AdminDashboard />} />
+            {/* APMC Admin Authentication Route */}
+            <Route path="/admin/login" element={<AdminAuth />} />
+
+            {/* Protected APMC Admin Portal */}
+            <Route
+              path="/admin"
+              element={
+                <AdminProtectedRoute>
+                  <AdminDashboard />
+                </AdminProtectedRoute>
+              }
+            />
 
             {/* Catch-all redirect to role selection */}
             <Route path="*" element={<Navigate to="/" replace />} />

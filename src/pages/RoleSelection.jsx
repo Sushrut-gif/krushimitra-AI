@@ -62,7 +62,7 @@ const roles = [
 
 export default function RoleSelection() {
   const navigate = useNavigate();
-  const { isFarmerAuthenticated, isMerchantAuthenticated } = useAuth();
+  const { isFarmerAuthenticated, isMerchantAuthenticated, isAdminAuthenticated } = useAuth();
 
   const handleRoleClick = (roleId) => {
     if (roleId === 'farmer') {
@@ -70,7 +70,7 @@ export default function RoleSelection() {
     } else if (roleId === 'merchant') {
       navigate(isMerchantAuthenticated ? '/merchant' : '/merchant/login');
     } else {
-      navigate('/admin');
+      navigate(isAdminAuthenticated ? '/admin' : '/admin/login');
     }
   };
 

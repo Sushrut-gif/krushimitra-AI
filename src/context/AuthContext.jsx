@@ -8,6 +8,24 @@ const FARMER_SESSION_KEY = 'krushimitra_farmer_session';
 const MERCHANTS_STORAGE_KEY = 'krushimitra_merchants';
 const MERCHANT_SESSION_KEY = 'krushimitra_active_merchant';
 
+const ADMIN_SESSION_KEY = 'krushimitra_admin_session';
+
+const ALLOWED_ADMIN_IDS = [
+  'admin',
+  'apmc-admin',
+  'apmc-slp-admin',
+  'admin@solapurapmc.gov.in',
+  'slp-admin',
+  'slp_admin',
+];
+
+const ALLOWED_ADMIN_PASSWORDS = [
+  'admin',
+  'apmc@2026',
+  'admin123',
+  'apmc2026',
+];
+
 const DEFAULT_SEEDED_MERCHANTS = [
   {
     id: 'MERCHANT_SLP_8841',
@@ -46,6 +64,15 @@ export function AuthProvider({ children }) {
   const [merchantUser, setMerchantUser] = useState(() => {
     try {
       const saved = localStorage.getItem(MERCHANT_SESSION_KEY);
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
+  });
+
+  const [adminUser, setAdminUser] = useState(() => {
+    try {
+      const saved = localStorage.getItem(ADMIN_SESSION_KEY);
       return saved ? JSON.parse(saved) : null;
     } catch {
       return null;
@@ -239,6 +266,42 @@ export function AuthProvider({ children }) {
     setMerchantUser(null);
   };
 
+  // Admin login
+  const loginAdmin = ({ identifier, password }) => {
+    const cleanId = (identifier || '').trim().toLowerCase();
+    const cleanPass = (password || '').trim();
+
+    const isIdValid = ALLOWED_ADMIN_IDS.some((id) => id.toLowerCase() === cleanId);
+    const isPassValid = ALLOWED_ADMIN_PASSWORDS.some((p) => p === cleanPass);
+
+    if (!isIdValid || !isPassValid) {
+      return {
+        success: false,
+        error: 'अवैध प्रशासक आयडी किंवा पासवर्ड! केवळ अधिकृत बाजार समिती अधिकाऱ्यांना प्रवेश आहे.',
+      };
+    }
+
+    const adminSession = {
+      id: cleanId.toUpperCase(),
+      name: 'सोलापूर APMC प्रशासकीय अधिकारी',
+      officerTitle: 'मुख्य बाजार निरीक्षक (Chief Market Inspector)',
+      role: 'APMC प्रशासक (Super Admin)',
+      yard: 'सोलापूर मुख्य प्रशासकीय नियंत्रण कक्ष',
+      loginAt: new Date().toISOString(),
+    };
+
+    localStorage.setItem(ADMIN_SESSION_KEY, JSON.stringify(adminSession));
+    setAdminUser(adminSession);
+
+    return { success: true, user: adminSession };
+  };
+
+  // Admin logout
+  const logoutAdmin = () => {
+    localStorage.removeItem(ADMIN_SESSION_KEY);
+    setAdminUser(null);
+  };
+
   const value = {
     farmerUser,
     isFarmerAuthenticated: !!farmerUser,
@@ -250,6 +313,10 @@ export function AuthProvider({ children }) {
     registerMerchant,
     loginMerchant,
     logoutMerchant,
+    adminUser,
+    isAdminAuthenticated: !!adminUser,
+    loginAdmin,
+    logoutAdmin,
     loading,
   };
 
