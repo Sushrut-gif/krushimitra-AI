@@ -7,27 +7,27 @@ import {
   TrendingDown,
   Minus,
   Calendar,
-  Layers,
-  Wheat,
-  Carrot,
-  Apple,
-  Droplets,
-  Sparkles,
   Building2,
-  Tag,
+  Landmark,
+  MapPin,
+  PackageCheck,
+  Clock,
   ArrowRight,
   Filter,
+  Tag,
+  ShieldCheck,
+  Layers,
 } from 'lucide-react';
 import { COMMODITY_CATEGORIES, SOLAPUR_COMMODITIES } from '../data/solapurCommodities';
 
-// Category icon mapper
-const CATEGORY_ICONS = {
-  all: Layers,
-  cereals_pulses: Wheat,
-  vegetables: Carrot,
-  fruits: Apple,
-  oilseeds: Droplets,
-  spices_others: Sparkles,
+// Visual Category Config with high-contrast emojis & labels
+const CATEGORY_CONFIG = {
+  all: { emoji: '📋', shortLabel: 'सर्व पिके', countBadge: 'bg-emerald-100 text-emerald-900' },
+  cereals_pulses: { emoji: '🌾', shortLabel: 'धान्य व कडधान्ये', countBadge: 'bg-amber-100 text-amber-900' },
+  vegetables: { emoji: '🥬', shortLabel: 'भाजीपाला', countBadge: 'bg-green-100 text-green-900' },
+  fruits: { emoji: '🍎', shortLabel: 'फळे', countBadge: 'bg-rose-100 text-rose-900' },
+  oilseeds: { emoji: '🌻', shortLabel: 'तेलबिया', countBadge: 'bg-yellow-100 text-yellow-900' },
+  spices_others: { emoji: '🍯', shortLabel: 'गूळ व मसाले', countBadge: 'bg-orange-100 text-orange-900' },
 };
 
 export default function SolapurMandiRatesModal({ isOpen, onClose, onSelectCropForListing }) {
@@ -107,64 +107,128 @@ export default function SolapurMandiRatesModal({ isOpen, onClose, onSelectCropFo
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-gray-900/70 backdrop-blur-xs overflow-y-auto"
+      className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 lg:p-6 bg-gray-950/80 backdrop-blur-sm overflow-y-auto"
       role="dialog"
       aria-modal="true"
       aria-labelledby="mandi-rates-title"
     >
-      <div className="bg-white w-full max-w-5xl rounded-2xl shadow-2xl border border-gray-200 overflow-hidden flex flex-col max-h-[92vh] my-auto animate-in fade-in zoom-in-95 duration-200">
-        {/* Modal Header */}
-        <div className="bg-linear-to-r from-emerald-800 via-emerald-700 to-emerald-900 text-white p-5 sm:p-6 shrink-0 relative">
+      <div className="bg-white w-full max-w-5xl rounded-3xl shadow-2xl border border-gray-200 overflow-hidden flex flex-col max-h-[94vh] my-auto animate-in fade-in zoom-in-95 duration-200">
+        
+        {/* PREMIUM REDESIGNED HEADER BANNER */}
+        <div className="relative bg-gradient-to-r from-emerald-800 via-emerald-700 to-teal-800 text-white p-5 sm:p-7 shrink-0 shadow-lg overflow-hidden">
+          {/* Subtle decorative grid/glow pattern overlay */}
+          <div className="absolute inset-0 bg-[radial-gradient(#ffffff15_1px,transparent_1px)] [background-size:16px_16px] pointer-events-none opacity-60" />
+          <div className="absolute -top-24 -right-24 w-72 h-72 bg-amber-400/15 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute -bottom-24 -left-24 w-72 h-72 bg-emerald-400/20 rounded-full blur-3xl pointer-events-none" />
+
+          {/* High-contrast Close Button */}
           <button
             onClick={onClose}
-            className="absolute top-5 right-5 p-2 rounded-full text-emerald-100 hover:text-white hover:bg-white/15 transition-colors cursor-pointer"
+            className="absolute top-4 right-4 sm:top-5 sm:right-5 p-2 rounded-xl text-white/90 bg-black/25 hover:bg-black/45 border border-white/25 hover:border-white/50 focus:ring-2 focus:ring-amber-400 focus:outline-none transition-all shadow-md cursor-pointer z-20 group"
             aria-label="Close modal"
           >
-            <X className="w-5 h-5" />
+            <X className="w-5 h-5 text-white group-hover:scale-110 transition-transform" />
           </button>
 
-          <div className="space-y-1.5 pr-10">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-white/20 text-white backdrop-blur-xs">
-                <Building2 className="w-3 h-3 text-emerald-200" />
-                सोलापूर कृषी उत्पन्न बाजार समिती (APMC Solapur)
-              </span>
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-500/40 text-emerald-100">
-                <Calendar className="w-3 h-3 text-emerald-200" />
-                दि. {formattedDate}
-              </span>
-              <span className="inline-block px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-400 text-gray-900">
-                अधिकृत दैनिक आवक व भाव
-              </span>
+          {/* Main Header Content */}
+          <div className="relative z-10 space-y-4 pr-10 sm:pr-12">
+            {/* Top Row: Official Emblem + Brand Titles + Live Status */}
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3.5 sm:gap-4">
+              {/* APMC Style Emblem / Icon Badge with Gold/Emerald Border & Glow */}
+              <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-br from-amber-300 via-amber-400 to-amber-600 p-0.5 shadow-xl shadow-black/30 shrink-0 flex items-center justify-center">
+                <div className="w-full h-full rounded-[14px] bg-gradient-to-b from-emerald-950 via-emerald-900 to-teal-950 flex flex-col items-center justify-center border border-amber-300/40 text-amber-300 shadow-inner group">
+                  <Landmark className="w-7 h-7 sm:w-8 sm:h-8 text-amber-300 drop-shadow-md" />
+                  <span className="text-[9px] font-black tracking-widest text-amber-300/90 uppercase -mt-0.5">APMC</span>
+                </div>
+              </div>
+
+              {/* Title & Subtitle */}
+              <div className="space-y-1">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-[11px] font-black tracking-wider uppercase px-2.5 py-0.5 rounded-md bg-amber-400 text-gray-950 shadow-xs">
+                    महाराष्ट्र शासन मान्यताप्राप्त
+                  </span>
+                  
+                  {/* Glowing Live Status Badge */}
+                  <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-950/80 border border-emerald-400/50 text-emerald-200 shadow-inner backdrop-blur-xs">
+                    <span className="relative flex h-2 w-2">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400"></span>
+                    </span>
+                    <span>थेट अपडेट चालू (Live Market Yard)</span>
+                  </div>
+                </div>
+
+                <h2 id="mandi-rates-title" className="text-xl sm:text-2xl lg:text-3xl font-black tracking-tight text-white drop-shadow-sm">
+                  सोलापूर कृषी उत्पन्न बाजार समिती (APMC Solapur)
+                </h2>
+                <p className="text-xs sm:text-sm text-emerald-100 font-medium">
+                  दैनिक अधिकृत शेतमाल आवक व थेट ई-लिलाव बाजारभाव पट्टी
+                </p>
+              </div>
             </div>
 
-            <h2 id="mandi-rates-title" className="text-xl sm:text-2xl font-black tracking-tight text-white">
-              सोलापूर APMC सर्व पिके दैनिक बाजारभाव निर्देशिका
-            </h2>
-            <p className="text-xs sm:text-sm text-emerald-100/90 font-medium">
-              धान्य, कडधान्ये, तेलबिया, भाजीपाला, फळे व गूळ यांचे अधिकृत किमान, कमाल व सरासरी बाजारभाव
-            </p>
+            {/* Solapur Yard Quick Stats Row */}
+            <div className="pt-2">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs">
+                <div className="flex items-center gap-2.5 bg-emerald-950/50 backdrop-blur-md px-3.5 py-2.5 rounded-xl border border-white/15 shadow-inner">
+                  <div className="w-7 h-7 rounded-lg bg-amber-400/20 flex items-center justify-center shrink-0">
+                    <MapPin className="w-4 h-4 text-amber-300" />
+                  </div>
+                  <div className="min-w-0">
+                    <span className="text-[10px] text-emerald-300 block font-semibold uppercase tracking-wider">मुख्य बाजार यार्ड</span>
+                    <span className="font-bold text-white text-[11px] sm:text-xs truncate block">
+                      📍 मंगळवार पेठ & कुमठा नाका मार्केट
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2.5 bg-emerald-950/50 backdrop-blur-md px-3.5 py-2.5 rounded-xl border border-white/15 shadow-inner">
+                  <div className="w-7 h-7 rounded-lg bg-emerald-400/20 flex items-center justify-center shrink-0">
+                    <PackageCheck className="w-4 h-4 text-emerald-300" />
+                  </div>
+                  <div className="min-w-0">
+                    <span className="text-[10px] text-emerald-300 block font-semibold uppercase tracking-wider">नोंदणीकृत आवक</span>
+                    <span className="font-bold text-white text-[11px] sm:text-xs truncate block">
+                      📦 एकूण पिके: {SOLAPUR_COMMODITIES.length}+ शेतमाल नोंद
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2.5 bg-emerald-950/50 backdrop-blur-md px-3.5 py-2.5 rounded-xl border border-white/15 shadow-inner">
+                  <div className="w-7 h-7 rounded-lg bg-amber-400/20 flex items-center justify-center shrink-0">
+                    <Clock className="w-4 h-4 text-amber-300" />
+                  </div>
+                  <div className="min-w-0">
+                    <span className="text-[10px] text-emerald-300 block font-semibold uppercase tracking-wider">बाजार सत्र व तारीख</span>
+                    <span className="font-bold text-white text-[11px] sm:text-xs truncate block">
+                      🕒 दि. {formattedDate} (ताजी सकाळ आवक)
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Filter Toolbar Section */}
-        <div className="bg-gray-50 border-b border-gray-200 p-4 sm:p-5 space-y-3 shrink-0">
+        {/* Filter Toolbar Section with Visual Category Chips */}
+        <div className="bg-gray-50 border-b border-gray-200 p-4 sm:p-5 space-y-3.5 shrink-0">
           {/* Search bar + Sort Row */}
           <div className="flex flex-col sm:flex-row gap-3">
             {/* Search Input */}
             <div className="relative flex-1">
-              <Search className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+              <Search className="w-4 h-4 text-gray-500 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="पिकाचे नाव शोधा (उदा. ज्वारी, कांदा, डाळिंब, तूर, गहू, Jowar, Onion)..."
-                className="w-full pl-10 pr-9 py-2.5 bg-white border border-gray-300 rounded-xl text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all shadow-2xs font-medium"
+                className="w-full pl-10 pr-9 py-2.5 bg-white border border-gray-300 rounded-xl text-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:border-transparent transition-all shadow-xs font-semibold"
               />
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery('')}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-0.5"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700 p-0.5"
                   title="Clear search"
                 >
                   <X className="w-4 h-4" />
@@ -174,13 +238,13 @@ export default function SolapurMandiRatesModal({ isOpen, onClose, onSelectCropFo
 
             {/* Sort & Trend Controls */}
             <div className="flex items-center gap-2">
-              <div className="flex items-center gap-1.5 bg-white border border-gray-300 rounded-xl px-3 py-2 text-xs shadow-2xs">
-                <ArrowUpDown className="w-3.5 h-3.5 text-gray-500" />
-                <span className="text-gray-600 font-medium hidden md:inline">क्रम:</span>
+              <div className="flex items-center gap-1.5 bg-white border border-gray-300 rounded-xl px-3 py-2 text-xs shadow-xs">
+                <ArrowUpDown className="w-3.5 h-3.5 text-gray-600" />
+                <span className="text-gray-600 font-semibold hidden md:inline">क्रम:</span>
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value)}
-                  className="bg-transparent text-gray-800 font-bold focus:outline-none cursor-pointer"
+                  className="bg-transparent text-gray-900 font-extrabold focus:outline-none cursor-pointer"
                 >
                   <option value="max_high_low">कमाल दर: जास्त ते कमी</option>
                   <option value="max_low_high">कमाल दर: कमी ते जास्त</option>
@@ -191,12 +255,12 @@ export default function SolapurMandiRatesModal({ isOpen, onClose, onSelectCropFo
               </div>
 
               {/* Trend Filter */}
-              <div className="flex items-center gap-1.5 bg-white border border-gray-300 rounded-xl px-2.5 py-2 text-xs shadow-2xs">
-                <Filter className="w-3.5 h-3.5 text-gray-500" />
+              <div className="flex items-center gap-1.5 bg-white border border-gray-300 rounded-xl px-2.5 py-2 text-xs shadow-xs">
+                <Filter className="w-3.5 h-3.5 text-gray-600" />
                 <select
                   value={trendFilter}
                   onChange={(e) => setTrendFilter(e.target.value)}
-                  className="bg-transparent text-gray-800 font-bold focus:outline-none cursor-pointer"
+                  className="bg-transparent text-gray-900 font-extrabold focus:outline-none cursor-pointer"
                 >
                   <option value="all">सर्व कल (Trends)</option>
                   <option value="up">📈 तेजी (Bullish)</option>
@@ -207,10 +271,10 @@ export default function SolapurMandiRatesModal({ isOpen, onClose, onSelectCropFo
             </div>
           </div>
 
-          {/* Category Tabs */}
+          {/* VISUAL CATEGORY CHIPS WITH CRISP ICONS (🌾 धान्य, 🥬 भाजीपाला, 🍎 फळे, 🌻 तेलबिया, 🍯 गुळ-मसाले) */}
           <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-thin scrollbar-thumb-gray-300">
             {COMMODITY_CATEGORIES.map((cat) => {
-              const IconComponent = CATEGORY_ICONS[cat.id] || Layers;
+              const meta = CATEGORY_CONFIG[cat.id] || { emoji: '📦', shortLabel: cat.labelMr, countBadge: 'bg-gray-100 text-gray-800' };
               const isActive = selectedCategory === cat.id;
               const count = categoryCounts[cat.id] || 0;
 
@@ -218,17 +282,17 @@ export default function SolapurMandiRatesModal({ isOpen, onClose, onSelectCropFo
                 <button
                   key={cat.id}
                   onClick={() => setSelectedCategory(cat.id)}
-                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
+                  className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-black whitespace-nowrap transition-all duration-150 cursor-pointer shadow-xs ${
                     isActive
-                      ? 'bg-emerald-600 text-white shadow-xs'
-                      : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-100 hover:text-gray-900'
+                      ? 'bg-emerald-800 text-white ring-2 ring-emerald-600 shadow-md scale-[1.02]'
+                      : 'bg-white text-gray-800 border border-gray-300 hover:bg-gray-100 hover:border-gray-400 hover:text-gray-950'
                   }`}
                 >
-                  <IconComponent className={`w-3.5 h-3.5 ${isActive ? 'text-white' : 'text-emerald-700'}`} />
+                  <span className="text-sm shrink-0">{meta.emoji}</span>
                   <span>{cat.labelMr}</span>
                   <span
-                    className={`ml-1 text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
-                      isActive ? 'bg-emerald-800 text-emerald-100' : 'bg-gray-100 text-gray-600'
+                    className={`ml-1 text-[11px] px-2 py-0.5 rounded-full font-black ${
+                      isActive ? 'bg-emerald-950 text-emerald-200 border border-emerald-600/50' : meta.countBadge
                     }`}
                   >
                     {count}
@@ -240,12 +304,15 @@ export default function SolapurMandiRatesModal({ isOpen, onClose, onSelectCropFo
         </div>
 
         {/* Results Info Counter */}
-        <div className="px-5 py-2.5 bg-emerald-50/50 border-b border-emerald-100 flex items-center justify-between text-xs text-emerald-950 font-medium shrink-0">
-          <span>
-            एकूण <strong className="font-bold text-emerald-800">{filteredCommodities.length}</strong> पिकांचे चालू बाजारभाव उपलब्ध
-            {searchQuery && ` ("${searchQuery}" साठी शोध परिणाम)`}
+        <div className="px-5 py-2.5 bg-emerald-50/70 border-b border-emerald-200 flex items-center justify-between text-xs text-emerald-950 font-semibold shrink-0">
+          <span className="flex items-center gap-1.5">
+            <ShieldCheck className="w-4 h-4 text-emerald-700" />
+            <span>
+              एकूण <strong className="font-extrabold text-emerald-900">{filteredCommodities.length}</strong> पिकांचे चालू बाजारभाव उपलब्ध
+              {searchQuery && ` ("${searchQuery}" शोध परिणाम)`}
+            </span>
           </span>
-          <span className="text-[11px] text-gray-500">दर: प्रति क्विंटल / जुडी (INR)</span>
+          <span className="text-[11px] text-gray-600 font-medium">दर प्रमाण: प्रति क्विंटल / जुडी (₹ INR)</span>
         </div>
 
         {/* Modal Body / Table / Cards List */}
@@ -273,16 +340,16 @@ export default function SolapurMandiRatesModal({ isOpen, onClose, onSelectCropFo
           ) : (
             <div className="space-y-4">
               {/* Desktop Table View */}
-              <div className="hidden md:block overflow-x-auto rounded-xl border border-gray-200">
+              <div className="hidden md:block overflow-x-auto rounded-xl border border-gray-200 shadow-2xs">
                 <table className="w-full text-left border-collapse text-xs">
                   <thead>
-                    <tr className="bg-gray-100 text-gray-700 font-bold uppercase tracking-wider border-b border-gray-200">
+                    <tr className="bg-gray-100 text-gray-800 font-extrabold uppercase tracking-wider border-b border-gray-300">
                       <th className="py-3 px-4">पीक व जात (Commodity)</th>
                       <th className="py-3 px-3">बाजार यार्ड (Yard)</th>
                       <th className="py-3 px-3 text-right">आवक (Arrivals)</th>
-                      <th className="py-3 px-3 text-right text-gray-800">किमान दर (Min)</th>
+                      <th className="py-3 px-3 text-right text-gray-900">किमान दर (Min)</th>
                       <th className="py-3 px-3 text-right text-emerald-800">कमाल दर (Max)</th>
-                      <th className="py-3 px-3 text-right text-indigo-800 font-extrabold">सरासरी दर (Modal)</th>
+                      <th className="py-3 px-3 text-right text-indigo-900 font-black">सरासरी दर (Modal)</th>
                       <th className="py-3 px-3 text-center">बाजारातील कल (Trend)</th>
                       {onSelectCropForListing && <th className="py-3 px-3 text-center">कृती</th>}
                     </tr>
@@ -293,43 +360,43 @@ export default function SolapurMandiRatesModal({ isOpen, onClose, onSelectCropFo
                       const isDown = item.trendType === 'down';
 
                       return (
-                        <tr key={item.id} className="hover:bg-emerald-50/40 transition-colors">
+                        <tr key={item.id} className="hover:bg-emerald-50/50 transition-colors">
                           <td className="py-3 px-4">
-                            <div className="font-extrabold text-gray-900 text-sm">{item.nameMr}</div>
+                            <div className="font-extrabold text-gray-950 text-sm">{item.nameMr}</div>
                             <div className="text-[11px] text-gray-500 font-medium">
-                              {item.nameEn} • <span className="text-emerald-700">{item.variety}</span>
+                              {item.nameEn} • <span className="text-emerald-700 font-semibold">{item.variety}</span>
                             </div>
                           </td>
-                          <td className="py-3 px-3 text-gray-600 font-medium">
-                            <span className="inline-flex items-center gap-1 bg-gray-100 px-2 py-0.5 rounded text-[11px]">
+                          <td className="py-3 px-3 text-gray-700 font-medium">
+                            <span className="inline-flex items-center gap-1 bg-gray-100 px-2 py-0.5 rounded text-[11px] border border-gray-200">
                               {item.yard}
                             </span>
                           </td>
-                          <td className="py-3 px-3 text-right font-bold text-gray-800">
+                          <td className="py-3 px-3 text-right font-black text-gray-900">
                             {item.arrivals.toLocaleString('en-IN')} <span className="text-[10px] text-gray-500 font-normal">{item.unit}</span>
                           </td>
-                          <td className="py-3 px-3 text-right font-bold text-gray-700">
+                          <td className="py-3 px-3 text-right font-bold text-gray-800">
                             ₹{item.minPrice.toLocaleString('en-IN')}
                           </td>
                           <td className="py-3 px-3 text-right font-black text-emerald-700 text-sm">
                             ₹{item.maxPrice.toLocaleString('en-IN')}
                           </td>
-                          <td className="py-3 px-3 text-right font-black text-indigo-900 text-sm bg-indigo-50/40">
+                          <td className="py-3 px-3 text-right font-black text-indigo-950 text-sm bg-indigo-50/50">
                             ₹{item.avgPrice.toLocaleString('en-IN')}
                           </td>
                           <td className="py-3 px-3 text-center">
                             <span
-                              className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold ${
+                              className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-extrabold ${
                                 isUp
-                                  ? 'bg-emerald-100 text-emerald-800'
+                                  ? 'bg-emerald-100 text-emerald-900 border border-emerald-300'
                                   : isDown
-                                  ? 'bg-rose-100 text-rose-800'
-                                  : 'bg-gray-100 text-gray-700'
+                                  ? 'bg-rose-100 text-rose-900 border border-rose-300'
+                                  : 'bg-gray-100 text-gray-800 border border-gray-300'
                               }`}
                             >
-                              {isUp && <TrendingUp className="w-3 h-3 text-emerald-600" />}
-                              {isDown && <TrendingDown className="w-3 h-3 text-rose-600" />}
-                              {!isUp && !isDown && <Minus className="w-3 h-3 text-gray-500" />}
+                              {isUp && <TrendingUp className="w-3.5 h-3.5 text-emerald-700" />}
+                              {isDown && <TrendingDown className="w-3.5 h-3.5 text-rose-700" />}
+                              {!isUp && !isDown && <Minus className="w-3.5 h-3.5 text-gray-600" />}
                               {item.trend.split(' ')[0]} {item.changePercent}
                             </span>
                           </td>
@@ -345,7 +412,7 @@ export default function SolapurMandiRatesModal({ isOpen, onClose, onSelectCropFo
                                   });
                                   onClose();
                                 }}
-                                className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-bold bg-emerald-600 text-white rounded-md hover:bg-emerald-700 transition-colors shadow-2xs cursor-pointer"
+                                className="inline-flex items-center gap-1 px-3 py-1 text-[11px] font-black bg-emerald-700 text-white rounded-lg hover:bg-emerald-800 transition-colors shadow-xs cursor-pointer"
                                 title="या पिकाचा लिलाव नोंदवा"
                               >
                                 नोंदवा <ArrowRight className="w-3 h-3" />
@@ -368,59 +435,59 @@ export default function SolapurMandiRatesModal({ isOpen, onClose, onSelectCropFo
                   return (
                     <div
                       key={item.id}
-                      className="bg-white rounded-xl border border-gray-200 p-4 shadow-2xs space-y-3"
+                      className="bg-white rounded-2xl border border-gray-200 p-4 shadow-xs space-y-3"
                     >
                       {/* Card Header */}
                       <div className="flex items-start justify-between gap-2 border-b border-gray-100 pb-2">
                         <div>
-                          <h4 className="font-extrabold text-gray-900 text-sm">{item.nameMr}</h4>
+                          <h4 className="font-extrabold text-gray-950 text-sm">{item.nameMr}</h4>
                           <p className="text-[11px] text-gray-500 font-medium">
-                            {item.nameEn} • <span className="text-emerald-700">{item.variety}</span>
+                            {item.nameEn} • <span className="text-emerald-700 font-semibold">{item.variety}</span>
                           </p>
                         </div>
                         <span
-                          className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold shrink-0 ${
+                          className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black shrink-0 ${
                             isUp
-                              ? 'bg-emerald-100 text-emerald-800'
+                              ? 'bg-emerald-100 text-emerald-900 border border-emerald-300'
                               : isDown
-                              ? 'bg-rose-100 text-rose-800'
-                              : 'bg-gray-100 text-gray-700'
+                              ? 'bg-rose-100 text-rose-900 border border-rose-300'
+                              : 'bg-gray-100 text-gray-800 border border-gray-300'
                           }`}
                         >
-                          {isUp && <TrendingUp className="w-3 h-3 text-emerald-600" />}
-                          {isDown && <TrendingDown className="w-3 h-3 text-rose-600" />}
-                          {!isUp && !isDown && <Minus className="w-3 h-3 text-gray-500" />}
+                          {isUp && <TrendingUp className="w-3 h-3 text-emerald-700" />}
+                          {isDown && <TrendingDown className="w-3 h-3 text-rose-700" />}
+                          {!isUp && !isDown && <Minus className="w-3 h-3 text-gray-600" />}
                           {item.trend.split(' ')[0]} {item.changePercent}
                         </span>
                       </div>
 
                       {/* Details row */}
                       <div className="flex items-center justify-between text-xs text-gray-600">
-                        <span className="bg-gray-100 px-2 py-0.5 rounded text-[11px] font-medium">
+                        <span className="bg-gray-100 px-2 py-0.5 rounded text-[11px] font-semibold text-gray-700 border border-gray-200">
                           {item.yard}
                         </span>
                         <span>
-                          आवक: <strong className="text-gray-900 font-bold">{item.arrivals.toLocaleString('en-IN')}</strong> {item.unit}
+                          आवक: <strong className="text-gray-950 font-black">{item.arrivals.toLocaleString('en-IN')}</strong> {item.unit}
                         </span>
                       </div>
 
                       {/* Price Grid */}
-                      <div className="grid grid-cols-3 gap-2 bg-gray-50 p-2.5 rounded-lg text-center border border-gray-200/70">
+                      <div className="grid grid-cols-3 gap-2 bg-gray-50 p-2.5 rounded-xl text-center border border-gray-200">
                         <div>
-                          <div className="text-[10px] text-gray-500 font-medium">किमान दर</div>
-                          <div className="text-xs font-bold text-gray-800 mt-0.5">
+                          <div className="text-[10px] text-gray-500 font-bold">किमान दर</div>
+                          <div className="text-xs font-black text-gray-900 mt-0.5">
                             ₹{item.minPrice.toLocaleString('en-IN')}
                           </div>
                         </div>
                         <div className="border-x border-gray-200">
-                          <div className="text-[10px] text-emerald-700 font-bold">कमाल दर</div>
+                          <div className="text-[10px] text-emerald-800 font-extrabold">कमाल दर</div>
                           <div className="text-xs font-black text-emerald-700 mt-0.5">
                             ₹{item.maxPrice.toLocaleString('en-IN')}
                           </div>
                         </div>
-                        <div className="bg-indigo-50/70 rounded py-0.5">
-                          <div className="text-[10px] text-indigo-700 font-bold">सरासरी दर</div>
-                          <div className="text-xs font-black text-indigo-900 mt-0.5">
+                        <div className="bg-indigo-50/80 rounded-lg py-0.5">
+                          <div className="text-[10px] text-indigo-800 font-extrabold">सरासरी दर</div>
+                          <div className="text-xs font-black text-indigo-950 mt-0.5">
                             ₹{item.avgPrice.toLocaleString('en-IN')}
                           </div>
                         </div>
@@ -438,7 +505,7 @@ export default function SolapurMandiRatesModal({ isOpen, onClose, onSelectCropFo
                             });
                             onClose();
                           }}
-                          className="w-full inline-flex items-center justify-center gap-1.5 py-2 text-xs font-bold bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors shadow-2xs cursor-pointer"
+                          className="w-full inline-flex items-center justify-center gap-1.5 py-2.5 text-xs font-black bg-emerald-700 text-white rounded-xl hover:bg-emerald-800 transition-colors shadow-xs cursor-pointer"
                         >
                           <Tag className="w-3.5 h-3.5" />
                           हा माल लिलावासाठी नोंदवा
@@ -455,11 +522,11 @@ export default function SolapurMandiRatesModal({ isOpen, onClose, onSelectCropFo
         {/* Footer Disclaimer */}
         <div className="bg-gray-50 border-t border-gray-200 p-3.5 sm:px-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-[11px] text-gray-600 shrink-0">
           <p className="leading-tight">
-            📌 <strong className="font-semibold text-gray-800">टीप:</strong> सदरचे बाजारभाव सोलापूर कृषी उत्पन्न बाजार समितीच्या (APMC) अधिकृत ई-लिलाव नोंदीनुसार असून मालाच्या प्रत्यक्ष प्रतवारीनुसार दरामध्ये फरक असू शकतो.
+            📌 <strong className="font-bold text-gray-800">टीप:</strong> सदरचे बाजारभाव सोलापूर कृषी उत्पन्न बाजार समितीच्या (APMC) अधिकृत ई-लिलाव नोंदीनुसार असून मालाच्या प्रत्यक्ष प्रतवारीनुसार दरामध्ये फरक असू शकतो.
           </p>
           <button
             onClick={onClose}
-            className="self-end sm:self-auto px-4 py-1.5 text-xs font-semibold text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
+            className="self-end sm:self-auto px-4 py-2 text-xs font-bold text-gray-800 bg-white border border-gray-300 rounded-xl hover:bg-gray-100 transition-colors cursor-pointer shadow-2xs"
           >
             बंद करा (Close)
           </button>
