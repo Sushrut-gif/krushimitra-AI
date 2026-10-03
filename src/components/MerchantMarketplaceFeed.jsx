@@ -106,7 +106,31 @@ export default function MerchantMarketplaceFeed() {
 
   // Compute feed summary statistics strictly from real active farmer listings
   const totalActiveLots = activeLots.length;
-  const totalQuintals = activeLots.reduce((acc, curr) => acc + (Number(curr.quantity) || 0), 0);
+
+  // Dynamic Quantity and Unit Aggregator for Active Lots
+  const formattedTotalInward = useMemo(() => {
+    if (activeLots.length === 0) return '० आवक';
+
+    // Group quantities by unit
+    const unitTotals = {};
+    activeLots.forEach((item) => {
+      const u = item.unit || 'क्विंटल';
+      const q = Number(item.quantity) || 0;
+      unitTotals[u] = (unitTotals[u] || 0) + q;
+    });
+
+    const entries = Object.entries(unitTotals);
+    if (entries.length === 0) return '० आवक';
+
+    // If single unit, e.g. "८५ क्विंटल" or "१२० पोती"
+    if (entries.length === 1) {
+      return `${entries[0][1]} ${entries[0][0]}`;
+    }
+
+    // If multiple units, format cleanly: "५० पोती + २० क्रेट्स"
+    return entries.map(([unitName, sum]) => `${sum} ${unitName}`).join(' + ');
+  }, [activeLots]);
+
   const avgBidHike = useMemo(() => {
     if (activeLots.length === 0) return '०%';
     let hikes = [];
@@ -168,7 +192,9 @@ export default function MerchantMarketplaceFeed() {
             </div>
             <div className="bg-slate-900/70 p-3 rounded-xl border border-indigo-950">
               <span className="text-[11px] text-slate-400 font-medium block">एकूण आवक प्रमाण</span>
-              <span className="text-lg font-bold text-emerald-400">{totalQuintals} क्विंटल</span>
+              <span className="text-lg font-bold text-emerald-400 truncate block" title={formattedTotalInward}>
+                {formattedTotalInward}
+              </span>
             </div>
             <div className="bg-slate-900/70 p-3 rounded-xl border border-indigo-950">
               <span className="text-[11px] text-slate-400 font-medium block">सरासरी बोली प्रीमियम</span>
@@ -415,7 +441,7 @@ export default function MerchantMarketplaceFeed() {
                     <div className="flex items-baseline justify-between text-xs">
                       <span className="text-gray-500 font-medium">शेतकरी मूळ दर:</span>
                       <span className="font-semibold text-gray-700 line-through">
-                        ₹{lot.basePrice?.toLocaleString('en-IN')} /{lot.unit || 'क्विंटल'}
+                        ₹{lot.basePrice?.toLocaleString('en-IN')} / {lot.unit || 'क्विंटल'}
                       </span>
                     </div>
 
@@ -430,7 +456,7 @@ export default function MerchantMarketplaceFeed() {
                         </div>
                         <div className="text-base sm:text-lg font-black text-indigo-950 mt-0.5">
                           ₹{highestBid.toLocaleString('en-IN')}{' '}
-                          <span className="text-xs font-normal text-gray-600">/{lot.unit || 'क्विंटल'}</span>
+                          <span className="text-xs font-normal text-gray-600">/ {lot.unit || 'क्विंटल'}</span>
                         </div>
                       </div>
 
@@ -737,7 +763,7 @@ function LotInspectionModal({ lotId, initialLot, onClose }) {
                   मूळ किंमत (Base Price)
                 </span>
                 <span className="text-base font-bold text-slate-200 mt-0.5 block">
-                  ₹{basePrice.toLocaleString('en-IN')} <span className="text-xs text-slate-400 font-normal">/{lot.unit || 'क्विंटल'}</span>
+                  ₹{basePrice.toLocaleString('en-IN')} <span className="text-xs text-slate-400 font-normal"> प्रति {lot.unit || 'क्विंटल'}</span>
                 </span>
               </div>
 
@@ -752,18 +778,23 @@ function LotInspectionModal({ lotId, initialLot, onClose }) {
                   </span>
                 </div>
                 <span className="text-lg font-black text-emerald-300 mt-0.5 block">
-                  ₹{highestBid.toLocaleString('en-IN')} <span className="text-xs text-emerald-400/80 font-normal">/{lot.unit || 'क्विंटल'}</span>
+                  ₹{highestBid.toLocaleString('en-IN')} <span className="text-xs text-emerald-400/80 font-normal"> प्रति {lot.unit || 'क्विंटल'}</span>
                 </span>
               </div>
             </div>
 
             {/* Bidding Form */}
             <form onSubmit={handlePlaceBid} className="space-y-3.5">
-              {/* Custom Bid Input Field */}
+              {/* Custom Bid Input Field with Helper */}
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                  आपली नवीन बोली रक्कम प्रविष्ट करा (Enter Bid Amount per {lot.unit || 'क्विंटल'}):
-                </label>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-1.5">
+                  <label className="block text-xs font-semibold text-slate-300">
+                    आपली नवीन बोली रक्कम प्रविष्ट करा:
+                  </label>
+                  <span className="text-[11px] font-semibold text-emerald-400 bg-emerald-950/80 px-2 py-0.5 rounded border border-emerald-700/60 self-start sm:self-auto">
+                    चालू सर्वोच्च बोली: ₹{highestBid.toLocaleString('en-IN')} प्रति {lot.unit || 'क्विंटल'}
+                  </span>
+                </div>
                 <div className="relative rounded-xl shadow-xs">
                   <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
                     <span className="text-base font-bold text-emerald-400">₹</span>
@@ -782,7 +813,7 @@ function LotInspectionModal({ lotId, initialLot, onClose }) {
                     placeholder={`उदा. ${highestBid + 50}`}
                   />
                   <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-xs text-slate-400 font-medium">
-                    /{lot.unit || 'क्विंटल'}
+                    प्रति {lot.unit || 'क्विंटल'}
                   </div>
                 </div>
               </div>
@@ -829,7 +860,7 @@ function LotInspectionModal({ lotId, initialLot, onClose }) {
                 className="w-full py-3 px-4 bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 hover:from-emerald-500 hover:to-emerald-600 active:from-emerald-700 active:to-emerald-800 text-white font-extrabold text-sm rounded-xl shadow-lg hover:shadow-emerald-500/20 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Gavel className="w-4 h-4" />
-                <span>ई-बोली नोंदवा (Submit Live Bid) • ₹{Number(bidAmount || 0).toLocaleString('en-IN')}</span>
+                <span>ई-बोली नोंदवा (Submit Live Bid) • ₹{Number(bidAmount || 0).toLocaleString('en-IN')} प्रति {lot.unit || 'क्विंटल'}</span>
               </button>
             </form>
           </div>

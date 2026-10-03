@@ -97,8 +97,8 @@ export default function ProduceListingModal({
       return;
     }
 
-    // Clean unit label
-    const cleanUnit = unit.split(' ')[0];
+    // Clean unit label (e.g. 'पोती (Bags / पोती)' -> 'पोती')
+    const cleanUnit = unit ? unit.split(' ')[0].trim() : 'क्विंटल';
 
     const newListing = addListing({
       farmerId: farmerUser?.id,
@@ -107,7 +107,7 @@ export default function ProduceListingModal({
       cropName: cropName.trim(),
       qualityGrade: qualityGrade.trim(),
       quantity: Number(quantity),
-      unit: cleanUnit,
+      unit: cleanUnit || 'क्विंटल',
       basePrice: Number(basePrice),
       location: location.trim(),
       listingDate: listingDate,
