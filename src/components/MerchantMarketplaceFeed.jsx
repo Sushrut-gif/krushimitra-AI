@@ -1,5 +1,6 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useListings, getCropCategory } from '../context/ListingsContext';
+import { useAuth } from '../context/AuthContext';
 import {
   Search,
   Filter,
@@ -466,7 +467,8 @@ export default function MerchantMarketplaceFeed() {
       {/* Lot Inspection & Bidding Modal */}
       {selectedLotForInspection && (
         <LotInspectionModal
-          lot={selectedLotForInspection}
+          lotId={selectedLotForInspection.id}
+          initialLot={selectedLotForInspection}
           onClose={() => setSelectedLotForInspection(null)}
         />
       )}
@@ -475,11 +477,83 @@ export default function MerchantMarketplaceFeed() {
 }
 
 /**
- * Detailed Lot Inspection & Quality Modal
+ * Detailed Lot Inspection & Interactive Live Bidding Modal
  */
-function LotInspectionModal({ lot, onClose }) {
-  const bids = lot.bids || [];
-  const highestBid = bids.length > 0 ? Math.max(...bids.map((b) => b.amount)) : lot.basePrice;
+function LotInspectionModal({ lotId, initialLot, onClose }) {
+  const { listings, placeBid } = useListings();
+  const { merchantUser } = useAuth();
+
+  // Dynamically synchronize with the reactive lot from ListingsContext
+  const lot = listings.find((item) => item.id === (lotId || initialLot?.id)) || initialLot;
+  const bids = lot?.bids || [];
+  const basePrice = Number(lot?.basePrice) || 0;
+  const highestBid = bids.length > 0 ? Math.max(...bids.map((b) => Number(b.amount) || 0)) : basePrice;
+
+  // Bidding form state
+  const [bidAmount, setBidAmount] = useState(() => highestBid + 50);
+  const [successMessage, setSuccessMessage] = useState('');
+  const [errorHelper, setErrorHelper] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Automatically keep bidAmount ahead of highestBid if highestBid increases
+  useEffect(() => {
+    if (Number(bidAmount) <= highestBid) {
+      setBidAmount(highestBid + 50);
+    }
+  }, [highestBid]);
+
+  // Stepper handlers
+  const handleIncrement = (increment) => {
+    setErrorHelper('');
+    setBidAmount((prev) => {
+      const current = Number(prev) || highestBid;
+      const base = Math.max(current, highestBid);
+      return base + increment;
+    });
+  };
+
+  // Submit Bid handler
+  const handlePlaceBid = (e) => {
+    e.preventDefault();
+    const amountNum = Number(bidAmount);
+
+    if (!amountNum || isNaN(amountNum)) {
+      setErrorHelper('कृपया वैध बोली रक्कम प्रविष्ट करा.');
+      return;
+    }
+
+    if (amountNum <= highestBid) {
+      setErrorHelper(`बोली चालू सर्वोच्च बोलीपेक्षा (₹${highestBid.toLocaleString('en-IN')}) जास्त असणे आवश्यक आहे.`);
+      return;
+    }
+
+    setIsSubmitting(true);
+    setErrorHelper('');
+
+    const newBidObj = {
+      id: 'BID_' + Date.now().toString().slice(-6),
+      merchantName: merchantUser?.firmName || 'माझी फर्म',
+      merchantPhone: merchantUser?.mobile || '',
+      merchantLocation: merchantUser?.operatingYard || 'सोलापूर APMC मार्केट यार्ड',
+      merchantLicense: merchantUser?.licenseNo || 'APMC/SLP/TRD-8841',
+      amount: amountNum,
+      timeFormatted: 'आत्ताच',
+      timestamp: new Date().toISOString(),
+    };
+
+    // Save bid in ListingsContext and localStorage
+    placeBid(lot.id, newBidObj);
+
+    // Provide user feedback
+    setSuccessMessage(`आपली ₹${amountNum.toLocaleString('en-IN')} ची बोली यशस्वीरित्या नोंदवली गेली!`);
+    setBidAmount(amountNum + 50);
+    setIsSubmitting(false);
+
+    // Auto-dismiss success notification
+    setTimeout(() => {
+      setSuccessMessage('');
+    }, 4500);
+  };
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-4 sm:p-6 animate-in fade-in-50 duration-200">
@@ -500,7 +574,7 @@ function LotInspectionModal({ lot, onClose }) {
                 <span className="text-xs text-gray-500">APMC Solapur Yard</span>
               </div>
               <h2 className="text-lg sm:text-xl font-extrabold text-gray-950 mt-0.5">
-                {lot.cropName} • तपशील व गुणवत्ता पाहणी
+                {lot.cropName} • गुणवत्ता व थेट ई-लिलाव
               </h2>
             </div>
           </div>
@@ -606,10 +680,10 @@ function LotInspectionModal({ lot, onClose }) {
 
             {bids.length === 0 ? (
               <div className="text-xs text-gray-500 p-3 bg-gray-50 rounded-xl text-center">
-                अद्याप कोणतीही बोली नाही. आपण पहिली बोली लावू शकता.
+                अद्याप कोणतीही बोली नाही. आपण पहिली बोली नोंदवू शकता.
               </div>
             ) : (
-              <div className="border border-gray-200 rounded-xl overflow-hidden divide-y divide-gray-100">
+              <div className="border border-gray-200 rounded-xl overflow-hidden divide-y divide-gray-100 max-h-40 overflow-y-auto">
                 {bids.map((b, idx) => (
                   <div
                     key={b.id || idx}
@@ -637,15 +711,127 @@ function LotInspectionModal({ lot, onClose }) {
             )}
           </div>
 
-          {/* Action Note for Step 12 Console */}
-          <div className="p-3.5 rounded-2xl bg-indigo-50 border border-indigo-200 flex items-start gap-3">
-            <Flame className="w-5 h-5 text-indigo-600 shrink-0 mt-0.5" />
-            <div className="text-xs text-indigo-950 space-y-1">
-              <span className="font-bold block">थेट लिलाव बोली कंसोल (Live Bidding Engine):</span>
-              <p className="text-indigo-800 leading-relaxed">
-                पुढील टप्प्यात (Step 12) आपण थेट या लॉटवर आपली वाढीव बोली (Counter Bid) क्षणात नोंदवू शकाल आणि शेतकऱ्याकडून मान्यता प्राप्त करू शकाल.
-              </p>
+          {/* Interactive Live Bidding Engine Console */}
+          <div className="bg-gradient-to-br from-indigo-900 via-slate-900 to-indigo-950 rounded-2xl border border-indigo-700/60 p-4 sm:p-5 text-white shadow-xl space-y-4">
+            {/* Console Header */}
+            <div className="flex items-center justify-between pb-3 border-b border-indigo-800/70">
+              <div className="flex items-center gap-2">
+                <span className="relative flex h-3 w-3">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+                </span>
+                <h4 className="text-sm sm:text-base font-extrabold text-white flex items-center gap-2">
+                  <Gavel className="w-4 h-4 text-emerald-400" />
+                  <span>थेट लिलाव ई-बोली कन्सोल (Live Bidding Engine)</span>
+                </h4>
+              </div>
+              <span className="text-[11px] font-semibold text-emerald-400 bg-emerald-950/80 px-2.5 py-0.5 rounded-full border border-emerald-700/60">
+                सक्रिय सत्र
+              </span>
             </div>
+
+            {/* Price Comparison Row: Base Price vs Current Highest Bid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="bg-slate-800/80 p-3 rounded-xl border border-indigo-900/80">
+                <span className="text-[11px] text-slate-400 block font-medium">
+                  मूळ किंमत (Base Price)
+                </span>
+                <span className="text-base font-bold text-slate-200 mt-0.5 block">
+                  ₹{basePrice.toLocaleString('en-IN')} <span className="text-xs text-slate-400 font-normal">/{lot.unit || 'क्विंटल'}</span>
+                </span>
+              </div>
+
+              <div className="bg-gradient-to-r from-emerald-950/90 to-teal-950/90 p-3 rounded-xl border border-emerald-500/50 shadow-inner">
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] text-emerald-300 font-semibold flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                    चालू सर्वोच्च बोली (Current Highest Bid)
+                  </span>
+                  <span className="text-[10px] text-emerald-400 font-bold bg-emerald-900/60 px-1.5 py-0.5 rounded">
+                    {bids.length} बोलीदार
+                  </span>
+                </div>
+                <span className="text-lg font-black text-emerald-300 mt-0.5 block">
+                  ₹{highestBid.toLocaleString('en-IN')} <span className="text-xs text-emerald-400/80 font-normal">/{lot.unit || 'क्विंटल'}</span>
+                </span>
+              </div>
+            </div>
+
+            {/* Bidding Form */}
+            <form onSubmit={handlePlaceBid} className="space-y-3.5">
+              {/* Custom Bid Input Field */}
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                  आपली नवीन बोली रक्कम प्रविष्ट करा (Enter Bid Amount per {lot.unit || 'क्विंटल'}):
+                </label>
+                <div className="relative rounded-xl shadow-xs">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                    <span className="text-base font-bold text-emerald-400">₹</span>
+                  </div>
+                  <input
+                    type="number"
+                    min={highestBid + 1}
+                    step="10"
+                    value={bidAmount}
+                    onChange={(e) => {
+                      setBidAmount(e.target.value);
+                      setErrorHelper('');
+                    }}
+                    required
+                    className="block w-full pl-9 pr-24 py-2.5 text-base font-bold text-white bg-slate-800 border border-indigo-700/80 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors placeholder:text-slate-500"
+                    placeholder={`उदा. ${highestBid + 50}`}
+                  />
+                  <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-xs text-slate-400 font-medium">
+                    /{lot.unit || 'क्विंटल'}
+                  </div>
+                </div>
+              </div>
+
+              {/* Quick Increment Stepper Buttons */}
+              <div>
+                <span className="block text-[11px] font-medium text-slate-400 mb-1.5">
+                  त्वरित वाढीव रक्कम निवडा (Quick Stepper Increments):
+                </span>
+                <div className="grid grid-cols-4 gap-2">
+                  {[50, 100, 250, 500].map((inc) => (
+                    <button
+                      key={inc}
+                      type="button"
+                      onClick={() => handleIncrement(inc)}
+                      className="py-1.5 px-2 bg-indigo-950/80 hover:bg-indigo-800/90 active:bg-indigo-700 border border-indigo-700/70 hover:border-emerald-400/60 rounded-lg text-xs font-bold text-indigo-200 hover:text-white transition-all text-center"
+                    >
+                      + ₹{inc}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Validation Helper Message */}
+              {errorHelper && (
+                <div className="p-2.5 rounded-xl bg-red-950/80 border border-red-800 text-red-200 text-xs flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 text-red-400 shrink-0" />
+                  <span>{errorHelper}</span>
+                </div>
+              )}
+
+              {/* Live Success Toast Message */}
+              {successMessage && (
+                <div className="p-3 rounded-xl bg-emerald-950/90 border border-emerald-500/80 text-emerald-200 text-xs flex items-center gap-2.5 shadow-md animate-in fade-in-50 duration-200">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <span className="font-semibold">{successMessage}</span>
+                </div>
+              )}
+
+              {/* Submit Bid Button */}
+              <button
+                type="submit"
+                disabled={isSubmitting || Number(bidAmount) <= highestBid}
+                className="w-full py-3 px-4 bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 hover:from-emerald-500 hover:to-emerald-600 active:from-emerald-700 active:to-emerald-800 text-white font-extrabold text-sm rounded-xl shadow-lg hover:shadow-emerald-500/20 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <Gavel className="w-4 h-4" />
+                <span>ई-बोली नोंदवा (Submit Live Bid) • ₹{Number(bidAmount || 0).toLocaleString('en-IN')}</span>
+              </button>
+            </form>
           </div>
         </div>
 

@@ -284,6 +284,38 @@ export function ListingsProvider({ children }) {
   };
 
   /**
+   * Place a new merchant bid on a produce listing
+   */
+  const placeBid = (listingId, bidData) => {
+    let updatedLot = null;
+    setListings((prev) =>
+      prev.map((item) => {
+        if (item.id === listingId) {
+          const currentBids = Array.isArray(item.bids) ? item.bids : [];
+          const newBid = {
+            id: bidData.id || 'BID_' + Date.now().toString().slice(-6),
+            merchantName: bidData.merchantName || 'व्यापारी',
+            merchantPhone: bidData.merchantPhone || '',
+            merchantLocation: bidData.merchantLocation || 'सोलापूर APMC मार्केट यार्ड',
+            merchantLicense: bidData.merchantLicense || '',
+            amount: Number(bidData.amount),
+            timestamp: bidData.timestamp || new Date().toISOString(),
+            timeFormatted: bidData.timeFormatted || 'आत्ताच',
+          };
+          const updatedBids = [newBid, ...currentBids];
+          updatedLot = {
+            ...item,
+            bids: updatedBids,
+          };
+          return updatedLot;
+        }
+        return item;
+      })
+    );
+    return updatedLot;
+  };
+
+  /**
    * Get listings for a specific farmer
    */
   const getFarmerListings = (farmerMobile) => {
@@ -302,6 +334,7 @@ export function ListingsProvider({ children }) {
     listings,
     addListing,
     acceptBid,
+    placeBid,
     getFarmerListings,
     removeListing,
   };
