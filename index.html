@@ -2,15 +2,33 @@
 <html lang="mr" class="h-full bg-slate-50 antialiased">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=5.0" />
     <title>KrushiMitra AI (कृषिमित्र AI) - बळीराजा व बाजार समिती डिजिटल महामार्ग</title>
+    <meta name="description" content="महाराष्ट्र राज्य APMC सुसंगत डिजिटल लिलाव, सोलापूर बाजार भाव, थेट गेटपास व AI कृषी सल्ला प्लॅटफॉर्म." />
+
+    <!-- PWA Web App Manifest -->
+    <link rel="manifest" href="/manifest.webmanifest" />
+
+    <!-- Favicon & Icons -->
+    <link rel="icon" type="image/svg+xml" href="/icons/icon.svg" />
+    <link rel="alternate icon" type="image/png" href="/icons/icon-192x192.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png" />
+
+    <!-- Theme Color & Mobile App Meta -->
+    <meta name="theme-color" content="#15803d" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="KrushiMitra" />
+    <meta name="application-name" content="KrushiMitra AI" />
+    <meta name="format-detection" content="telephone=no" />
+
     <!-- Google Fonts for Inter and Noto Sans Devanagari for crisp Marathi typography -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap" rel="stylesheet" />
   </head>
-  <body class="h-full text-gray-900 bg-slate-50">
+  <body class="h-full text-gray-900 bg-slate-50 selection:bg-emerald-100 selection:text-emerald-900">
     <div id="root" class="min-h-full flex flex-col"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>

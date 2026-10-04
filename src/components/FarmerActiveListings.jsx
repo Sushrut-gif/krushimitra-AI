@@ -265,9 +265,9 @@ export default function FarmerActiveListings({ onOpenNewListing }) {
   return (
     <div className="pt-2 pb-4">
       {/* Sleek Sub-header */}
-      <div className="px-4 pb-2 flex items-center justify-between">
+      <div className="pb-2 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <h3 className="text-sm font-extrabold text-slate-900 tracking-tight">
+          <h3 className="text-base font-extrabold text-slate-900 tracking-tight">
             माझे नोंदवलेले माल
           </h3>
           <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">
@@ -288,7 +288,7 @@ export default function FarmerActiveListings({ onOpenNewListing }) {
 
       {/* Listings Body */}
       {myListings.length === 0 ? (
-        <div className="mx-4 my-2 p-6 rounded-2xl bg-white border border-slate-200 text-center space-y-2.5 shadow-2xs">
+        <div className="my-2 p-8 rounded-2xl bg-white border border-slate-200 text-center space-y-2.5 shadow-2xs">
           <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto">
             <Gavel className="w-6 h-6" />
           </div>
@@ -309,7 +309,7 @@ export default function FarmerActiveListings({ onOpenNewListing }) {
           )}
         </div>
       ) : (
-        <div className="space-y-1">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {myListings.map((item, index) => (
             <SafeListingCard
               key={item?.id || index}

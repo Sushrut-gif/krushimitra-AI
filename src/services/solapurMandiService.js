@@ -204,6 +204,7 @@ export function getSolapurYardLiveStatus(now = new Date()) {
  */
 export async function fetchSolapurLiveMandiRates() {
   const yardStatus = getSolapurYardLiveStatus(new Date());
+  const CACHE_KEY = 'krushimitra_cached_mandi_rates';
 
   // Check if live Agmarknet endpoint is configured
   const liveEndpoint = import.meta.env.VITE_MANDI_LIVE_API_URL;
@@ -216,22 +217,43 @@ export async function fetchSolapurLiveMandiRates() {
       if (response.ok) {
         const liveData = await response.json();
         if (Array.isArray(liveData) && liveData.length > 0) {
-          return {
+          const result = {
             isLiveFeed: true,
             source: 'Agmarknet / Live APMC Gateway',
             verifiedDate: new Date().toISOString().split('T')[0],
             yardStatus,
             commodities: liveData,
           };
+          try {
+            localStorage.setItem(CACHE_KEY, JSON.stringify(result));
+          } catch {
+            // Ignore
+          }
+          return result;
         }
       }
     } catch {
-      // Gracefully fall through to verified official bulletin
+      // Gracefully fall through to cached or verified bulletin
     }
   }
 
+  // If offline, check if we have previously cached live rates
+  try {
+    const cached = localStorage.getItem(CACHE_KEY);
+    if (cached) {
+      const parsed = JSON.parse(cached);
+      return {
+        ...parsed,
+        yardStatus,
+        isFromOfflineCache: true,
+      };
+    }
+  } catch {
+    // Ignore and proceed to bulletin
+  }
+
   // Official verified Solapur APMC bulletin
-  return {
+  const defaultResult = {
     isLiveFeed: false,
     source: 'कृषी उत्पन्न बाजार समिती, सोलापूर (APMC Solapur) अधिकृत दैनंदिन भाव फलक',
     sourceUrl: 'https://agmarknet.gov.in',
@@ -243,4 +265,12 @@ export async function fetchSolapurLiveMandiRates() {
     yardStatus,
     commodities: OFFICIAL_SOLAPUR_BULLETIN,
   };
+
+  try {
+    localStorage.setItem(CACHE_KEY, JSON.stringify(defaultResult));
+  } catch {
+    // Ignore
+  }
+
+  return defaultResult;
 }

@@ -147,9 +147,9 @@ export default function MerchantMarketplaceFeed() {
   }, [activeLots]);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* 3. Sleek 3-Column Stats Bar (Replacing oversized dark banner) */}
-      <div className="mx-4 my-2.5 bg-white rounded-2xl p-3 border border-slate-200/90 shadow-xs grid grid-cols-3 divide-x divide-slate-100 text-center">
+      <div className="my-2 bg-white rounded-2xl p-3 border border-slate-200/90 shadow-xs grid grid-cols-3 divide-x divide-slate-100 text-center">
         <div className="px-1">
           <span className="text-[10px] text-slate-500 font-medium block">उपलब्ध लॉट्स</span>
           <span className="text-sm font-extrabold text-slate-900 mt-0.5 block">{totalActiveLots}</span>
@@ -170,7 +170,7 @@ export default function MerchantMarketplaceFeed() {
       </div>
 
       {/* 4. Search & Filter Bar */}
-      <div className="px-4 space-y-2">
+      <div className="space-y-2">
         {/* Search input with magnifying icon */}
         <div className="relative">
           <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
@@ -247,7 +247,7 @@ export default function MerchantMarketplaceFeed() {
           )}
         </div>
       ) : (
-        <div className="space-y-1">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {sortedLots.map((lot) => {
             const bids = lot.bids || [];
             const highestBid = bids.length > 0 ? Math.max(...bids.map((b) => b.amount)) : lot.basePrice;

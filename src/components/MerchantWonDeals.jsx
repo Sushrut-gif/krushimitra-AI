@@ -38,9 +38,16 @@ export default function MerchantWonDeals({ onSwitchToFeed }) {
   const [selectedLotForScanner, setSelectedLotForScanner] = useState(null);
   const [celebrationToast, setCelebrationToast] = useState('');
 
-  // 1. Filter listings where status is 'विक्री पूर्ण (Sold)'
+  // 1. Filter listings where transaction is finalized (SETTLED, WON, or विक्री पूर्ण)
   const wonLots = (listings || []).filter((item) => {
-    return item?.status && item.status.includes('विक्री पूर्ण');
+    const s = (item?.status || '').toUpperCase();
+    return (
+      s.includes('विक्री पूर्ण') ||
+      s.includes('SOLD') ||
+      s === 'SETTLED' ||
+      s === 'WON' ||
+      item?.paymentStatus === 'खात्यात जमा (Completed)'
+    );
   });
 
   // Calculate high-level summary metrics
@@ -51,6 +58,7 @@ export default function MerchantWonDeals({ onSwitchToFeed }) {
     return acc + Math.round(qty * rate);
   }, 0);
 
+  const totalCessTax = Math.round(totalPurchaseValue * 0.0105);
   const pendingPaymentsCount = wonLots.filter((item) => item.paymentStatus !== 'खात्यात जमा (Completed)').length;
   const completedPaymentsCount = wonLots.filter((item) => item.paymentStatus === 'खात्यात जमा (Completed)').length;
 
@@ -86,11 +94,11 @@ export default function MerchantWonDeals({ onSwitchToFeed }) {
               <div className="flex items-center gap-1.5">
                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
                 <span className="text-[10px] font-bold tracking-wider uppercase text-emerald-400">
-                  APMC अधिकृत खरेदी नोंदवही
+                  APMC अधिकृत खरेदी नोंदवही • हिशोब
                 </span>
               </div>
               <h2 className="text-base font-extrabold text-white tracking-tight mt-0.5">
-                माझे जिंकलेले सौदे व हिशोब
+                माझे जिंकलेले सौदे व हिशोब (Settlements)
               </h2>
             </div>
 
@@ -101,14 +109,22 @@ export default function MerchantWonDeals({ onSwitchToFeed }) {
           </div>
 
           {/* Quick Metrics Bar */}
-          <div className="grid grid-cols-2 gap-2 pt-2 border-t border-indigo-900/60 text-xs">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 pt-3 border-t border-indigo-900/60 text-xs">
+            <div className="bg-slate-900/80 p-2.5 rounded-xl border border-indigo-950/80 min-w-0">
+              <span className="text-[10px] text-slate-400 font-medium block">जिंकलेले सौदे</span>
+              <span className="text-sm font-extrabold text-white truncate block">{totalWonCount} लॉट्स</span>
+            </div>
             <div className="bg-slate-900/80 p-2.5 rounded-xl border border-indigo-950/80 min-w-0">
               <span className="text-[10px] text-slate-400 font-medium block">एकूण खरेदी रक्कम</span>
               <span className="text-sm font-extrabold text-emerald-400 truncate block">₹{totalPurchaseValue.toLocaleString('en-IN')}</span>
             </div>
             <div className="bg-slate-900/80 p-2.5 rounded-xl border border-indigo-950/80 min-w-0">
-              <span className="text-[10px] text-slate-400 font-medium block">प्रलंबित देयके</span>
-              <span className="text-sm font-extrabold text-amber-400 truncate block">{pendingPaymentsCount} प्रलंबित</span>
+              <span className="text-[10px] text-slate-400 font-medium block">सेस टॅक्स (१.०५%)</span>
+              <span className="text-sm font-extrabold text-amber-400 truncate block">₹{totalCessTax.toLocaleString('en-IN')}</span>
+            </div>
+            <div className="bg-slate-900/80 p-2.5 rounded-xl border border-indigo-950/80 min-w-0">
+              <span className="text-[10px] text-slate-400 font-medium block">पूर्ण देयके / सेटलमेंट</span>
+              <span className="text-sm font-extrabold text-indigo-300 truncate block">{completedPaymentsCount} पूर्ण</span>
             </div>
           </div>
         </div>
@@ -140,7 +156,7 @@ export default function MerchantWonDeals({ onSwitchToFeed }) {
           )}
         </div>
       ) : (
-        <div className="flex flex-col gap-3.5 w-full">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 w-full">
           {wonLots.map((lot) => {
             const quantity = Number(lot.quantity) || 1;
             const winningRate = Number(lot.winningPrice || lot.basePrice) || 0;

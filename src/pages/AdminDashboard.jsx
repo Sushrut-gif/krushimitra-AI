@@ -292,18 +292,16 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-150 sm:bg-slate-200 flex justify-center items-start selection:bg-amber-100 font-sans">
-      {/* INNER ADAPTIVE PHONE SHELL */}
-      <div className="w-full min-h-screen bg-slate-50 border-0 shadow-none pb-24 sm:max-w-md sm:my-6 sm:rounded-3xl sm:shadow-2xl sm:border sm:border-slate-300 sm:overflow-hidden relative flex flex-col">
-        
-        {/* 2. NATIVE TOP ADMIN BAR */}
-        <header className="sticky top-0 z-40 bg-slate-900 text-white px-4 py-3 flex items-center justify-between shadow-md">
+    <div className="min-h-screen bg-slate-50 w-full flex flex-col selection:bg-amber-100 font-sans pb-20 md:pb-8">
+      {/* 2. TOP ADMIN BAR */}
+      <header className="sticky top-0 z-40 bg-slate-900 text-white shadow-md">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
           {/* Left: Brand Badge + Live Indicator */}
           <div className="flex items-center gap-2">
             <span className="text-xl">🏛️</span>
             <div>
               <div className="flex items-center gap-1.5">
-                <h1 className="text-sm font-extrabold text-white tracking-tight leading-none">
+                <h1 className="text-sm sm:text-base font-extrabold text-white tracking-tight leading-none">
                   सोलापूर APMC प्रशासक
                 </h1>
                 <span className="relative flex h-2 w-2">
@@ -317,9 +315,57 @@ export default function AdminDashboard() {
             </div>
           </div>
 
+          {/* Desktop Navigation Tabs */}
+          <nav className="hidden md:flex items-center gap-1.5 lg:gap-3 bg-slate-800/80 p-1 rounded-2xl border border-slate-700/80">
+            <button
+              onClick={() => setActiveTab('merchants')}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                activeTab === 'merchants'
+                  ? 'bg-slate-700 text-white shadow-xs'
+                  : 'text-slate-300 hover:text-white hover:bg-slate-700/50'
+              }`}
+            >
+              <Building2 className="w-3.5 h-3.5" />
+              <span>व्यापारी</span>
+            </button>
+            <button
+              onClick={() => setActiveTab('auctions')}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                activeTab === 'auctions'
+                  ? 'bg-slate-700 text-white shadow-xs'
+                  : 'text-slate-300 hover:text-white hover:bg-slate-700/50'
+              }`}
+            >
+              <Gavel className="w-3.5 h-3.5" />
+              <span>लिलाव ({activeAuctions.length})</span>
+            </button>
+            <button
+              onClick={() => setActiveTab('gate_passes')}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                activeTab === 'gate_passes'
+                  ? 'bg-slate-700 text-white shadow-xs'
+                  : 'text-slate-300 hover:text-white hover:bg-slate-700/50'
+              }`}
+            >
+              <Truck className="w-3.5 h-3.5" />
+              <span>आवक ({verifiedGatePasses.length})</span>
+            </button>
+            <button
+              onClick={() => setActiveTab('cess')}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                activeTab === 'cess'
+                  ? 'bg-slate-700 text-white shadow-xs'
+                  : 'text-slate-300 hover:text-white hover:bg-slate-700/50'
+              }`}
+            >
+              <Coins className="w-3.5 h-3.5" />
+              <span>सेस महसूल</span>
+            </button>
+          </nav>
+
           {/* Right: Chief Inspector role badge + compact logout button */}
           <div className="flex items-center gap-2">
-            <span className="text-[10px] font-bold bg-slate-800 text-slate-300 border border-slate-700 px-2 py-0.5 rounded-full">
+            <span className="text-[10px] font-bold bg-slate-800 text-slate-300 border border-slate-700 px-2.5 py-1 rounded-full">
               मुख्य निरीक्षक
             </span>
             <button
@@ -330,88 +376,89 @@ export default function AdminDashboard() {
               <LogOut className="w-4 h-4" />
             </button>
           </div>
-        </header>
+        </div>
+      </header>
 
-        {/* MAIN SCROLLABLE CONTENT */}
-        <main className="flex-1 flex flex-col space-y-2 pb-4">
-          {/* 3. 2x2 KPI STATS GRID */}
-          <div className="grid grid-cols-2 gap-2.5 p-4">
-            {/* Card 1: 👥 व्यापारी */}
-            <div
-              onClick={() => setActiveTab('merchants')}
-              className="bg-white rounded-2xl p-3 border border-slate-200/90 shadow-2xs hover:border-slate-300 transition-colors cursor-pointer"
-            >
-              <div className="flex items-center justify-between">
-                <span className="text-[11px] font-bold text-slate-500">👥 व्यापारी</span>
-                <span className="text-[10px] font-semibold text-indigo-700 bg-indigo-50 px-1.5 py-0.2 rounded">
-                  नोंदणी
-                </span>
-              </div>
-              <div className="text-xl font-black text-slate-900 font-mono mt-1">
-                {merchants.length}
-              </div>
-              <div className="text-[10px] text-amber-600 font-medium mt-0.5">
-                {merchants.filter((m) => m.status === 'PENDING').length} प्रलंबित मंजुरी
-              </div>
+      {/* MAIN RESPONSIVE CONTENT AREA */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 w-full flex-1 flex flex-col space-y-4">
+        {/* 3. RESPONSIVE KPI STATS GRID (2x2 on Mobile, 4-Cols on Desktop) */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-2">
+          {/* Card 1: 👥 व्यापारी */}
+          <div
+            onClick={() => setActiveTab('merchants')}
+            className="bg-white rounded-2xl p-4 border border-slate-200/90 shadow-2xs hover:border-slate-300 transition-colors cursor-pointer"
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold text-slate-500">👥 व्यापारी</span>
+              <span className="text-[10px] font-semibold text-indigo-700 bg-indigo-50 px-1.5 py-0.2 rounded">
+                नोंदणी
+              </span>
             </div>
-
-            {/* Card 2: 🌾 सक्रिय लॉट्स */}
-            <div
-              onClick={() => setActiveTab('auctions')}
-              className="bg-white rounded-2xl p-3 border border-slate-200/90 shadow-2xs hover:border-slate-300 transition-colors cursor-pointer"
-            >
-              <div className="flex items-center justify-between">
-                <span className="text-[11px] font-bold text-slate-500">🌾 सक्रिय लॉट्स</span>
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-              </div>
-              <div className="text-xl font-black text-slate-900 font-mono mt-1">
-                {activeAuctions.length}
-              </div>
-              <div className="text-[10px] text-slate-400 mt-0.5">
-                {activeAuctions.filter((a) => a.adminFlagged).length} फ्लॅग केलेले
-              </div>
+            <div className="text-2xl font-black text-slate-900 font-mono mt-1.5">
+              {merchants.length}
             </div>
-
-            {/* Card 3: 🚛 यार्ड आवक */}
-            <div
-              onClick={() => setActiveTab('gate_passes')}
-              className="bg-white rounded-2xl p-3 border border-slate-200/90 shadow-2xs hover:border-slate-300 transition-colors cursor-pointer"
-            >
-              <div className="flex items-center justify-between">
-                <span className="text-[11px] font-bold text-slate-500">🚛 यार्ड आवक</span>
-                <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-1.5 py-0.2 rounded">
-                  गेट पास
-                </span>
-              </div>
-              <div className="text-xl font-black text-emerald-700 font-mono mt-1">
-                {verifiedGatePasses.length}
-              </div>
-              <div className="text-[10px] text-slate-400 mt-0.5">
-                QR स्कॅनद्वारे तपासणी
-              </div>
-            </div>
-
-            {/* Card 4: 💰 सेस महसूल */}
-            <div
-              onClick={() => setActiveTab('cess')}
-              className="bg-white rounded-2xl p-3 border border-slate-200/90 shadow-2xs hover:border-slate-300 transition-colors cursor-pointer bg-gradient-to-br from-amber-50/40 to-white"
-            >
-              <div className="flex items-center justify-between">
-                <span className="text-[11px] font-bold text-slate-700">💰 सेस महसूल</span>
-                <span className="text-[9px] font-bold text-amber-800 bg-amber-100 px-1 py-0.2 rounded">
-                  १.०५%
-                </span>
-              </div>
-              <div className="text-xl font-black text-slate-900 font-mono mt-1 truncate">
-                ₹{totalCess.toLocaleString('en-IN')}
-              </div>
-              <div className="text-[10px] text-slate-500 mt-0.5 truncate">
-                {settledDeals.length} सौदे पूर्ण
-              </div>
+            <div className="text-[11px] text-amber-600 font-medium mt-0.5">
+              {merchants.filter((m) => m.status === 'PENDING').length} प्रलंबित मंजुरी
             </div>
           </div>
 
-          <div className="flex-1">
+          {/* Card 2: 🌾 सक्रिय लॉट्स */}
+          <div
+            onClick={() => setActiveTab('auctions')}
+            className="bg-white rounded-2xl p-4 border border-slate-200/90 shadow-2xs hover:border-slate-300 transition-colors cursor-pointer"
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold text-slate-500">🌾 सक्रिय लॉट्स</span>
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            </div>
+            <div className="text-2xl font-black text-slate-900 font-mono mt-1.5">
+              {activeAuctions.length}
+            </div>
+            <div className="text-[11px] text-slate-400 mt-0.5">
+              {activeAuctions.filter((a) => a.adminFlagged).length} फ्लॅग केलेले
+            </div>
+          </div>
+
+          {/* Card 3: 🚛 यार्ड आवक */}
+          <div
+            onClick={() => setActiveTab('gate_passes')}
+            className="bg-white rounded-2xl p-4 border border-slate-200/90 shadow-2xs hover:border-slate-300 transition-colors cursor-pointer"
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold text-slate-500">🚛 यार्ड आवक</span>
+              <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-1.5 py-0.2 rounded">
+                गेट पास
+              </span>
+            </div>
+            <div className="text-2xl font-black text-emerald-700 font-mono mt-1.5">
+              {verifiedGatePasses.length}
+            </div>
+            <div className="text-[11px] text-slate-400 mt-0.5">
+              QR स्कॅनद्वारे तपासणी
+            </div>
+          </div>
+
+          {/* Card 4: 💰 सेस महसूल */}
+          <div
+            onClick={() => setActiveTab('cess')}
+            className="bg-white rounded-2xl p-4 border border-slate-200/90 shadow-2xs hover:border-slate-300 transition-colors cursor-pointer bg-gradient-to-br from-amber-50/40 to-white"
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold text-slate-700">💰 सेस महसूल</span>
+              <span className="text-[9px] font-bold text-amber-800 bg-amber-100 px-1.5 py-0.2 rounded">
+                १.०५%
+              </span>
+            </div>
+            <div className="text-2xl font-black text-slate-900 font-mono mt-1.5 truncate">
+              ₹{totalCess.toLocaleString('en-IN')}
+            </div>
+            <div className="text-[11px] text-slate-500 mt-0.5 truncate">
+              {settledDeals.length} सौदे पूर्ण
+            </div>
+          </div>
+        </div>
+
+        <div className="flex-1">
             <ErrorBoundary>
             {/* ========================================================================= */}
             {/* TAB 1: MERCHANT VERIFICATION LEDGER */}
@@ -477,7 +524,7 @@ export default function AdminDashboard() {
                     </p>
                   </div>
                 ) : (
-                  <div className="space-y-3">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {filteredMerchants.map((merchant) => {
                       const status = merchant.status || 'APPROVED';
                       return (
@@ -1092,7 +1139,7 @@ export default function AdminDashboard() {
         </main>
 
         {/* 5. PERSISTENT BOTTOM NAVIGATION BAR */}
-        <nav className="fixed bottom-0 left-0 right-0 sm:left-auto sm:right-auto sm:max-w-md w-full bg-white border-t border-slate-200 py-2 px-3 pb-safe sm:pb-2 flex justify-around items-center z-50 shadow-lg">
+        <nav className="block md:hidden fixed bottom-0 left-0 right-0 w-full bg-white border-t border-slate-200 py-2 px-3 pb-safe flex justify-around items-center z-50 shadow-lg">
           {/* Item 1: Home */}
           <button
             onClick={() => setActiveTab('merchants')}
@@ -1156,7 +1203,7 @@ export default function AdminDashboard() {
         {/* 4. ADMIN FLAG / PAUSE MODAL */}
         {flagModalLot && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs">
-            <div className="bg-white rounded-3xl max-w-sm sm:max-w-md w-full p-5 space-y-4 border border-slate-300 shadow-2xl animate-in fade-in zoom-in-95 duration-150">
+            <div className="bg-white rounded-2xl max-w-lg w-full p-5 space-y-4 border border-slate-300 shadow-2xl animate-in fade-in zoom-in-95 duration-150">
               <div className="flex items-center justify-between border-b border-gray-100 pb-3">
                 <div className="flex items-center gap-2 text-amber-700 font-black text-sm">
                   <AlertTriangle className="w-4 h-4 text-amber-600" />
@@ -1224,7 +1271,6 @@ export default function AdminDashboard() {
           </div>
         )}
       </div>
-    </div>
   );
 }
 

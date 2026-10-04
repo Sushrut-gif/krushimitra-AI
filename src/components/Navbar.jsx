@@ -1,7 +1,8 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowLeftRight, Sprout, Store, Landmark, User, LogOut, ShieldCheck } from 'lucide-react';
+import { ArrowLeftRight, Sprout, Store, Landmark, User, LogOut, ShieldCheck, Download, WifiOff } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { usePWA } from '../context/PWAContext';
 
 const roleConfig = {
   farmer: {
@@ -41,6 +42,13 @@ export default function Navbar({ role }) {
     isAdminAuthenticated,
     logoutAdmin,
   } = useAuth();
+  const {
+    isOnline,
+    isInstallable,
+    isInstalled,
+    isIOS,
+    openInstallDialog,
+  } = usePWA();
   const navigate = useNavigate();
 
   const handleFarmerLogout = () => {
@@ -120,6 +128,31 @@ export default function Navbar({ role }) {
                   {adminUser.officerTitle || 'प्रशासक'}
                 </span>
               </div>
+            )}
+
+            {/* Offline Mode Badge */}
+            {!isOnline && (
+              <div
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-900 border border-amber-300"
+                title="इंटरनेट कनेक्शन खंडित आहे - ऑफलाइन मोड"
+              >
+                <WifiOff className="w-3.5 h-3.5 text-amber-700" />
+                <span className="hidden sm:inline">ऑफलाइन</span>
+              </div>
+            )}
+
+            {/* Install PWA Button (when installable or on iOS Safari) */}
+            {!isInstalled && (isInstallable || isIOS) && (
+              <button
+                type="button"
+                onClick={openInstallDialog}
+                className="inline-flex items-center gap-1.5 text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white px-2.5 sm:px-3 py-1.5 rounded-lg shadow-2xs transition-all active:scale-95 cursor-pointer"
+                title="कृषिमित्र ॲप फोनवर इन्स्टॉल करा"
+              >
+                <Download className="w-3.5 h-3.5 stroke-[2.5]" />
+                <span className="hidden sm:inline">ॲप इन्स्टॉल करा</span>
+                <span className="sm:hidden">ॲप</span>
+              </button>
             )}
 
             {/* Switch Role Link */}

@@ -87,56 +87,105 @@ export default function FarmerDashboard() {
   const farmerVillage = farmerUser?.village || 'सोलापूर';
 
   return (
-    <div className="min-h-screen bg-slate-150 sm:bg-slate-200 flex justify-center items-start selection:bg-emerald-100 font-sans">
-      {/* INNER ADAPTIVE PHONE SHELL */}
-      <div className="w-full min-h-screen bg-slate-50 border-0 shadow-none pb-20 sm:max-w-md sm:my-6 sm:rounded-3xl sm:shadow-2xl sm:border sm:border-slate-300 sm:overflow-hidden relative flex flex-col">
-        
-        {/* 1. NATIVE APP STICKY HEADER */}
-        <header className="sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-slate-200 px-4 py-3 shadow-xs">
-          <div className="flex items-center justify-between">
-            {/* Left: Brand Badge + live green dot */}
-            <div className="flex items-center gap-2">
-              <span className="text-xl">🌾</span>
-              <div>
-                <div className="flex items-center gap-1.5">
-                  <h1 className="text-base font-extrabold text-slate-900 tracking-tight leading-none">
-                    कृषी मित्र
-                  </h1>
-                  <span className="relative flex h-2 w-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                  </span>
-                </div>
-                <p className="text-[10px] text-slate-500 font-medium tracking-tight mt-0.5">
-                  सोलापूर APMC • शेतकरी कक्ष
-                </p>
-              </div>
-            </div>
-
-            {/* Right: Farmer Chip & Logout */}
-            <div className="flex items-center gap-2">
-              <div className="flex items-center gap-1.5 bg-slate-100/90 py-1 px-2.5 rounded-full border border-slate-200">
-                <div className="w-5 h-5 rounded-full bg-emerald-600 text-white font-black text-[10px] flex items-center justify-center shrink-0">
-                  {farmerName.charAt(0)}
-                </div>
-                <span className="text-xs font-bold text-slate-800 max-w-[85px] truncate">
-                  {farmerName}
+    <div className="min-h-screen bg-slate-50 w-full flex flex-col selection:bg-emerald-100 font-sans pb-20 md:pb-8">
+      {/* 1. APP STICKY HEADER */}
+      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-slate-200 shadow-xs">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
+          {/* Left: Brand Badge + live green dot */}
+          <div className="flex items-center gap-2">
+            <span className="text-xl">🌾</span>
+            <div>
+              <div className="flex items-center gap-1.5">
+                <h1 className="text-base font-extrabold text-slate-900 tracking-tight leading-none">
+                  कृषी मित्र
+                </h1>
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
                 </span>
               </div>
-              <button
-                onClick={logoutFarmer}
-                title="बाहेर पडा (Logout)"
-                className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
-              >
-                <LogOut className="w-4 h-4" />
-              </button>
+              <p className="text-[10px] text-slate-500 font-medium tracking-tight mt-0.5">
+                सोलापूर APMC • शेतकरी कक्ष
+              </p>
             </div>
           </div>
-        </header>
 
-        {/* 2. SLEEK LIVE MANDI TICKER (Horizontal swipeable strip) */}
-        <div className="bg-white border-b border-slate-100 py-2.5">
-          <div className="px-4 flex items-center justify-between pb-1.5">
+          {/* Desktop Navigation Links */}
+          <nav className="hidden md:flex items-center gap-1.5 lg:gap-3 bg-slate-100/80 p-1 rounded-2xl border border-slate-200/80">
+            <button
+              onClick={() => setActiveTab('home')}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                activeTab === 'home'
+                  ? 'bg-white text-emerald-800 shadow-2xs'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
+              }`}
+            >
+              <Home className="w-3.5 h-3.5" />
+              <span>मुख्य</span>
+            </button>
+            <button
+              onClick={handleBidsTabClick}
+              className="px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer text-slate-600 hover:text-slate-900 hover:bg-slate-200/60"
+            >
+              <Gavel className="w-3.5 h-3.5" />
+              <span>लिलाव</span>
+            </button>
+            <button
+              onClick={() => setActiveTab('payments')}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                activeTab === 'payments'
+                  ? 'bg-white text-emerald-800 shadow-2xs'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
+              }`}
+            >
+              <CreditCard className="w-3.5 h-3.5" />
+              <span>खातावही</span>
+            </button>
+            <button
+              onClick={() => setActiveTab('intelligence')}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                activeTab === 'intelligence'
+                  ? 'bg-white text-emerald-800 shadow-2xs'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
+              }`}
+            >
+              <BarChart3 className="w-3.5 h-3.5" />
+              <span>बाजारभाव</span>
+            </button>
+            <button
+              onClick={() => handleOpenListingModal({})}
+              className="px-3 py-1.5 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs transition-all flex items-center gap-1 cursor-pointer ml-1"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>+ नवीन माल</span>
+            </button>
+          </nav>
+
+          {/* Right: Farmer Chip & Logout */}
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 bg-slate-100/90 py-1 px-2.5 rounded-full border border-slate-200">
+              <div className="w-5 h-5 rounded-full bg-emerald-600 text-white font-black text-[10px] flex items-center justify-center shrink-0">
+                {farmerName.charAt(0)}
+              </div>
+              <span className="text-xs font-bold text-slate-800 max-w-[120px] truncate">
+                {farmerName}
+              </span>
+            </div>
+            <button
+              onClick={logoutFarmer}
+              title="बाहेर पडा (Logout)"
+              className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
+            >
+              <LogOut className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      </header>
+
+      {/* 2. LIVE MANDI TICKER (Horizontal swipeable strip) */}
+      <div className="bg-white border-b border-slate-100 py-2.5">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between pb-1.5">
             <div className="flex items-center gap-1 text-[11px] font-bold text-slate-600 uppercase tracking-wider">
               <TrendingUp className="w-3.5 h-3.5 text-emerald-600" />
               <span>थेट बाजारभाव (Live Mandi)</span>
@@ -150,7 +199,7 @@ export default function FarmerDashboard() {
             </button>
           </div>
 
-          <div className="flex overflow-x-auto gap-2.5 px-4 no-scrollbar [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+          <div className="flex overflow-x-auto gap-2.5 no-scrollbar [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
             {tickerItems.map((c) => (
               <div
                 key={c.id}
@@ -175,14 +224,16 @@ export default function FarmerDashboard() {
             ))}
           </div>
         </div>
+      </div>
 
-        {/* 3. MAIN SCROLLABLE CONTENT AREA */}
-        <main className="flex-1 flex flex-col space-y-3 pb-6">
-          {/* VIEW: HOME / ACTIVE PRODUCE LISTINGS */}
-          {activeTab === 'home' && (
-            <>
-              {/* Scan / Upload Produce Actionable Card */}
-              <div className="pt-2">
+      {/* 3. MAIN RESPONSIVE CONTENT AREA */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 w-full flex-1 flex flex-col space-y-4">
+        {/* VIEW: HOME / ACTIVE PRODUCE LISTINGS */}
+        {activeTab === 'home' && (
+          <>
+            {/* Top Grid on Desktop: Quality Assessment & Market Advice Side-by-Side */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+              <div className="lg:col-span-2">
                 <ErrorBoundary>
                   <CropQualityAssessment
                     key={assessmentResetKey}
@@ -191,160 +242,160 @@ export default function FarmerDashboard() {
                 </ErrorBoundary>
               </div>
 
-              {/* Active Lots Section */}
-              <div id="active-listings-section" className="space-y-2">
-                <ErrorBoundary>
-                  <FarmerActiveListings
-                    onOpenNewListing={() => handleOpenListingModal({})}
-                  />
-                </ErrorBoundary>
-              </div>
-
               {/* Quick intelligence / AI Advisor Banner */}
-              <div className="mx-4 mt-2 p-3 bg-gradient-to-r from-emerald-800 to-teal-900 rounded-2xl text-white shadow-sm flex items-center justify-between gap-3">
-                <div className="space-y-0.5">
+              <div className="p-4 bg-gradient-to-br from-emerald-800 to-teal-900 rounded-2xl text-white shadow-sm flex flex-col justify-between">
+                <div className="space-y-1.5">
                   <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-200">
                     <Sparkles className="w-3.5 h-3.5 text-amber-400" />
                     <span>AI सोलापूर बाजार सल्लागार</span>
                   </div>
-                  <p className="text-[11px] text-slate-200 leading-tight">
-                    आज कांदा व डाळिंबाची विक्रमी आवक. योग्य विक्री वेळ पहा.
+                  <h3 className="font-bold text-sm text-white">आजची आवक व दर अंदाज</h3>
+                  <p className="text-xs text-slate-200 leading-relaxed">
+                    आज सोलापूर यार्डात कांदा, डाळिंब व ज्वारीची विक्रमी आवक. लिलावात जास्तीत जास्त दर मिळवण्यासाठी योग्य विक्री वेळ पहा.
                   </p>
                 </div>
-                <button
-                  onClick={() => setActiveTab('intelligence')}
-                  className="px-3 py-1.5 bg-white text-emerald-900 rounded-xl text-xs font-bold shrink-0 hover:bg-emerald-50 transition-colors shadow-2xs cursor-pointer"
-                >
-                  तपासा &rarr;
-                </button>
+                <div className="pt-4">
+                  <button
+                    onClick={() => setActiveTab('intelligence')}
+                    className="w-full py-2.5 bg-white text-emerald-900 rounded-xl text-xs font-bold hover:bg-emerald-50 transition-colors shadow-2xs cursor-pointer flex items-center justify-center gap-1"
+                  >
+                    <span>सल्लागार पहा</span>
+                    <span>&rarr;</span>
+                  </button>
+                </div>
               </div>
-            </>
-          )}
-
-          {/* VIEW: PAYMENTS & DBT TRACKER */}
-          {activeTab === 'payments' && (
-            <div className="p-3">
-              <div className="mb-3 px-1">
-                <h2 className="text-base font-extrabold text-slate-900">
-                  💳 खातावही व DBT बँक पेमेंट्स
-                </h2>
-                <p className="text-xs text-slate-500">
-                  सोलापूर APMC द्वारे थेट बँक खात्यात वर्ग झालेली रक्कम
-                </p>
-              </div>
-              <ErrorBoundary>
-                <FarmerPaymentTracker />
-              </ErrorBoundary>
             </div>
-          )}
 
-          {/* VIEW: MARKET INTELLIGENCE & ADVISORY */}
-          {activeTab === 'intelligence' && (
-            <div className="p-3">
-              <div className="mb-3 px-1 flex items-center justify-between">
-                <div>
-                  <h2 className="text-base font-extrabold text-slate-900">
-                    📊 APMC बाजारभाव व AI सल्ला
-                  </h2>
-                  <p className="text-xs text-slate-500">
-                    दैनिक आवक, दर अंदाज आणि विक्री विश्लेषण
-                  </p>
-                </div>
-                <button
-                  onClick={() => setActiveTab('home')}
-                  className="text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg hover:bg-emerald-100"
-                >
-                  मागे
-                </button>
-              </div>
+            {/* Active Lots Section */}
+            <div id="active-listings-section" className="space-y-2 pt-2">
               <ErrorBoundary>
-                <SolapurMarketIntelligence
-                  onSelectCropForListing={handleOpenListingModal}
+                <FarmerActiveListings
+                  onOpenNewListing={() => handleOpenListingModal({})}
                 />
               </ErrorBoundary>
             </div>
-          )}
-        </main>
+          </>
+        )}
 
-        {/* 4. FIXED BOTTOM NAVIGATION BAR (Adaptive edge-to-edge on mobile, centered within sm shell on desktop) */}
-        <nav className="fixed bottom-0 left-0 right-0 sm:left-auto sm:right-auto sm:max-w-md w-full bg-white border-t border-slate-200 py-2 px-3 pb-safe sm:pb-2 flex justify-around items-center z-50 shadow-lg">
-          {/* Nav Item: Home */}
-          <button
-            onClick={() => setActiveTab('home')}
-            className={`flex flex-col items-center gap-0.5 cursor-pointer transition-colors ${
-              activeTab === 'home'
-                ? 'text-emerald-700 font-extrabold'
-                : 'text-slate-400 hover:text-slate-600 font-medium'
-            }`}
-          >
-            <Home className="w-5 h-5" />
-            <span className="text-[10px]">मुख्य</span>
-          </button>
+        {/* VIEW: PAYMENTS & DBT TRACKER */}
+        {activeTab === 'payments' && (
+          <div className="space-y-3">
+            <div>
+              <h2 className="text-lg font-extrabold text-slate-900">
+                💳 खातावही व DBT बँक पेमेंट्स
+              </h2>
+              <p className="text-xs text-slate-500">
+                सोलापूर APMC द्वारे थेट बँक खात्यात वर्ग झालेली रक्कम
+              </p>
+            </div>
+            <ErrorBoundary>
+              <FarmerPaymentTracker />
+            </ErrorBoundary>
+          </div>
+        )}
 
-          {/* Nav Item: Bids / Auction Tracker */}
-          <button
-            onClick={handleBidsTabClick}
-            className={`flex flex-col items-center gap-0.5 cursor-pointer transition-colors ${
-              activeTab === 'home' && false
-                ? 'text-emerald-700 font-extrabold'
-                : 'text-slate-400 hover:text-slate-600 font-medium'
-            }`}
-          >
-            <Gavel className="w-5 h-5" />
-            <span className="text-[10px]">लिलाव</span>
-          </button>
+        {/* VIEW: MARKET INTELLIGENCE & ADVISORY */}
+        {activeTab === 'intelligence' && (
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-lg font-extrabold text-slate-900">
+                  📊 APMC बाजारभाव व AI सल्ला
+                </h2>
+                <p className="text-xs text-slate-500">
+                  दैनिक आवक, दर अंदाज आणि विक्री विश्लेषण
+                </p>
+              </div>
+              <button
+                onClick={() => setActiveTab('home')}
+                className="text-xs font-bold text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-xl hover:bg-emerald-100 transition-colors cursor-pointer"
+              >
+                मागे &rarr;
+              </button>
+            </div>
+            <ErrorBoundary>
+              <SolapurMarketIntelligence
+                onSelectCropForListing={handleOpenListingModal}
+              />
+            </ErrorBoundary>
+          </div>
+        )}
+      </main>
 
-          {/* Center Elevated Action Button: New Listing */}
-          <button
-            onClick={() => handleOpenListingModal({})}
-            className="w-12 h-12 -mt-6 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg flex items-center justify-center transition-transform hover:scale-105 active:scale-95 cursor-pointer border-4 border-white"
-            title="नवीन माल नोंदवा (New Listing)"
-          >
-            <Plus className="w-6 h-6 stroke-[2.5]" />
-          </button>
+      {/* 4. FIXED BOTTOM NAVIGATION BAR (Shown ONLY on Mobile screens < 768px) */}
+      <nav className="block md:hidden fixed bottom-0 left-0 right-0 w-full bg-white border-t border-slate-200 py-2 px-3 pb-safe flex justify-around items-center z-50 shadow-lg">
+        {/* Nav Item: Home */}
+        <button
+          onClick={() => setActiveTab('home')}
+          className={`flex flex-col items-center gap-0.5 cursor-pointer transition-colors ${
+            activeTab === 'home'
+              ? 'text-emerald-700 font-extrabold'
+              : 'text-slate-400 hover:text-slate-600 font-medium'
+          }`}
+        >
+          <Home className="w-5 h-5" />
+          <span className="text-[10px]">मुख्य</span>
+        </button>
 
-          {/* Nav Item: Payments / DBT */}
-          <button
-            onClick={() => setActiveTab('payments')}
-            className={`flex flex-col items-center gap-0.5 cursor-pointer transition-colors ${
-              activeTab === 'payments'
-                ? 'text-emerald-700 font-extrabold'
-                : 'text-slate-400 hover:text-slate-600 font-medium'
-            }`}
-          >
-            <CreditCard className="w-5 h-5" />
-            <span className="text-[10px]">खातावही</span>
-          </button>
+        {/* Nav Item: Bids / Auction Tracker */}
+        <button
+          onClick={handleBidsTabClick}
+          className="flex flex-col items-center gap-0.5 cursor-pointer transition-colors text-slate-400 hover:text-slate-600 font-medium"
+        >
+          <Gavel className="w-5 h-5" />
+          <span className="text-[10px]">लिलाव</span>
+        </button>
 
-          {/* Nav Item: Market Intelligence */}
-          <button
-            onClick={() => setActiveTab('intelligence')}
-            className={`flex flex-col items-center gap-0.5 cursor-pointer transition-colors ${
-              activeTab === 'intelligence'
-                ? 'text-emerald-700 font-extrabold'
-                : 'text-slate-400 hover:text-slate-600 font-medium'
-            }`}
-          >
-            <BarChart3 className="w-5 h-5" />
-            <span className="text-[10px]">बाजारभाव</span>
-          </button>
-        </nav>
+        {/* Center Elevated Action Button: New Listing */}
+        <button
+          onClick={() => handleOpenListingModal({})}
+          className="w-12 h-12 -mt-6 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg flex items-center justify-center transition-transform hover:scale-105 active:scale-95 cursor-pointer border-4 border-white"
+          title="नवीन माल नोंदवा (New Listing)"
+        >
+          <Plus className="w-6 h-6 stroke-[2.5]" />
+        </button>
 
-        {/* Produce Listing Modal */}
-        <ProduceListingModal
-          isOpen={isListingModalOpen}
-          onClose={() => setIsListingModalOpen(false)}
-          initialData={listingInitialData}
-          onListingSuccess={handleListingSuccess}
-        />
+        {/* Nav Item: Payments / DBT */}
+        <button
+          onClick={() => setActiveTab('payments')}
+          className={`flex flex-col items-center gap-0.5 cursor-pointer transition-colors ${
+            activeTab === 'payments'
+              ? 'text-emerald-700 font-extrabold'
+              : 'text-slate-400 hover:text-slate-600 font-medium'
+          }`}
+        >
+          <CreditCard className="w-5 h-5" />
+          <span className="text-[10px]">खातावही</span>
+        </button>
 
-        {/* Solapur APMC Mandi Rates Modal */}
-        <SolapurMandiRatesModal
-          isOpen={isMandiRatesOpen}
-          onClose={() => setIsMandiRatesOpen(false)}
-          onSelectCropForListing={handleOpenListingModal}
-        />
-      </div>
+        {/* Nav Item: Market Intelligence */}
+        <button
+          onClick={() => setActiveTab('intelligence')}
+          className={`flex flex-col items-center gap-0.5 cursor-pointer transition-colors ${
+            activeTab === 'intelligence'
+              ? 'text-emerald-700 font-extrabold'
+              : 'text-slate-400 hover:text-slate-600 font-medium'
+          }`}
+        >
+          <BarChart3 className="w-5 h-5" />
+          <span className="text-[10px]">बाजारभाव</span>
+        </button>
+      </nav>
+
+      {/* Produce Listing Modal */}
+      <ProduceListingModal
+        isOpen={isListingModalOpen}
+        onClose={() => setIsListingModalOpen(false)}
+        initialData={listingInitialData}
+        onListingSuccess={handleListingSuccess}
+      />
+
+      {/* Solapur APMC Mandi Rates Modal */}
+      <SolapurMandiRatesModal
+        isOpen={isMandiRatesOpen}
+        onClose={() => setIsMandiRatesOpen(false)}
+        onSelectCropForListing={handleOpenListingModal}
+      />
     </div>
   );
 }

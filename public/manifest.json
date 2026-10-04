@@ -1,0 +1,73 @@
+{
+  "name": "KrushiMitra AI (कृषिमित्र AI) - बळीराजा व बाजार समिती डिजिटल महामार्ग",
+  "short_name": "KrushiMitra",
+  "description": "महाराष्ट्र राज्य APMC सुसंगत डिजिटल लिलाव, सोलापूर बाजार भाव, थेट गेटपास व AI कृषी सल्ला प्लॅटफॉर्म.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
+  "orientation": "portrait-primary",
+  "background_color": "#f8fafc",
+  "theme_color": "#15803d",
+  "lang": "mr-IN",
+  "dir": "ltr",
+  "categories": ["agriculture", "business", "productivity", "utilities"],
+  "icons": [
+    {
+      "src": "/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-maskable-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "शेतकरी कक्ष (Farmer Portal)",
+      "short_name": "शेतकरी",
+      "description": "शेतमाल नोंदणी, गेटपास व थेट बोली व्यवस्थापन",
+      "url": "/farmer",
+      "icons": [{ "src": "/icons/icon-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "सोलापूर बाजार भाव (APMC Rates)",
+      "short_name": "बाजार भाव",
+      "description": "सोलापूर APMC मार्केट यार्ड अधिकृत दैनंदिन दर व आवक",
+      "url": "/farmer?action=rates",
+      "icons": [{ "src": "/icons/icon-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "व्यापारी लिलाव (Merchant Feed)",
+      "short_name": "व्यापारी कक्ष",
+      "description": "परवानाधारक व्यापारी थेट ई-बोली व सौदे पूर्तता",
+      "url": "/merchant",
+      "icons": [{ "src": "/icons/icon-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "कृषी AI मित्र (AI Advisor)",
+      "short_name": "AI सल्ला",
+      "description": "हवामान, पीक रोग व बाजारपेठ मार्गदर्शन",
+      "url": "/?action=ai",
+      "icons": [{ "src": "/icons/icon-192x192.png", "sizes": "192x192" }]
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false
+}

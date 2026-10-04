@@ -3,6 +3,10 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { ListingsProvider } from './context/ListingsContext';
 import { PaymentsProvider } from './context/PaymentsContext';
+import { PWAProvider } from './context/PWAContext';
+import PWAInstallPrompt from './components/PWAInstallPrompt';
+import PWAOfflineNotice from './components/PWAOfflineNotice';
+import PWAUpdateToast from './components/PWAUpdateToast';
 import RoleSelection from './pages/RoleSelection';
 import FarmerAuth from './pages/FarmerAuth';
 import FarmerProtectedRoute from './components/FarmerProtectedRoute';
@@ -19,68 +23,78 @@ import ErrorBoundary from './components/ErrorBoundary';
 export default function App() {
   return (
     <ErrorBoundary>
-      <AuthProvider>
-        <ListingsProvider>
-          <PaymentsProvider>
-            <BrowserRouter>
-              <ErrorBoundary>
-                <Routes>
-            {/* Main Role Selection Portals */}
-            <Route path="/" element={<RoleSelection />} />
-            <Route path="/login" element={<RoleSelection />} />
+      <PWAProvider>
+        <AuthProvider>
+          <ListingsProvider>
+            <PaymentsProvider>
+              <BrowserRouter>
+                <ErrorBoundary>
+                  {/* Offline Notice Banner */}
+                  <PWAOfflineNotice />
 
-            {/* Farmer Authentication Routes */}
-            <Route path="/farmer/login" element={<FarmerAuth initialMode="login" />} />
-            <Route path="/farmer/register" element={<FarmerAuth initialMode="register" />} />
+                  {/* App Routes */}
+                  <Routes>
+                    {/* Main Role Selection Portals */}
+                    <Route path="/" element={<RoleSelection />} />
+                    <Route path="/login" element={<RoleSelection />} />
 
-            {/* Protected Farmer Portal */}
-            <Route
-              path="/farmer"
-              element={
-                <FarmerProtectedRoute>
-                  <FarmerDashboard />
-                </FarmerProtectedRoute>
-              }
-            />
+                    {/* Farmer Authentication Routes */}
+                    <Route path="/farmer/login" element={<FarmerAuth initialMode="login" />} />
+                    <Route path="/farmer/register" element={<FarmerAuth initialMode="register" />} />
 
-            {/* Merchant Authentication Routes */}
-            <Route path="/merchant/login" element={<MerchantAuth initialMode="login" />} />
-            <Route path="/merchant/register" element={<MerchantAuth initialMode="register" />} />
+                    {/* Protected Farmer Portal */}
+                    <Route
+                      path="/farmer"
+                      element={
+                        <FarmerProtectedRoute>
+                          <FarmerDashboard />
+                        </FarmerProtectedRoute>
+                      }
+                    />
 
-            {/* Protected Merchant Portal */}
-            <Route
-              path="/merchant"
-              element={
-                <MerchantProtectedRoute>
-                  <MerchantDashboard />
-                </MerchantProtectedRoute>
-              }
-            />
+                    {/* Merchant Authentication Routes */}
+                    <Route path="/merchant/login" element={<MerchantAuth initialMode="login" />} />
+                    <Route path="/merchant/register" element={<MerchantAuth initialMode="register" />} />
 
-            {/* APMC Admin Authentication Route */}
-            <Route path="/admin/login" element={<AdminAuth />} />
+                    {/* Protected Merchant Portal */}
+                    <Route
+                      path="/merchant"
+                      element={
+                        <MerchantProtectedRoute>
+                          <MerchantDashboard />
+                        </MerchantProtectedRoute>
+                      }
+                    />
 
-            {/* Protected APMC Admin Portal */}
-            <Route
-              path="/admin"
-              element={
-                <AdminProtectedRoute>
-                  <AdminDashboard />
-                </AdminProtectedRoute>
-              }
-            />
+                    {/* APMC Admin Authentication Route */}
+                    <Route path="/admin/login" element={<AdminAuth />} />
 
-            {/* Catch-all redirect to role selection */}
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
+                    {/* Protected APMC Admin Portal */}
+                    <Route
+                      path="/admin"
+                      element={
+                        <AdminProtectedRoute>
+                          <AdminDashboard />
+                        </AdminProtectedRoute>
+                      }
+                    />
 
-            {/* Global Multi-Lingual AI Farming Assistant (Voice & Chat) */}
-            <AIAssistant />
-          </ErrorBoundary>
-        </BrowserRouter>
-        </PaymentsProvider>
-      </ListingsProvider>
-      </AuthProvider>
+                    {/* Catch-all redirect to role selection */}
+                    <Route path="*" element={<Navigate to="/" replace />} />
+                  </Routes>
+
+                  {/* Global Multi-Lingual AI Farming Assistant (Voice & Chat) */}
+                  <AIAssistant />
+
+                  {/* PWA Floating Install Prompt & Update Toast */}
+                  <PWAInstallPrompt />
+                  <PWAUpdateToast />
+                </ErrorBoundary>
+              </BrowserRouter>
+            </PaymentsProvider>
+          </ListingsProvider>
+        </AuthProvider>
+      </PWAProvider>
     </ErrorBoundary>
   );
 }
