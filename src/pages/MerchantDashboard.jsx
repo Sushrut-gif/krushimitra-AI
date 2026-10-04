@@ -1,137 +1,199 @@
 import React, { useState } from 'react';
-import DashboardLayout from '../components/DashboardLayout';
-import { Store, TrendingUp, ShieldCheck, MapPin, FileText, Radio, CheckCircle2, BarChart3, Sparkles } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import {
+  Store,
+  Tag,
+  QrCode,
+  Briefcase,
+  CheckCircle2,
+  LogOut,
+  ChevronRight,
+  ShieldCheck,
+} from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useListings } from '../context/ListingsContext';
 import MerchantMarketplaceFeed from '../components/MerchantMarketplaceFeed';
 import MerchantWonDeals from '../components/MerchantWonDeals';
+import MerchantInwardScannerModal from '../components/MerchantInwardScannerModal';
 import SolapurMarketIntelligence from '../components/SolapurMarketIntelligence';
 import ErrorBoundary from '../components/ErrorBoundary';
 
 export default function MerchantDashboard() {
-  const { merchantUser } = useAuth();
-  const { listings } = useListings();
-  const [activeTab, setActiveTab] = useState('feed'); // 'feed' | 'won_deals' | 'intelligence'
+  const { merchantUser, logoutMerchant } = useAuth();
+  const { listings, markLotInwardDelivered } = useListings();
 
-  // Count won deals
-  const wonCount = (listings || []).filter((item) => item?.status && item.status.includes('विक्री पूर्ण')).length;
+  // Active bottom navigation tab: 'yard' (Live Yard feed) | 'bids' (My won deals/bids) | 'scanner' (QR Inward scan) | 'settlements' (Settlement invoices)
+  const [activeTab, setActiveTab] = useState('yard');
+
+  // Scanner modal state
+  const [isScannerOpen, setIsScannerOpen] = useState(false);
+  const [scannerSelectedLot, setScannerSelectedLot] = useState(null);
+
+  // Won deals count
+  const wonLots = (listings || []).filter((item) => item?.status && item.status.includes('विक्री पूर्ण'));
+  const wonCount = wonLots.length;
+
+  const firmName = merchantUser?.firmName || merchantUser?.name || 'Bhajiwala';
+  const yardName = merchantUser?.operatingYard || 'मंगळवार पेठ यार्ड';
+
+  const handleOpenScanner = (lot = null) => {
+    // If no specific lot selected, pick first pending delivery lot or general lot
+    const targetLot = lot || wonLots.find((l) => !l.deliveredAtYard) || wonLots[0] || null;
+    setScannerSelectedLot(targetLot);
+    setIsScannerOpen(true);
+  };
+
+  const handleVerificationSuccess = (verifiedLot) => {
+    if (verifiedLot?.id) {
+      markLotInwardDelivered(verifiedLot.id);
+    }
+  };
 
   return (
-    <DashboardLayout role="merchant">
-      <div className="space-y-6">
-        {/* Header section */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2 border-b border-gray-200">
-          <div>
+    <div className="min-h-screen bg-slate-100 flex justify-center py-0 sm:py-4 selection:bg-indigo-100 font-sans">
+      {/* INNER PHONE SHELL */}
+      <div className="w-full max-w-md bg-slate-50 min-h-screen shadow-2xl relative pb-24 overflow-x-hidden border-x border-slate-200 flex flex-col">
+        
+        {/* 1. TOP NATIVE HEADER */}
+        <header className="sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-slate-200 px-4 py-3 shadow-xs">
+          <div className="flex items-center justify-between">
+            {/* Left: Brand Badge + live green dot */}
             <div className="flex items-center gap-2">
-              <span className="inline-block w-2.5 h-2.5 rounded-full bg-indigo-500"></span>
-              <span className="text-xs font-semibold uppercase tracking-wider text-indigo-700">
-                व्यापारी कक्ष • Merchant Portal
-              </span>
+              <span className="text-xl">🌾</span>
+              <div>
+                <div className="flex items-center gap-1.5">
+                  <h1 className="text-base font-extrabold text-slate-900 tracking-tight leading-none">
+                    कृषी मित्र
+                  </h1>
+                  <span className="text-xs font-semibold text-indigo-700 bg-indigo-50 px-1.5 py-0.5 rounded border border-indigo-200">
+                    व्यापारी
+                  </span>
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                  </span>
+                </div>
+                {/* Sub-bar: Clean summary pill */}
+                <p className="text-[10px] text-slate-500 font-medium tracking-tight mt-0.5">
+                  सोलापूर APMC • {yardName}
+                </p>
+              </div>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight mt-1">
-              {merchantUser?.firmName || 'व्यापारी डॅशबोर्ड'}
-            </h1>
-            <div className="flex flex-wrap items-center gap-3 text-xs text-gray-500 mt-1">
-              {merchantUser?.licenseNo && (
-                <span className="inline-flex items-center gap-1 font-medium text-indigo-900 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-200">
-                  <FileText className="w-3 h-3 text-indigo-600" />
-                  परवाना: {merchantUser.licenseNo}
+
+            {/* Right: Firm Badge with verified checkmark + logout icon */}
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5 bg-slate-100/90 py-1 px-2.5 rounded-full border border-slate-200">
+                <span className="text-xs font-bold text-slate-800 max-w-[85px] truncate">
+                  {firmName}
                 </span>
-              )}
-              {merchantUser?.operatingYard && (
-                <span className="inline-flex items-center gap-1">
-                  <MapPin className="w-3 h-3 text-gray-400" />
-                  {merchantUser.operatingYard}
-                </span>
-              )}
-              {merchantUser?.merchantType && (
-                <span className="inline-flex items-center gap-1 text-gray-600">
-                  • {merchantUser.merchantType}
-                </span>
-              )}
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+              </div>
+
+              <button
+                onClick={logoutMerchant}
+                title="बाहेर पडा (Logout)"
+                className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
+              >
+                <LogOut className="w-4 h-4" />
+              </button>
             </div>
           </div>
+        </header>
 
-          <div className="flex items-center gap-2">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200">
-              <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-              परवाना प्रमाणित
-            </span>
-            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-50 text-indigo-800 border border-indigo-200 shadow-2xs">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span>थेट लिलाव सत्र चालू</span>
-            </span>
-          </div>
-        </div>
+        {/* 2. MAIN SCROLLABLE CONTENT AREA */}
+        <main className="flex-1 flex flex-col space-y-2 pb-4">
+          {/* TAB 1: LIVE YARD (Feed, Search, 3-Col Stats, Cards) */}
+          {activeTab === 'yard' && (
+            <ErrorBoundary>
+              <MerchantMarketplaceFeed onSwitchToWonDeals={() => setActiveTab('bids')} />
+            </ErrorBoundary>
+          )}
 
-        {/* Tab Navigation: Live Auction Feed vs Won Deals vs Market Intelligence */}
-        <div className="bg-gray-100/80 p-1.5 rounded-2xl border border-gray-200/90 max-w-2xl flex flex-wrap gap-1">
+          {/* TAB 2: MY BIDS / WON DEALS */}
+          {activeTab === 'bids' && (
+            <div className="pt-2 px-1">
+              <ErrorBoundary>
+                <MerchantWonDeals onSwitchToFeed={() => setActiveTab('yard')} />
+              </ErrorBoundary>
+            </div>
+          )}
+
+          {/* TAB 3: HISHOB / SETTLEMENTS */}
+          {activeTab === 'settlements' && (
+            <div className="pt-2 px-1">
+              <ErrorBoundary>
+                <MerchantWonDeals onSwitchToFeed={() => setActiveTab('yard')} />
+              </ErrorBoundary>
+            </div>
+          )}
+        </main>
+
+        {/* 3. PERSISTENT BOTTOM NAVIGATION BAR */}
+        <nav className="fixed bottom-0 max-w-md w-full bg-white border-t border-slate-200 py-2 px-3 flex justify-around items-center z-50 shadow-lg">
+          {/* Item 1: Live Yard */}
           <button
-            type="button"
-            onClick={() => setActiveTab('feed')}
-            className={`flex-1 py-2.5 px-3.5 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-1.5 whitespace-nowrap cursor-pointer ${
-              activeTab === 'feed'
-                ? 'bg-white text-indigo-950 shadow-sm ring-1 ring-black/5'
-                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-200/50'
+            onClick={() => setActiveTab('yard')}
+            className={`flex flex-col items-center gap-0.5 cursor-pointer transition-colors ${
+              activeTab === 'yard'
+                ? 'text-indigo-700 font-extrabold'
+                : 'text-slate-400 hover:text-slate-600 font-medium'
             }`}
           >
-            <Radio className={`w-4 h-4 ${activeTab === 'feed' ? 'text-indigo-600' : 'text-gray-400'}`} />
-            <span>ई-लिलाव फीड (Live Feed)</span>
+            <Store className="w-5 h-5" />
+            <span className="text-[10px]">यार्ड</span>
           </button>
 
+          {/* Item 2: My Bids */}
           <button
-            type="button"
-            onClick={() => setActiveTab('won_deals')}
-            className={`flex-1 py-2.5 px-3.5 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-1.5 whitespace-nowrap cursor-pointer ${
-              activeTab === 'won_deals'
-                ? 'bg-white text-indigo-950 shadow-sm ring-1 ring-black/5'
-                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-200/50'
+            onClick={() => setActiveTab('bids')}
+            className={`flex flex-col items-center gap-0.5 cursor-pointer transition-colors relative ${
+              activeTab === 'bids'
+                ? 'text-indigo-700 font-extrabold'
+                : 'text-slate-400 hover:text-slate-600 font-medium'
             }`}
           >
-            <FileText className={`w-4 h-4 ${activeTab === 'won_deals' ? 'text-indigo-600' : 'text-gray-400'}`} />
-            <span>जिंकलेले सौदे</span>
-            <span className={`px-2 py-0.5 rounded-full text-[11px] font-extrabold ${
-              activeTab === 'won_deals'
-                ? 'bg-emerald-600 text-white'
-                : 'bg-gray-200 text-gray-700'
-            }`}>
-              {wonCount}
-            </span>
+            <div className="relative">
+              <Tag className="w-5 h-5" />
+              {wonCount > 0 && (
+                <span className="absolute -top-1 -right-2 bg-emerald-600 text-white font-extrabold text-[9px] w-4 h-4 rounded-full flex items-center justify-center">
+                  {wonCount}
+                </span>
+              )}
+            </div>
+            <span className="text-[10px]">माझ्या बोली</span>
           </button>
 
+          {/* Item 3: Inward QR Scan */}
           <button
-            type="button"
-            onClick={() => setActiveTab('intelligence')}
-            className={`flex-1 py-2.5 px-3.5 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-1.5 whitespace-nowrap cursor-pointer ${
-              activeTab === 'intelligence'
-                ? 'bg-white text-indigo-950 shadow-sm ring-1 ring-black/5'
-                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-200/50'
+            onClick={() => handleOpenScanner()}
+            className="flex flex-col items-center gap-0.5 cursor-pointer transition-colors text-slate-400 hover:text-indigo-700 font-medium"
+          >
+            <QrCode className="w-5 h-5 text-indigo-600" />
+            <span className="text-[10px] text-slate-700 font-bold">आवक स्कॅन</span>
+          </button>
+
+          {/* Item 4: Settlements / Hishob */}
+          <button
+            onClick={() => setActiveTab('settlements')}
+            className={`flex flex-col items-center gap-0.5 cursor-pointer transition-colors ${
+              activeTab === 'settlements'
+                ? 'text-indigo-700 font-extrabold'
+                : 'text-slate-400 hover:text-slate-600 font-medium'
             }`}
           >
-            <BarChart3 className={`w-4 h-4 ${activeTab === 'intelligence' ? 'text-emerald-700' : 'text-gray-400'}`} />
-            <span>APMC दर व आवक इंटेलिजन्स</span>
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            <Briefcase className="w-5 h-5" />
+            <span className="text-[10px]">हिशोब</span>
           </button>
-        </div>
+        </nav>
 
-        {/* Tab Content Rendering */}
-        {activeTab === 'feed' && (
-          <ErrorBoundary>
-            <MerchantMarketplaceFeed onSwitchToWonDeals={() => setActiveTab('won_deals')} />
-          </ErrorBoundary>
-        )}
-        {activeTab === 'won_deals' && (
-          <ErrorBoundary>
-            <MerchantWonDeals onSwitchToFeed={() => setActiveTab('feed')} />
-          </ErrorBoundary>
-        )}
-        {activeTab === 'intelligence' && (
-          <ErrorBoundary>
-            <SolapurMarketIntelligence />
-          </ErrorBoundary>
-        )}
+        {/* Inward QR Scanner Modal */}
+        <MerchantInwardScannerModal
+          isOpen={isScannerOpen}
+          onClose={() => setIsScannerOpen(false)}
+          lot={scannerSelectedLot}
+          onVerificationSuccess={handleVerificationSuccess}
+        />
       </div>
-    </DashboardLayout>
+    </div>
   );
 }
+

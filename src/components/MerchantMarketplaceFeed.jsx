@@ -148,119 +148,54 @@ export default function MerchantMarketplaceFeed() {
 
   return (
     <div className="space-y-6">
-      {/* Top Header & Feed Summary Row */}
-      <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 rounded-2xl border border-indigo-900/50 p-5 sm:p-6 text-white shadow-xl relative overflow-hidden">
-        {/* Subtle decorative glow */}
-        <div className="absolute top-0 right-0 w-80 h-80 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
-
-        <div className="relative z-10 space-y-4">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="relative flex h-3 w-3">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
-                </span>
-                <span className="text-xs font-bold tracking-wider uppercase text-emerald-400">
-                  थेट आवक ई-लिलाव फीड • Live APMC Solapur
-                </span>
-              </div>
-              <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight mt-1 flex items-center gap-2">
-                <span>शेतीमाल थेट बाजारपेठ (Marketplace Feed)</span>
-              </h2>
-              <p className="text-xs sm:text-sm text-slate-300 mt-1 max-w-2xl">
-                सोलापूर बाजार समिती आवारातील शेतकरी प्रमाणित माल, AI गुणवत्ता प्रतवारी व थेट व्यापारी लिलाव बोली.
-              </p>
-            </div>
-
-            {/* Dynamic Counter Pill */}
-            <div className="flex items-center gap-2 self-start md:self-auto">
-              <div className="px-4 py-2 rounded-xl bg-indigo-900/80 border border-indigo-700/80 backdrop-blur-sm shadow-inner flex items-center gap-2.5">
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
-                <span className="text-xs sm:text-sm font-bold text-white">
-                  सध्या लिलावात उपलब्ध लॉट्स: <span className="text-emerald-400 text-base font-extrabold">{totalActiveLots}</span>
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Quick Metrics Bar */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-3 border-t border-indigo-900/60">
-            <div className="bg-slate-900/70 p-3 rounded-xl border border-indigo-950">
-              <span className="text-[11px] text-slate-400 font-medium block">सक्रिय लॉट्स</span>
-              <span className="text-lg font-bold text-white">{totalActiveLots} लॉट्स</span>
-            </div>
-            <div className="bg-slate-900/70 p-3 rounded-xl border border-indigo-950">
-              <span className="text-[11px] text-slate-400 font-medium block">एकूण आवक प्रमाण</span>
-              <span className="text-lg font-bold text-emerald-400 truncate block" title={formattedTotalInward}>
-                {formattedTotalInward}
-              </span>
-            </div>
-            <div className="bg-slate-900/70 p-3 rounded-xl border border-indigo-950">
-              <span className="text-[11px] text-slate-400 font-medium block">सरासरी बोली प्रीमियम</span>
-              <span className="text-lg font-bold text-amber-400">{avgBidHike}</span>
-            </div>
-            <div className="bg-slate-900/70 p-3 rounded-xl border border-indigo-950">
-              <span className="text-[11px] text-slate-400 font-medium block">बाजार यार्ड</span>
-              <span className="text-lg font-bold text-indigo-300">सोलापूर मुख्य यार्ड</span>
-            </div>
-          </div>
+      {/* 3. Sleek 3-Column Stats Bar (Replacing oversized dark banner) */}
+      <div className="mx-4 my-2.5 bg-white rounded-2xl p-3 border border-slate-200/90 shadow-xs grid grid-cols-3 divide-x divide-slate-100 text-center">
+        <div className="px-1">
+          <span className="text-[10px] text-slate-500 font-medium block">उपलब्ध लॉट्स</span>
+          <span className="text-sm font-extrabold text-slate-900 mt-0.5 block">{totalActiveLots}</span>
+        </div>
+        <div className="px-1">
+          <span className="text-[10px] text-slate-500 font-medium block">एकूण आवक</span>
+          <span className="text-sm font-extrabold text-emerald-700 truncate mt-0.5 block" title={formattedTotalInward}>
+            {formattedTotalInward}
+          </span>
+        </div>
+        <div className="px-1">
+          <span className="text-[10px] text-slate-500 font-medium block">थेट सत्र</span>
+          <span className="text-sm font-extrabold text-indigo-700 mt-0.5 inline-flex items-center gap-1 justify-center">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            <span>चालू</span>
+          </span>
         </div>
       </div>
 
-      {/* Search, Filter Pills & Sort Bar */}
-      <div className="bg-white rounded-2xl border border-gray-200/90 p-4 sm:p-5 shadow-xs space-y-4">
-        {/* Top line: Search box + Sort By */}
-        <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
-          {/* Search Box */}
-          <div className="relative flex-1">
-            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400">
-              <Search className="w-4 h-4" />
-            </div>
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="पिकाचे नाव, जात किंवा शेतकऱ्याचे गाव शोधा (उदा. कांदा, डाळिंब, माढा, बार्शी)..."
-              className="block w-full pl-10 pr-9 py-2.5 text-xs sm:text-sm text-gray-900 bg-gray-50/80 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors placeholder:text-gray-400"
-            />
-            {searchQuery && (
-              <button
-                type="button"
-                onClick={() => setSearchQuery('')}
-                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            )}
+      {/* 4. Search & Filter Bar */}
+      <div className="px-4 space-y-2">
+        {/* Search input with magnifying icon */}
+        <div className="relative">
+          <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+            <Search className="w-4 h-4" />
           </div>
-
-          {/* Sort Dropdown */}
-          <div className="flex items-center gap-2 shrink-0">
-            <label className="text-xs font-semibold text-gray-600 flex items-center gap-1">
-              <ArrowUpDown className="w-3.5 h-3.5 text-gray-500" />
-              <span>क्रमवारी:</span>
-            </label>
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-              className="py-2 px-3 text-xs sm:text-sm font-medium text-gray-800 bg-white border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors shadow-2xs"
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="पीक, जात किंवा शेतकरी शोधा..."
+            className="block w-full pl-10 pr-9 py-2.5 text-xs text-slate-900 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-2xs placeholder:text-slate-400"
+          />
+          {searchQuery && (
+            <button
+              type="button"
+              onClick={() => setSearchQuery('')}
+              className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600"
             >
-              {SORT_OPTIONS.map((opt) => (
-                <option key={opt.id} value={opt.id}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
-          </div>
+              <X className="w-4 h-4" />
+            </button>
+          )}
         </div>
 
-        {/* Category Pills */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none pt-1">
-          <span className="text-xs font-semibold text-gray-500 flex items-center gap-1 shrink-0 mr-1">
-            <Filter className="w-3.5 h-3.5" />
-            <span>वर्ग:</span>
-          </span>
+        {/* Horizontally scrollable category pills */}
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
           {CATEGORIES.map((cat) => {
             const isSelected = selectedCategory === cat.value;
             return (
@@ -268,55 +203,34 @@ export default function MerchantMarketplaceFeed() {
                 key={cat.id}
                 type="button"
                 onClick={() => setSelectedCategory(cat.value)}
-                className={`py-1.5 px-3.5 rounded-full text-xs font-semibold transition-all shrink-0 border ${
+                className={`py-1.5 px-3 rounded-full text-[11px] font-bold transition-all shrink-0 border ${
                   isSelected
-                    ? 'bg-indigo-600 text-white border-indigo-600 shadow-xs'
-                    : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100 hover:text-gray-900'
+                    ? 'bg-indigo-600 text-white border-indigo-600 shadow-2xs'
+                    : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
                 }`}
               >
-                {cat.labelMr}
+                {cat.labelMr.split(' ')[0]}
               </button>
             );
           })}
         </div>
       </div>
 
-      {/* Filter result feedback */}
-      {(searchQuery || selectedCategory !== 'सर्व') && (
-        <div className="flex items-center justify-between text-xs text-gray-600 px-1">
-          <span>
-            फिल्टरनुसार निकाल: <strong className="text-indigo-800 font-bold">{sortedLots.length}</strong> लॉट्स उपलब्ध
-          </span>
-          <button
-            type="button"
-            onClick={() => {
-              setSelectedCategory('सर्व');
-              setSearchQuery('');
-            }}
-            className="text-xs text-indigo-700 hover:text-indigo-900 font-semibold underline"
-          >
-            सर्व फिल्टर हटवा (Reset)
-          </button>
-        </div>
-      )}
-
-      {/* Produce Cards Grid */}
+      {/* Produce Cards Mobile List */}
       {sortedLots.length === 0 ? (
         /* Empty State */
-        <div className="bg-white rounded-2xl border border-gray-200 p-8 sm:p-12 text-center max-w-lg mx-auto shadow-xs space-y-4">
-          <div className="w-16 h-16 rounded-2xl bg-indigo-50 border border-indigo-100 text-indigo-600 mx-auto flex items-center justify-center">
-            <Store className="w-8 h-8" />
+        <div className="bg-white rounded-2xl border border-slate-200 mx-4 p-8 text-center shadow-xs space-y-3">
+          <div className="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 mx-auto flex items-center justify-center">
+            <Store className="w-6 h-6" />
           </div>
-          <div className="space-y-1.5">
-            <h3 className="text-base sm:text-lg font-bold text-gray-900">
+          <div className="space-y-1">
+            <h3 className="text-sm font-bold text-slate-900">
               {activeLots.length === 0
-                ? 'सध्या बाजारात लिलावासाठी कोणताही शेतमाल उपलब्ध नाही. शेतकरी नोंदणी करतील तेव्हा येथे थेट दिसेल.'
-                : 'निवडलेल्या फिल्टरनुसार कोणताही माल उपलब्ध नाही.'}
+                ? 'सध्या लिलावात कोणताही माल उपलब्ध नाही.'
+                : 'शोधानुसार माल आढळला नाही.'}
             </h3>
-            <p className="text-xs sm:text-sm text-gray-500 leading-relaxed">
-              {activeLots.length === 0
-                ? 'शेतकऱ्यांनी सोलापूर APMC मध्ये माल नोंदवताच येथे थेट ई-लिलावासाठी दिसेल.'
-                : 'कृपया शोध शब्द बदला किंवा इतर वर्ग निवडून तपासा.'}
+            <p className="text-xs text-slate-500 leading-relaxed">
+              शेतकऱ्यांनी माल नोंदवताच येथे थेट ई-लिलावासाठी दिसेल.
             </p>
           </div>
           {activeLots.length > 0 && (searchQuery || selectedCategory !== 'सर्व') && (
@@ -326,19 +240,17 @@ export default function MerchantMarketplaceFeed() {
                 setSelectedCategory('सर्व');
                 setSearchQuery('');
               }}
-              className="px-4 py-2 rounded-xl text-xs font-semibold bg-indigo-600 hover:bg-indigo-700 text-white shadow-xs"
+              className="px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-indigo-600 text-white"
             >
-              सर्व पिके पहा (Reset Filters)
+              सर्व पिके पहा
             </button>
           )}
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
+        <div className="space-y-1">
           {sortedLots.map((lot) => {
             const bids = lot.bids || [];
             const highestBid = bids.length > 0 ? Math.max(...bids.map((b) => b.amount)) : lot.basePrice;
-            const bidDifference = highestBid > lot.basePrice ? highestBid - lot.basePrice : 0;
-            const bidPercentIncrease = lot.basePrice > 0 ? ((bidDifference / lot.basePrice) * 100).toFixed(1) : 0;
 
             // Crop image fallback
             const defaultImage =
@@ -348,150 +260,76 @@ export default function MerchantMarketplaceFeed() {
             return (
               <div
                 key={lot.id}
-                className="group bg-white rounded-2xl border border-gray-200/90 shadow-xs hover:shadow-xl hover:border-indigo-400 transition-all duration-300 flex flex-col justify-between overflow-hidden relative"
+                className="bg-white rounded-2xl p-3.5 shadow-sm border border-slate-150 mx-4 my-2.5 transition-all space-y-3"
               >
-                {/* Top Media & Floating Badges */}
-                <div className="relative h-48 w-full bg-gray-100 overflow-hidden">
-                  <img
-                    src={displayImage}
-                    alt={lot.cropName}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    loading="lazy"
-                  />
-                  {/* Subtle gradient overlay for readability */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                {/* Top Row: Thumbnail (85x85px) on left; Title, Farmer, Quantity Badge on right */}
+                <div className="flex items-start gap-3">
+                  <div className="relative w-[85px] h-[85px] rounded-xl overflow-hidden bg-slate-100 shrink-0 border border-slate-200">
+                    <img
+                      src={displayImage}
+                      alt={lot.cropName}
+                      className="w-full h-full object-cover"
+                      loading="lazy"
+                    />
+                    <div className="absolute top-1 left-1 bg-black/60 backdrop-blur-xs text-white text-[9px] font-bold px-1.5 py-0.5 rounded">
+                      {lot.qualityGrade || 'Grade A'}
+                    </div>
+                  </div>
 
-                  {/* Top Left: AI Grade Glow Badge */}
-                  <div className="absolute top-3 left-3">
-                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-extrabold bg-emerald-950/90 text-emerald-300 border border-emerald-500/60 shadow-lg backdrop-blur-md">
-                      <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                      <span>{lot.qualityGrade || 'Grade A'}</span>
-                      {lot.aiScore && (
-                        <span className="text-[10px] text-emerald-200 border-l border-emerald-600/60 pl-1.5 font-normal">
-                          {lot.aiScore}%
+                  <div className="flex-1 min-w-0 flex flex-col justify-between h-[85px] py-0.5">
+                    <div>
+                      <div className="flex items-center justify-between gap-1">
+                        <h3 className="text-sm font-extrabold text-slate-900 truncate">
+                          {lot.cropName}
+                        </h3>
+                        <span className="shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">
+                          {lot.quantity} {lot.unit || 'क्विंटल'}
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-slate-500 truncate mt-0.5">
+                        {lot.farmerName} • {lot.location || 'सोलापूर यार्ड'}
+                      </p>
+                    </div>
+
+                    <div className="flex items-center gap-1 text-[10px] text-slate-400">
+                      <span>लॉट: #{lot.id}</span>
+                      {bids.length > 0 && (
+                        <span className="text-emerald-700 font-bold bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-200 ml-auto">
+                          {bids.length} बोली
                         </span>
                       )}
-                    </span>
-                  </div>
-
-                  {/* Top Right: Live Auction Badge with pulsing green indicator */}
-                  <div className="absolute top-3 right-3">
-                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-500/95 text-slate-950 shadow-md backdrop-blur-md">
-                      <Flame className="w-3.5 h-3.5 text-slate-950 animate-bounce" />
-                      <span>लिलाव सुरू</span>
-                    </span>
-                  </div>
-
-                  {/* Bottom Image Overlay: Crop Name & Variety */}
-                  <div className="absolute bottom-2.5 left-3 right-3 text-white">
-                    <span className="text-[10px] font-semibold uppercase tracking-wider text-indigo-300 bg-indigo-950/80 px-2 py-0.5 rounded backdrop-blur-xs">
-                      {lot.category || getCropCategory(lot.cropName)}
-                    </span>
-                    <h3 className="text-lg font-bold text-white tracking-tight leading-snug mt-1 drop-shadow-xs">
-                      {lot.cropName}
-                    </h3>
-                    <p className="text-xs text-gray-200 line-clamp-1 drop-shadow-xs">
-                      {lot.variety || 'सोलापूर स्थानिक जात'}
-                    </p>
+                    </div>
                   </div>
                 </div>
 
-                {/* Card Body */}
-                <div className="p-4 sm:p-5 space-y-3.5 flex-1 flex flex-col justify-between">
-                  {/* Farmer identity & location */}
-                  <div className="space-y-1.5 text-xs text-gray-600 border-b border-gray-100 pb-3">
-                    <div className="flex items-center justify-between gap-2">
-                      <div className="flex items-center gap-1.5 font-semibold text-gray-900 truncate">
-                        <User className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
-                        <span className="truncate">{lot.farmerName}</span>
-                      </div>
-                      <span className="text-[11px] text-gray-400 shrink-0">
-                        लॉट: {lot.id}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center gap-1.5 text-gray-500">
-                      <MapPin className="w-3.5 h-3.5 text-gray-400 shrink-0" />
-                      <span className="truncate">{lot.location}</span>
-                    </div>
+                {/* Middle Row: Base Price Chip & Current Highest Bid */}
+                <div className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-200/80">
+                  <div className="text-left">
+                    <span className="text-[10px] text-slate-500 font-medium block">मूळ दर</span>
+                    <span className="text-xs font-bold text-slate-700">
+                      ₹{lot.basePrice?.toLocaleString('en-IN')}/{lot.unit || 'क्विं'}
+                    </span>
                   </div>
 
-                  {/* Quantity & Moisture Row */}
-                  <div className="grid grid-cols-2 gap-2 bg-slate-50 p-2.5 rounded-xl border border-slate-200/80">
-                    <div>
-                      <span className="text-[10px] text-gray-500 font-medium block">
-                        एकूण प्रमाण (Quantity)
-                      </span>
-                      <span className="text-sm font-extrabold text-gray-900">
-                        {lot.quantity} {lot.unit || 'क्विंटल'}
-                      </span>
-                    </div>
-                    <div>
-                      <span className="text-[10px] text-gray-500 font-medium block">
-                        गुणवत्ता निकष (Quality)
-                      </span>
-                      <span className="text-xs font-bold text-emerald-800">
-                        {lot.moisture ? `ओलावा: ${lot.moisture}` : 'उत्कृष्ट प्रत'}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Pricing Comparison: Base vs Current Highest Bid */}
-                  <div className="space-y-1.5 pt-1">
-                    <div className="flex items-baseline justify-between text-xs">
-                      <span className="text-gray-500 font-medium">शेतकरी मूळ दर:</span>
-                      <span className={`font-semibold text-gray-700 ${bids.length > 0 ? 'line-through text-gray-400' : ''}`}>
-                        ₹{lot.basePrice?.toLocaleString('en-IN')} / {lot.unit || 'क्विंटल'}
-                      </span>
-                    </div>
-
-                    {/* Current Highest Bid Highlight */}
-                    <div className="flex items-center justify-between p-2.5 rounded-xl bg-gradient-to-r from-indigo-50 to-blue-50 border border-indigo-200/80">
-                      <div>
-                        <div className="flex items-center gap-1.5">
-                          <span className={`w-2 h-2 rounded-full ${bids.length > 0 ? 'bg-emerald-500 animate-pulse' : 'bg-indigo-400'}`} />
-                          <span className="text-[11px] font-bold text-indigo-900 uppercase tracking-tight">
-                            {bids.length > 0 ? 'चालू सर्वोच्च बोली:' : 'किमान मूळ दर (लिलाव सुरू):'}
-                          </span>
-                        </div>
-                        <div className="text-base sm:text-lg font-black text-indigo-950 mt-0.5">
-                          ₹{highestBid.toLocaleString('en-IN')}{' '}
-                          <span className="text-xs font-normal text-gray-600">/ {lot.unit || 'क्विंटल'}</span>
-                        </div>
-                      </div>
-
-                      <div className="text-right">
-                        {bids.length > 0 ? (
-                          <>
-                            <span className="inline-block px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
-                              +{bidPercentIncrease}% वाढ
-                            </span>
-                            <span className="block text-[10px] text-indigo-700 font-medium mt-0.5">
-                              {bids.length} व्यापारी बोली
-                            </span>
-                          </>
-                        ) : (
-                          <span className="inline-block px-2 py-0.5 rounded text-[10px] font-semibold bg-indigo-100/70 text-indigo-800 border border-indigo-200">
-                            0 बोली प्राप्त
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Primary Action Button */}
-                  <div className="pt-2">
-                    <button
-                      type="button"
-                      onClick={() => setSelectedLotForInspection(lot)}
-                      className="w-full py-2.5 px-4 bg-gradient-to-r from-indigo-700 via-indigo-600 to-indigo-800 hover:from-indigo-600 hover:to-indigo-700 active:from-indigo-800 active:to-indigo-900 text-white font-semibold text-xs sm:text-sm rounded-xl shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 group-hover:ring-2 group-hover:ring-indigo-500/20"
-                    >
-                      <Eye className="w-4 h-4 text-indigo-200" />
-                      <span>मालाची गुणवत्ता पहा व बोली लावा</span>
-                      <ChevronRight className="w-4 h-4 text-indigo-200 group-hover:translate-x-0.5 transition-transform" />
-                    </button>
+                  <div className="text-right">
+                    <span className="text-[10px] font-bold text-indigo-700 uppercase tracking-tight block">
+                      चालू सर्वोच्च बोली
+                    </span>
+                    <span className="text-sm font-black text-indigo-950">
+                      ₹{highestBid.toLocaleString('en-IN')}
+                    </span>
                   </div>
                 </div>
+
+                {/* Bottom Action: Full-width vibrant button */}
+                <button
+                  type="button"
+                  onClick={() => setSelectedLotForInspection(lot)}
+                  className="w-full py-2.5 px-4 bg-gradient-to-r from-indigo-600 via-indigo-700 to-indigo-800 hover:from-indigo-700 hover:to-indigo-800 active:scale-98 text-white font-bold text-xs rounded-xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  <Gavel className="w-3.5 h-3.5 text-indigo-200" />
+                  <span>⚡ थेट बोली लावा (Place Live Bid)</span>
+                </button>
               </div>
             );
           })}
