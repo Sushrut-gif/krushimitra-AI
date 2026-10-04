@@ -31,11 +31,11 @@ export default function FarmerActiveListings({ onOpenNewListing }) {
   const [selectedListingForReceipt, setSelectedListingForReceipt] = useState(null);
   const [selectedListingForGatePass, setSelectedListingForGatePass] = useState(null);
 
-  const myListings = getFarmerListings(farmerUser?.mobile);
+  const myListings = getFarmerListings ? (getFarmerListings(farmerUser?.mobile) || []) : [];
 
   // Grade color helper
   const getGradeBadge = (grade = '') => {
-    const lower = grade.toLowerCase();
+    const lower = (grade || '').toLowerCase();
     if (lower.includes('उत्तम') || lower.includes('a') || lower.includes('सुपर')) {
       return 'bg-emerald-100 text-emerald-800 border-emerald-300';
     }
@@ -61,7 +61,7 @@ export default function FarmerActiveListings({ onOpenNewListing }) {
               <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200/80">
                 सक्रिय लिलाव बाजार
               </span>
-              <span className="text-xs text-gray-400 font-medium">({myListings.length} नोंदी)</span>
+              <span className="text-xs text-gray-400 font-medium">({myListings?.length || 0} नोंदी)</span>
             </div>
             <h2 className="text-xl sm:text-2xl font-bold text-gray-950 tracking-tight mt-0.5">
               माझे नोंदवलेले माल (My Active Listings)
@@ -74,7 +74,7 @@ export default function FarmerActiveListings({ onOpenNewListing }) {
             <button
               type="button"
               onClick={onOpenNewListing}
-              className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shadow-xs hover:shadow transition-all"
+              className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shadow-xs hover:shadow transition-all cursor-pointer"
             >
               <Gavel className="w-3.5 h-3.5" />
               <span>+ नवीन माल नोंदवा</span>
@@ -85,7 +85,7 @@ export default function FarmerActiveListings({ onOpenNewListing }) {
 
       {/* Listings Body */}
       <div className="p-6 sm:p-8">
-        {myListings.length === 0 ? (
+        {(myListings || []).length === 0 ? (
           /* Empty state */
           <div className="py-12 px-4 text-center max-w-md mx-auto space-y-4">
             <div className="w-16 h-16 rounded-2xl bg-emerald-50 border border-emerald-100 text-emerald-600 flex items-center justify-center mx-auto shadow-xs">
@@ -112,11 +112,11 @@ export default function FarmerActiveListings({ onOpenNewListing }) {
         ) : (
           /* Grid of Listings Cards */
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {myListings.map((item) => {
-              const bids = Array.isArray(item.bids) ? item.bids : [];
+            {(myListings || []).map((item) => {
+              const bids = Array.isArray(item?.bids) ? item.bids : [];
               const highestBid = bids.length > 0 ? bids.reduce((max, curr) => (curr.amount > max.amount ? curr : max), bids[0]) : null;
               const isSold =
-                item.status &&
+                item?.status &&
                 (item.status.includes('विक्री पूर्ण') || item.status.includes('Sold') || !!item.winningMerchant);
 
               return (

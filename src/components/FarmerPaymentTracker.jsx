@@ -37,9 +37,9 @@ export default function FarmerPaymentTracker() {
   const [justSettledId, setJustSettledId] = useState(null);
 
   // Filter settlements
-  const filteredSettlements = settlements.filter((item) => {
+  const filteredSettlements = (settlements || []).filter((item) => {
     if (activeFilter === 'all') return true;
-    return item.status === activeFilter;
+    return item?.status === activeFilter;
   });
 
   // Handle advancing lifecycle

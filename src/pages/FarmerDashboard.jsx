@@ -8,6 +8,7 @@ import SolapurMandiRatesBanner from '../components/SolapurMandiRatesBanner';
 import SolapurMandiRatesModal from '../components/SolapurMandiRatesModal';
 import FarmerPaymentTracker from '../components/FarmerPaymentTracker';
 import SolapurMarketIntelligence from '../components/SolapurMarketIntelligence';
+import ErrorBoundary from '../components/ErrorBoundary';
 import {
   Clock,
   MapPin,
@@ -151,14 +152,18 @@ export default function FarmerDashboard() {
         {/* VIEW 1: PAYMENTS & SETTLEMENTS VIEW */}
         {activeDashboardTab === 'payments' && (
           <section aria-label="Farmer Payment & Bank Settlements">
-            <FarmerPaymentTracker />
+            <ErrorBoundary>
+              <FarmerPaymentTracker />
+            </ErrorBoundary>
           </section>
         )}
 
         {/* VIEW 2: APMC LIVE MARKET INTELLIGENCE & AI SELLING ADVISORY */}
         {activeDashboardTab === 'intelligence' && (
           <section aria-label="Solapur APMC Market Intelligence and AI Advisor">
-            <SolapurMarketIntelligence onSelectCropForListing={handleOpenListingModal} />
+            <ErrorBoundary>
+              <SolapurMarketIntelligence onSelectCropForListing={handleOpenListingModal} />
+            </ErrorBoundary>
           </section>
         )}
 
@@ -167,20 +172,26 @@ export default function FarmerDashboard() {
           <>
             {/* COMPREHENSIVE SOLAPUR MANDI RATES BANNER & QUICK TICKER */}
             <section aria-label="Solapur APMC Live Mandi Rates">
-              <SolapurMandiRatesBanner
-                onOpenMandiModal={() => setIsMandiRatesOpen(true)}
-                onOpenIntelligence={() => setActiveDashboardTab('intelligence')}
-              />
+              <ErrorBoundary>
+                <SolapurMandiRatesBanner
+                  onOpenMandiModal={() => setIsMandiRatesOpen(true)}
+                  onOpenIntelligence={() => setActiveDashboardTab('intelligence')}
+                />
+              </ErrorBoundary>
             </section>
 
             {/* PROMINENT AI CROP QUALITY ASSESSMENT SECTION */}
             <section aria-label="AI Crop Quality Assessment">
-              <CropQualityAssessment onListProduce={handleOpenListingModal} />
+              <ErrorBoundary>
+                <CropQualityAssessment onListProduce={handleOpenListingModal} />
+              </ErrorBoundary>
             </section>
 
             {/* ACTIVE PRODUCE LISTINGS SECTION */}
             <section id="active-listings-section" aria-label="Active Produce Listings">
-              <FarmerActiveListings onOpenNewListing={() => handleOpenListingModal({})} />
+              <ErrorBoundary>
+                <FarmerActiveListings onOpenNewListing={() => handleOpenListingModal({})} />
+              </ErrorBoundary>
             </section>
 
             {/* PAYMENTS PREVIEW STRIP IN PRODUCE VIEW */}

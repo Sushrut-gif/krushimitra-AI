@@ -14,14 +14,17 @@ import FarmerDashboard from './pages/FarmerDashboard';
 import MerchantDashboard from './pages/MerchantDashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import AIAssistant from './components/AIAssistant';
+import ErrorBoundary from './components/ErrorBoundary';
 
 export default function App() {
   return (
-    <AuthProvider>
-      <ListingsProvider>
-        <PaymentsProvider>
-          <BrowserRouter>
-          <Routes>
+    <ErrorBoundary>
+      <AuthProvider>
+        <ListingsProvider>
+          <PaymentsProvider>
+            <BrowserRouter>
+              <ErrorBoundary>
+                <Routes>
             {/* Main Role Selection Portals */}
             <Route path="/" element={<RoleSelection />} />
             <Route path="/login" element={<RoleSelection />} />
@@ -71,11 +74,13 @@ export default function App() {
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
 
-          {/* Global Multi-Lingual AI Farming Assistant (Voice & Chat) */}
-          <AIAssistant />
+            {/* Global Multi-Lingual AI Farming Assistant (Voice & Chat) */}
+            <AIAssistant />
+          </ErrorBoundary>
         </BrowserRouter>
         </PaymentsProvider>
       </ListingsProvider>
-    </AuthProvider>
+      </AuthProvider>
+    </ErrorBoundary>
   );
 }

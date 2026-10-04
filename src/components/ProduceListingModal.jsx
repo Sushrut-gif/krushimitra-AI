@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useListings } from '../context/ListingsContext';
 import {
@@ -12,6 +12,8 @@ import {
   AlertCircle,
   CheckCircle2,
   Sparkles,
+  Camera,
+  Upload,
 } from 'lucide-react';
 
 const UNITS = ['क्विंटल (Quintal)', 'पोती (Bags / पोती)', 'क्रेट्स (Crates)', 'टन (Tons)', 'जुड्या (Bunches)'];
@@ -27,32 +29,36 @@ export default function ProduceListingModal({
 
   // Pre-filled & editable form states
   const [cropName, setCropName] = useState('');
-  const [qualityGrade, setQualityGrade] = useState('मध्यम');
+  const [qualityGrade, setQualityGrade] = useState('उत्तम (Grade A)');
   const [quantity, setQuantity] = useState('');
   const [unit, setUnit] = useState('क्विंटल (Quintal)');
   const [basePrice, setBasePrice] = useState('');
   const [location, setLocation] = useState('');
   const [listingDate, setListingDate] = useState('');
+  const [produceImage, setProduceImage] = useState(null);
   const [error, setError] = useState('');
   const [isSuccess, setIsSuccess] = useState(false);
+
+  const fileInputRef = useRef(null);
 
   // Initialize form when modal opens
   useEffect(() => {
     if (isOpen) {
-      setCropName(initialData.cropName || '');
-      setQualityGrade(initialData.qualityGrade || 'मध्यम');
+      setCropName(initialData?.cropName || '');
+      setQualityGrade(initialData?.qualityGrade || 'उत्तम (Grade A)');
       setQuantity('');
       setUnit('क्विंटल (Quintal)');
       setBasePrice('');
+      setProduceImage(initialData?.image || null);
 
       // Format default location from farmer's profile
       if (farmerUser) {
         const parts = [
-          farmerUser.village ? `गाव: ${farmerUser.village}` : '',
-          farmerUser.taluka ? `ता. ${farmerUser.taluka}` : '',
-          farmerUser.district ? `जि. ${farmerUser.district}` : '',
+          farmerUser?.village ? `गाव: ${farmerUser.village}` : '',
+          farmerUser?.taluka ? `ता. ${farmerUser.taluka}` : '',
+          farmerUser?.district ? `जि. ${farmerUser.district}` : '',
         ].filter(Boolean);
-        setLocation(parts.join(', '));
+        setLocation(parts.join(', ') || 'सोलापूर APMC परिसर');
       } else {
         setLocation('सोलापूर APMC परिसर');
       }
@@ -67,6 +73,24 @@ export default function ProduceListingModal({
   }, [isOpen, initialData, farmerUser]);
 
   if (!isOpen) return null;
+
+  const handleImageFileChange = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      setError('कृपया वैध फोटो फाईल निवडा.');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      setProduceImage(event.target.result);
+      setError('');
+    };
+    reader.readAsDataURL(file);
+    e.target.value = '';
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -101,7 +125,7 @@ export default function ProduceListingModal({
     const cleanUnit = unit ? unit.split(' ')[0].trim() : 'क्विंटल';
 
     const newListing = addListing({
-      farmerId: farmerUser?.id,
+      farmerId: farmerUser?.id || `FARMER_${Date.now()}`,
       farmerName: farmerUser?.name || 'शेतकरी मित्र',
       farmerMobile: farmerUser?.mobile || '',
       cropName: cropName.trim(),
@@ -111,9 +135,9 @@ export default function ProduceListingModal({
       basePrice: Number(basePrice),
       location: location.trim(),
       listingDate: listingDate,
-      image: initialData.image || null,
-      notes: initialData.notes || '',
-      estimatedMarketPrice: initialData.estimatedPrice || '',
+      image: produceImage || null,
+      notes: initialData?.notes || '',
+      estimatedMarketPrice: initialData?.estimatedPrice || '',
     });
 
     setIsSuccess(true);
@@ -141,7 +165,7 @@ export default function ProduceListingModal({
                 माल विक्री / लिलाव नोंदणी
               </h2>
               <p className="text-xs text-gray-500">
-                AI तपासणीनुसार माहिती पूर्वनोंदणी केली आहे
+                सोलापूर APMC थेट ई-लिलाव नोंदणी (Zero Blocking Form)
               </p>
             </div>
           </div>
@@ -149,7 +173,7 @@ export default function ProduceListingModal({
           <button
             type="button"
             onClick={onClose}
-            className="p-2 rounded-xl text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors focus:outline-none"
+            className="p-2 rounded-xl text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors focus:outline-none cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -167,35 +191,54 @@ export default function ProduceListingModal({
                 लिलाव नोंदणी यशस्वी झाली!
               </h3>
               <p className="text-xs text-gray-600">
-                आपला माल "माझे नोंदवलेले माल" या कक्षामध्ये बोलीसाठी सक्रिय झाला आहे.
+                आपला माल "माझे नोंदवलेले माल" या कक्षामध्ये बोलीसाठी थेट Supabase डेटाबेसमध्ये सक्रिय झाला आहे.
               </p>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4">
-              {/* Photo & Pre-filled AI info banner */}
-              <div className="p-3.5 rounded-2xl bg-emerald-50/70 border border-emerald-200/80 flex items-center gap-4">
-                {initialData.image ? (
-                  <div className="w-16 h-16 rounded-xl overflow-hidden bg-white shrink-0 border border-emerald-200 shadow-2xs">
-                    <img
-                      src={initialData.image}
-                      alt="पिकाचा फोटो"
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                ) : (
-                  <div className="w-16 h-16 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
-                    <Tag className="w-6 h-6" />
-                  </div>
-                )}
+              {/* Photo & Upload Widget */}
+              <div className="p-3.5 rounded-2xl bg-emerald-50/70 border border-emerald-200/80 flex items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  {produceImage ? (
+                    <div className="w-16 h-16 rounded-xl overflow-hidden bg-white shrink-0 border border-emerald-200 shadow-2xs relative">
+                      <img
+                        src={produceImage}
+                        alt="पिकाचा फोटो"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  ) : (
+                    <div className="w-16 h-16 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
+                      <Tag className="w-6 h-6" />
+                    </div>
+                  )}
 
-                <div className="space-y-1">
-                  <div className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-800 bg-white px-2 py-0.5 rounded-md border border-emerald-200">
-                    <Sparkles className="w-3 h-3 text-emerald-600" />
-                    <span>AI व्हिजनद्वारे ओळखलेले पीक</span>
+                  <div className="space-y-0.5">
+                    <div className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-800 bg-white px-2 py-0.5 rounded-md border border-emerald-200">
+                      <Sparkles className="w-3 h-3 text-emerald-600" />
+                      <span>{produceImage ? 'शेतमालाचा फोटो जोडला आहे' : 'फोटो ऐच्छिक आहे'}</span>
+                    </div>
+                    <div className="text-xs text-gray-600">
+                      पिकाचे नाव, गुणवत्ता प्रत व दर खाली मॅन्युअली भरू शकता.
+                    </div>
                   </div>
-                  <div className="text-xs text-gray-700">
-                    पिकाचे नाव व गुणवत्ता प्रत आपण खाली आवश्यकतेनुसार बदलू शकता.
-                  </div>
+                </div>
+
+                <div>
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleImageFileChange}
+                    accept="image/*"
+                    className="hidden"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="text-xs font-bold text-emerald-800 bg-white hover:bg-emerald-100 border border-emerald-300 px-3 py-1.5 rounded-xl transition-all cursor-pointer whitespace-nowrap"
+                  >
+                    {produceImage ? 'फोटो बदला' : '+ फोटो जोडा'}
+                  </button>
                 </div>
               </div>
 
@@ -236,11 +279,11 @@ export default function ProduceListingModal({
                     value={qualityGrade}
                     onChange={(e) => setQualityGrade(e.target.value)}
                     required
-                    className="block w-full px-3 py-2 text-sm text-gray-900 bg-white border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 shadow-2xs"
+                    className="block w-full px-3 py-2 text-sm text-gray-900 bg-white border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 shadow-2xs cursor-pointer"
                   >
-                    <option value="उत्तम (Grade A)">उत्तम (Grade A - सुपर)</option>
-                    <option value="मध्यम (Grade B)">मध्यम (Grade B - सरासरी)</option>
-                    <option value="सामान्य (Grade C)">सामान्य (Grade C - चालू)</option>
+                    <option value="Grade A">उत्तम (Grade A - सुपर)</option>
+                    <option value="Grade B">मध्यम (Grade B - सरासरी)</option>
+                    <option value="Grade C">सामान्य (Grade C - चालू)</option>
                   </select>
                 </div>
               </div>
@@ -275,7 +318,7 @@ export default function ProduceListingModal({
                   <select
                     value={unit}
                     onChange={(e) => setUnit(e.target.value)}
-                    className="block w-full px-3 py-2 text-sm text-gray-900 bg-white border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 shadow-2xs"
+                    className="block w-full px-3 py-2 text-sm text-gray-900 bg-white border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 shadow-2xs cursor-pointer"
                   >
                     {UNITS.map((u) => (
                       <option key={u} value={u}>
@@ -305,7 +348,7 @@ export default function ProduceListingModal({
                     className="block w-full pl-10 pr-3 py-2 text-sm text-gray-900 bg-white border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                   />
                 </div>
-                {initialData.estimatedPrice && (
+                {initialData?.estimatedPrice && (
                   <p className="text-[11px] text-gray-500 mt-1">
                     AI संदर्भ दर: <span className="font-semibold text-emerald-800">{initialData.estimatedPrice}</span>
                   </p>
@@ -357,13 +400,13 @@ export default function ProduceListingModal({
                 <button
                   type="button"
                   onClick={onClose}
-                  className="w-full sm:w-auto px-4 py-2.5 rounded-xl border border-gray-300 text-gray-700 font-semibold text-xs sm:text-sm hover:bg-gray-50 transition-colors"
+                  className="w-full sm:w-auto px-4 py-2.5 rounded-xl border border-gray-300 text-gray-700 font-semibold text-xs sm:text-sm hover:bg-gray-50 transition-colors cursor-pointer"
                 >
                   रद्द करा
                 </button>
                 <button
                   type="submit"
-                  className="w-full sm:w-auto px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold text-xs sm:text-sm rounded-xl shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500"
+                  className="w-full sm:w-auto px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold text-xs sm:text-sm rounded-xl shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 cursor-pointer"
                 >
                   <Gavel className="w-4 h-4 text-emerald-200" />
                   <span>लिलावात नोंदणी पूर्ण करा (Confirm Listing)</span>

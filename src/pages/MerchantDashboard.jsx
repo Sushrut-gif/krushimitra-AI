@@ -7,6 +7,7 @@ import { useListings } from '../context/ListingsContext';
 import MerchantMarketplaceFeed from '../components/MerchantMarketplaceFeed';
 import MerchantWonDeals from '../components/MerchantWonDeals';
 import SolapurMarketIntelligence from '../components/SolapurMarketIntelligence';
+import ErrorBoundary from '../components/ErrorBoundary';
 
 export default function MerchantDashboard() {
   const { merchantUser } = useAuth();
@@ -14,7 +15,7 @@ export default function MerchantDashboard() {
   const [activeTab, setActiveTab] = useState('feed'); // 'feed' | 'won_deals' | 'intelligence'
 
   // Count won deals
-  const wonCount = listings.filter((item) => item.status && item.status.includes('विक्री पूर्ण')).length;
+  const wonCount = (listings || []).filter((item) => item?.status && item.status.includes('विक्री पूर्ण')).length;
 
   return (
     <DashboardLayout role="merchant">
@@ -116,13 +117,19 @@ export default function MerchantDashboard() {
 
         {/* Tab Content Rendering */}
         {activeTab === 'feed' && (
-          <MerchantMarketplaceFeed onSwitchToWonDeals={() => setActiveTab('won_deals')} />
+          <ErrorBoundary>
+            <MerchantMarketplaceFeed onSwitchToWonDeals={() => setActiveTab('won_deals')} />
+          </ErrorBoundary>
         )}
         {activeTab === 'won_deals' && (
-          <MerchantWonDeals onSwitchToFeed={() => setActiveTab('feed')} />
+          <ErrorBoundary>
+            <MerchantWonDeals onSwitchToFeed={() => setActiveTab('feed')} />
+          </ErrorBoundary>
         )}
         {activeTab === 'intelligence' && (
-          <SolapurMarketIntelligence />
+          <ErrorBoundary>
+            <SolapurMarketIntelligence />
+          </ErrorBoundary>
         )}
       </div>
     </DashboardLayout>

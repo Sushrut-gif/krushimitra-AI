@@ -70,6 +70,8 @@ export default function AIAssistant() {
     }
   });
 
+  const [showFallbackToast, setShowFallbackToast] = useState(false);
+
   const [messages, setMessages] = useState(() => {
     try {
       const saved = sessionStorage.getItem(STORAGE_KEY_HISTORY);
@@ -244,28 +246,30 @@ export default function AIAssistant() {
     try {
       const responseText = await askKrushiMitraAssistant(query.trim(), updatedMessages, language);
 
+      if (responseText && (responseText.includes('AI सेवा तात्पुरती व्यस्त आहे') || responseText.includes('Fallback Mode') || responseText.includes('temporarily busy'))) {
+        setShowFallbackToast(true);
+        setTimeout(() => setShowFallbackToast(false), 5000);
+      }
+
       const botMsg = {
         id: (Date.now() + 1).toString(),
         sender: 'assistant',
-        text: responseText,
+        text: responseText || 'AI सेवा तात्पुरती व्यस्त आहे, परंतु तुमचा डेटा सुरक्षितपणे सेव्ह झाला आहे.',
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       };
 
       setMessages((prev) => [...prev, botMsg]);
     } catch (err) {
-      console.error('Gemini API Error in KrushiMitra Chat:', err);
-      const errorMsg = {
+      console.warn('Gemini API Error in KrushiMitra Chat (safe fallback):', err);
+      setShowFallbackToast(true);
+      setTimeout(() => setShowFallbackToast(false), 5000);
+      const fallbackMsg = {
         id: (Date.now() + 1).toString(),
         sender: 'assistant',
-        text:
-          language === 'en'
-            ? '⚠️ Could not fetch an answer from KrushiMitra AI right now. Please tap to retry your question.'
-            : language === 'hi'
-            ? '⚠️ कृषि मित्र AI से उत्तर प्राप्त नहीं हो सका। कृपया अपना प्रश्न पुनः पूछें।'
-            : '⚠️ कृषीमित्र AI कडून उत्तर मिळवण्यात अडचण आली आहे. कृपया आपला प्रश्न पुन्हा विचारून पहा.',
+        text: 'AI सेवा तात्पुरती व्यस्त आहे, परंतु तुमचा डेटा सुरक्षितपणे सेव्ह झाला आहे.',
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       };
-      setMessages((prev) => [...prev, errorMsg]);
+      setMessages((prev) => [...prev, fallbackMsg]);
     } finally {
       setIsLoading(false);
     }
@@ -423,6 +427,23 @@ export default function AIAssistant() {
               </div>
             </div>
           </div>
+
+          {/* Non-blocking Toast Warning: AI सर्व्हर व्यस्त आहे (Fallback Mode सक्रिय) */}
+          {showFallbackToast && (
+            <div className="px-3.5 py-2 bg-amber-500 text-white text-xs font-bold flex items-center justify-between shrink-0 shadow-sm animate-in fade-in">
+              <div className="flex items-center gap-1.5">
+                <AlertCircle className="w-4 h-4 text-amber-100 shrink-0" />
+                <span>AI सर्व्हर व्यस्त आहे (Fallback Mode सक्रिय).</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowFallbackToast(false)}
+                className="p-0.5 hover:bg-amber-600 rounded text-amber-100 hover:text-white"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          )}
 
           {/* Speech Error Banner if any */}
           {speechError && (

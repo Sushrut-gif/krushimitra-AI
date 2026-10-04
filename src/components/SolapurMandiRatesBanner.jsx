@@ -75,17 +75,17 @@ export default function SolapurMandiRatesBanner({ onOpenMandiModal, onOpenIntell
 
       {/* Quick Glance Ticker Strip */}
       <div className="mt-5 pt-4 border-t border-emerald-700/60 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5">
-        {featuredItems.map((crop) => {
-          const isUp = crop.trendType === 'up';
+        {(featuredItems || []).map((crop) => {
+          const isUp = crop?.trendType === 'up';
           return (
             <div
-              key={crop.id}
+              key={crop?.id || Math.random()}
               onClick={onOpenMandiModal}
               className="bg-white/10 hover:bg-white/15 backdrop-blur-xs p-2.5 rounded-xl border border-white/10 transition-all cursor-pointer group"
             >
               <div className="flex items-center justify-between text-[11px]">
                 <span className="font-bold text-white truncate group-hover:text-emerald-200 transition-colors">
-                  {crop.nameMr.split(' ')[0]}
+                  {crop?.nameMr ? crop.nameMr.split(' ')[0] : 'शेतमाल'}
                 </span>
                 <span
                   className={`text-[10px] font-bold flex items-center ${

@@ -32,6 +32,7 @@ import {
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useListings } from '../context/ListingsContext';
+import ErrorBoundary from '../components/ErrorBoundary';
 
 export default function AdminDashboard() {
   const { adminUser, logoutAdmin, merchants = [], updateMerchantStatus } = useAuth();
@@ -69,9 +70,9 @@ export default function AdminDashboard() {
 
   // --- 1. REAL STATS CALCULATION (ZERO-MOCK DATA) ---
   const activeAuctions = useMemo(() => {
-    return listings.filter(
+    return (listings || []).filter(
       (item) =>
-        !item.status ||
+        !item?.status ||
         (!item.status.includes('विक्री पूर्ण') &&
           !item.status.includes('यार्डात प्राप्त') &&
           item.status !== 'विक्री पूर्ण (Sold)' &&
@@ -80,21 +81,21 @@ export default function AdminDashboard() {
   }, [listings]);
 
   const verifiedGatePasses = useMemo(() => {
-    return listings.filter(
+    return (listings || []).filter(
       (item) =>
-        item.gatePassVerified === true ||
-        (item.status && item.status.includes('यार्डात प्राप्त')) ||
-        (item.inwardStatus && item.inwardStatus.includes('यार्डात प्राप्त'))
+        item?.gatePassVerified === true ||
+        (item?.status && item.status.includes('यार्डात प्राप्त')) ||
+        (item?.inwardStatus && item.inwardStatus.includes('यार्डात प्राप्त'))
     );
   }, [listings]);
 
   const settledDeals = useMemo(() => {
-    return listings.filter(
+    return (listings || []).filter(
       (item) =>
-        (item.status && (item.status.includes('विक्री पूर्ण') || item.status.includes('यार्डात प्राप्त'))) ||
-        item.status === 'विक्री पूर्ण (Sold)' ||
-        item.status === 'विक्री पूर्ण (Deal Finalized / Sold)' ||
-        !!item.winningPrice
+        (item?.status && (item.status.includes('विक्री पूर्ण') || item.status.includes('यार्डात प्राप्त'))) ||
+        item?.status === 'विक्री पूर्ण (Sold)' ||
+        item?.status === 'विक्री पूर्ण (Deal Finalized / Sold)' ||
+        !!item?.winningPrice
     );
   }, [listings]);
 
@@ -118,16 +119,16 @@ export default function AdminDashboard() {
 
   // Filtered Merchants
   const filteredMerchants = useMemo(() => {
-    return merchants.filter((m) => {
-      const q = merchantSearch.toLowerCase().trim();
+    return (merchants || []).filter((m) => {
+      const q = (merchantSearch || '').toLowerCase().trim();
       const matchSearch =
         !q ||
-        (m.firmName && m.firmName.toLowerCase().includes(q)) ||
-        (m.licenseNo && m.licenseNo.toLowerCase().includes(q)) ||
-        (m.mobile && m.mobile.includes(q)) ||
-        (m.gstPan && m.gstPan.toLowerCase().includes(q));
+        (m?.firmName && m.firmName.toLowerCase().includes(q)) ||
+        (m?.licenseNo && m.licenseNo.toLowerCase().includes(q)) ||
+        (m?.mobile && m.mobile.includes(q)) ||
+        (m?.gstPan && m.gstPan.toLowerCase().includes(q));
 
-      const status = m.status || 'APPROVED';
+      const status = m?.status || 'APPROVED';
       const matchFilter =
         merchantFilter === 'ALL' ||
         (merchantFilter === 'APPROVED' && status === 'APPROVED') ||
@@ -518,6 +519,7 @@ export default function AdminDashboard() {
           </div>
 
           <div className="p-5 sm:p-7">
+            <ErrorBoundary>
             {/* ========================================================================= */}
             {/* TAB 1: MERCHANT VERIFICATION LEDGER */}
             {/* ========================================================================= */}
@@ -1196,6 +1198,7 @@ export default function AdminDashboard() {
                 )}
               </div>
             )}
+            </ErrorBoundary>
           </div>
         </div>
 

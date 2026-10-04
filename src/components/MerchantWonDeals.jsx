@@ -39,8 +39,8 @@ export default function MerchantWonDeals({ onSwitchToFeed }) {
   const [celebrationToast, setCelebrationToast] = useState('');
 
   // 1. Filter listings where status is 'विक्री पूर्ण (Sold)'
-  const wonLots = listings.filter((item) => {
-    return item.status && item.status.includes('विक्री पूर्ण');
+  const wonLots = (listings || []).filter((item) => {
+    return item?.status && item.status.includes('विक्री पूर्ण');
   });
 
   // Calculate high-level summary metrics

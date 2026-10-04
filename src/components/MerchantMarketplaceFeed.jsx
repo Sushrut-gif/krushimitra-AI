@@ -50,9 +50,9 @@ export default function MerchantMarketplaceFeed() {
 
   // 1. Filter items to show active lots available for auction
   const activeLots = useMemo(() => {
-    return listings.filter((item) => {
+    return (listings || []).filter((item) => {
       // Must not be already sold
-      const isSold = item.status && item.status.includes('विक्री पूर्ण');
+      const isSold = item?.status && item.status.includes('विक्री पूर्ण');
       return !isSold;
     });
   }, [listings]);
