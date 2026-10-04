@@ -231,16 +231,13 @@ export default function CropQualityAssessment({ onListProduce }) {
   const currentGrade = editableGrade || assessmentResult?.qualityGrade || 'Grade A';
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden transition-all relative">
-      {/* Emerald accent top border */}
-      <div className="h-1.5 bg-gradient-to-r from-emerald-500 via-emerald-600 to-emerald-700 w-full" />
-
+    <div className="relative">
       {/* Non-blocking Toast Warning: "AI सर्व्हर व्यस्त आहे (Fallback Mode सक्रिय)." */}
       {showFallbackToast && (
-        <div className="p-3 bg-amber-500 text-white text-xs font-bold flex items-center justify-between px-4 sm:px-6 shadow-md animate-in slide-in-from-top-2 duration-300">
+        <div className="mx-4 mb-2 p-3 bg-amber-500 text-white text-xs font-bold rounded-xl flex items-center justify-between shadow-xs animate-in slide-in-from-top-2 duration-300">
           <div className="flex items-center gap-2">
-            <ShieldCheck className="w-4 h-4 text-amber-100" />
-            <span>AI सर्व्हर व्यस्त आहे (Fallback Mode सक्रिय). मानक APMC निकषांनुसार ग्रेडिंग लागू केले आहे.</span>
+            <ShieldCheck className="w-4 h-4 text-amber-100 shrink-0" />
+            <span>AI सर्व्हर व्यस्त आहे (Fallback Mode सक्रिय). मानक APMC निकष लागू केले आहेत.</span>
           </div>
           <button
             type="button"
@@ -262,106 +259,67 @@ export default function CropQualityAssessment({ onListProduce }) {
       />
       <canvas ref={canvasRef} className="hidden" />
 
-      {/* Card Header */}
-      <div className="p-6 sm:p-7 border-b border-gray-100">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 flex items-center justify-center shrink-0 shadow-xs">
-              <Camera className="w-6 h-6" />
+      {/* Step 1: Sleek Actionable Scan / Upload Bar (When no image and camera inactive) */}
+      {!selectedImage && !isCameraActive && (
+        <div className="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 mx-4 my-2">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="text-xs font-bold text-slate-800">शेतमाल गुणवत्ता व दर तपासणी</span>
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200/80">
-                  Gemini Flash AI
-                </span>
-                <span className="text-xs text-gray-500 hidden sm:inline">• सोलापूर APMC बाजारभाव सुसंगत</span>
-              </div>
-              <h2 className="text-xl sm:text-2xl font-bold text-gray-950 tracking-tight mt-0.5">
-                मालाची गुणवत्ता तपासा (AI Quality Assessment)
-              </h2>
-            </div>
+            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200">
+              Gemini Vision
+            </span>
           </div>
 
-          <div className="flex items-center gap-2">
-            {onListProduce && (
-              <button
-                type="button"
-                onClick={() => onListProduce({})}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 transition-all cursor-pointer"
-                title="फोटो किंवा AI शिवाय थेट शेतमाल नोंदवा"
-              >
-                <Gavel className="w-3.5 h-3.5 text-emerald-600" />
-                <span>थेट नोंदणी करा (Manual Listing)</span>
-              </button>
-            )}
+          {/* Action Grid (Touch target 48px) */}
+          <div className="grid grid-cols-2 gap-3">
+            <button
+              type="button"
+              onClick={handleOpenCamera}
+              className="h-12 flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 active:scale-98 text-white rounded-xl font-bold text-xs shadow-xs transition-all cursor-pointer"
+            >
+              <Camera className="w-4 h-4 text-emerald-100" />
+              <span>📷 कॅमेरा उघडा</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="h-12 flex items-center justify-center gap-2 bg-white hover:bg-slate-50 active:scale-98 text-slate-700 border border-slate-300 rounded-xl font-bold text-xs transition-all cursor-pointer"
+            >
+              <Upload className="w-4 h-4 text-slate-500" />
+              <span>📁 फोटो निवडा</span>
+            </button>
+          </div>
+
+          <div className="text-center mt-3 pt-2.5 border-t border-slate-100">
+            <button
+              type="button"
+              onClick={() => onListProduce && onListProduce({})}
+              className="text-[11px] font-semibold text-emerald-700 hover:text-emerald-800 transition-colors cursor-pointer"
+            >
+              किंवा मॅन्युअल तपशील भरा &rarr;
+            </button>
           </div>
         </div>
-      </div>
+      )}
 
-      <div className="p-6 sm:p-8 space-y-6">
-        {/* Step 1: Input Action Buttons (When no image and camera inactive) */}
-        {!selectedImage && !isCameraActive && (
-          <div className="space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {/* Open Camera Button */}
-              <button
-                type="button"
-                onClick={handleOpenCamera}
-                className="group p-6 rounded-2xl border-2 border-dashed border-emerald-300 hover:border-emerald-600 bg-emerald-50/40 hover:bg-emerald-50/80 transition-all text-center flex flex-col items-center justify-center gap-3 focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
-              >
-                <div className="w-14 h-14 rounded-2xl bg-emerald-600 text-white flex items-center justify-center shadow-md group-hover:scale-105 transition-transform">
-                  <Camera className="w-7 h-7" />
-                </div>
-                <div>
-                  <span className="block text-base font-bold text-gray-900 group-hover:text-emerald-900">
-                    कॅमेरा उघडा (Open Camera)
-                  </span>
-                  <span className="block text-xs text-gray-500 mt-1">
-                    शेतातून किंवा बाजारातून पिकाचा थेट फोटो काढा
-                  </span>
-                </div>
-              </button>
-
-              {/* Upload Photo Button */}
-              <button
-                type="button"
-                onClick={() => fileInputRef.current?.click()}
-                className="group p-6 rounded-2xl border-2 border-dashed border-gray-300 hover:border-emerald-600 bg-gray-50/50 hover:bg-emerald-50/40 transition-all text-center flex flex-col items-center justify-center gap-3 focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
-              >
-                <div className="w-14 h-14 rounded-2xl bg-gray-800 group-hover:bg-emerald-700 text-white flex items-center justify-center shadow-md group-hover:scale-105 transition-all">
-                  <Upload className="w-7 h-7" />
-                </div>
-                <div>
-                  <span className="block text-base font-bold text-gray-900 group-hover:text-emerald-900">
-                    फोटो अपलोड करा (Upload Photo)
-                  </span>
-                  <span className="block text-xs text-gray-500 mt-1">
-                    डिव्हाइस गॅलरीमधील अस्तित्वात असलेला फोटो निवडा
-                  </span>
-                </div>
-              </button>
+      {(isCameraActive || selectedImage) && (
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm mx-4 my-2 p-4 space-y-4">
+          <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+            <div className="flex items-center gap-1.5">
+              <Sparkles className="w-4 h-4 text-emerald-600" />
+              <span className="text-xs font-bold text-slate-800">AI गुणवत्ता विश्लेषण कक्ष</span>
             </div>
-
-            {/* Direct manual listing helper strip */}
-            <div className="p-3.5 bg-gray-50 rounded-xl border border-gray-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-gray-600">
-              <div className="flex items-center gap-2">
-                <Info className="w-4 h-4 text-emerald-600 shrink-0" />
-                <span>
-                  <strong>टीप:</strong> AI तपासणी ऐच्छिक आहे. आपण हवे असल्यास थेट मॅन्युअल लिलाव फॉर्म भरून माल नोंदवू शकता.
-                </span>
-              </div>
-              {onListProduce && (
-                <button
-                  type="button"
-                  onClick={() => onListProduce({})}
-                  className="font-bold text-emerald-700 hover:text-emerald-900 underline shrink-0 cursor-pointer"
-                >
-                  थेट माल नोंदणीकडे जा &rarr;
-                </button>
-              )}
-            </div>
+            <button
+              type="button"
+              onClick={handleChangePhoto}
+              className="text-xs font-semibold text-slate-500 hover:text-slate-800 transition-colors cursor-pointer"
+            >
+              रद्द करा ✕
+            </button>
           </div>
-        )}
 
         {/* Camera Permission or Initialization Error */}
         {cameraError && !selectedImage && (
@@ -759,7 +717,9 @@ export default function CropQualityAssessment({ onListProduce }) {
             )}
           </div>
         )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }
+
