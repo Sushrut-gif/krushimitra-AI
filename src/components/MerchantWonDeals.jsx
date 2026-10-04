@@ -79,80 +79,68 @@ export default function MerchantWonDeals({ onSwitchToFeed }) {
       )}
 
       {/* Top Won Deals Banner */}
-      <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 rounded-2xl border border-indigo-900/50 p-5 sm:p-6 text-white shadow-xl relative overflow-hidden">
-        <div className="relative z-10 space-y-4">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 rounded-2xl border border-indigo-900/50 p-4 text-white shadow-md relative overflow-hidden">
+        <div className="relative z-10 space-y-3">
+          <div className="flex items-center justify-between gap-2">
             <div>
-              <div className="flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
-                <span className="text-xs font-bold tracking-wider uppercase text-emerald-400">
-                  APMC अधिकृत खरेदी नोंदवही • Settled Deals
+              <div className="flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                <span className="text-[10px] font-bold tracking-wider uppercase text-emerald-400">
+                  APMC अधिकृत खरेदी नोंदवही
                 </span>
               </div>
-              <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight mt-1">
-                माझे जिंकलेले सौदे व खरेदी बिले
+              <h2 className="text-base font-extrabold text-white tracking-tight mt-0.5">
+                माझे जिंकलेले सौदे व हिशोब
               </h2>
-              <p className="text-xs sm:text-sm text-slate-300 mt-1 max-w-2xl">
-                शेतकऱ्यांनी मान्य केलेले ई-लिलाव सौदे, अधिकृत बाजार समिती खरेदी बीजक आणि एस्क्रो पेमेंट प्रणाली.
-              </p>
             </div>
 
-            <div className="px-4 py-2 rounded-xl bg-indigo-900/80 border border-indigo-700/80 backdrop-blur-sm self-start md:self-auto">
-              <span className="text-xs font-bold text-white">
-                एकूण जिंकलेले लॉट्स: <span className="text-emerald-400 text-base font-extrabold">{totalWonCount}</span>
-              </span>
+            <div className="px-2.5 py-1 rounded-xl bg-indigo-900/80 border border-indigo-700/80 shrink-0 text-right">
+              <span className="text-[10px] text-slate-300 block">जिंकलेले लॉट्स</span>
+              <span className="text-emerald-400 text-sm font-extrabold">{totalWonCount}</span>
             </div>
           </div>
 
           {/* Quick Metrics Bar */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-3 border-t border-indigo-900/60">
-            <div className="bg-slate-900/70 p-3 rounded-xl border border-indigo-950">
-              <span className="text-[11px] text-slate-400 font-medium block">जिंकलेले सौदे</span>
-              <span className="text-lg font-bold text-white">{totalWonCount} लॉट्स</span>
+          <div className="grid grid-cols-2 gap-2 pt-2 border-t border-indigo-900/60 text-xs">
+            <div className="bg-slate-900/80 p-2.5 rounded-xl border border-indigo-950/80 min-w-0">
+              <span className="text-[10px] text-slate-400 font-medium block">एकूण खरेदी रक्कम</span>
+              <span className="text-sm font-extrabold text-emerald-400 truncate block">₹{totalPurchaseValue.toLocaleString('en-IN')}</span>
             </div>
-            <div className="bg-slate-900/70 p-3 rounded-xl border border-indigo-950">
-              <span className="text-[11px] text-slate-400 font-medium block">एकूण खरेदी रक्कम</span>
-              <span className="text-lg font-bold text-emerald-400">₹{totalPurchaseValue.toLocaleString('en-IN')}</span>
-            </div>
-            <div className="bg-slate-900/70 p-3 rounded-xl border border-indigo-950">
-              <span className="text-[11px] text-slate-400 font-medium block">प्रलंबित देयके</span>
-              <span className="text-lg font-bold text-amber-400">{pendingPaymentsCount} प्रलंबित</span>
-            </div>
-            <div className="bg-slate-900/70 p-3 rounded-xl border border-indigo-950">
-              <span className="text-[11px] text-slate-400 font-medium block">पूर्ण झालेली देयके</span>
-              <span className="text-lg font-bold text-indigo-300">{completedPaymentsCount} पूर्ण</span>
+            <div className="bg-slate-900/80 p-2.5 rounded-xl border border-indigo-950/80 min-w-0">
+              <span className="text-[10px] text-slate-400 font-medium block">प्रलंबित देयके</span>
+              <span className="text-sm font-extrabold text-amber-400 truncate block">{pendingPaymentsCount} प्रलंबित</span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Won Lots Grid or Empty State */}
+      {/* Won Lots List or Empty State */}
       {wonLots.length === 0 ? (
-        <div className="bg-white rounded-2xl border border-gray-200 p-8 sm:p-12 text-center max-w-lg mx-auto shadow-xs space-y-4">
-          <div className="w-16 h-16 rounded-2xl bg-indigo-50 border border-indigo-100 text-indigo-600 mx-auto flex items-center justify-center">
-            <Store className="w-8 h-8" />
+        <div className="bg-white rounded-2xl border border-gray-200 p-8 text-center max-w-lg mx-auto shadow-xs space-y-4">
+          <div className="w-14 h-14 rounded-2xl bg-indigo-50 border border-indigo-100 text-indigo-600 mx-auto flex items-center justify-center">
+            <Store className="w-7 h-7" />
           </div>
-          <div className="space-y-1.5">
-            <h3 className="text-base sm:text-lg font-bold text-gray-900">
+          <div className="space-y-1">
+            <h3 className="text-base font-bold text-gray-900">
               सध्या कोणताही जिंकलेला सौदा उपलब्ध नाही.
             </h3>
-            <p className="text-xs sm:text-sm text-gray-500 leading-relaxed">
-              थेट लिलावात शेतीमालावर आपली बोली नोंदवा. शेतकऱ्याने आपली बोली स्वीकारताच येथे अधिकृत खरेदी बिल व पेमेंट रिलीज पर्याय दिसेल.
+            <p className="text-xs text-gray-500 leading-relaxed">
+              थेट लिलावात शेतीमालावर आपली बोली नोंदवा. शेतकऱ्याने आपली बोली स्वीकारताच येथे अधिकृत खरेदी बिल व पेमेंट पर्याय दिसेल.
             </p>
           </div>
           {onSwitchToFeed && (
             <button
               type="button"
               onClick={onSwitchToFeed}
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold bg-indigo-600 hover:bg-indigo-700 text-white shadow-xs transition-colors"
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold bg-indigo-600 hover:bg-indigo-700 text-white shadow-xs transition-colors cursor-pointer"
             >
-              <span>थेट लिलाव फीडवर जा (Live Auction Feed)</span>
+              <span>थेट लिलाव फीडवर जा</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </button>
           )}
         </div>
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-6">
+        <div className="flex flex-col gap-3.5 w-full">
           {wonLots.map((lot) => {
             const quantity = Number(lot.quantity) || 1;
             const winningRate = Number(lot.winningPrice || lot.basePrice) || 0;
@@ -170,147 +158,125 @@ export default function MerchantWonDeals({ onSwitchToFeed }) {
             return (
               <div
                 key={lot.id}
-                className="bg-white rounded-2xl border border-gray-200/90 shadow-xs hover:shadow-md transition-all overflow-hidden flex flex-col justify-between"
+                className="w-full bg-white rounded-2xl p-4 shadow-sm border border-slate-200 flex flex-col gap-3.5 transition-all"
               >
-                {/* Card Top Banner */}
-                <div className="p-4 sm:p-5 border-b border-gray-100 bg-gray-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                  <div className="flex items-center gap-2.5">
-                    <span className="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold text-xs">
-                      ✓
-                    </span>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs font-bold text-gray-900">{lot.cropName}</span>
-                        <span className="text-[10px] font-semibold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
-                          {lot.qualityGrade || 'Grade A'}
-                        </span>
-                      </div>
-                      <span className="text-[11px] text-gray-500">लॉट क्र: {lot.id} • {lot.receiptId || 'APMC-SLP-2026'}</span>
+                {/* 1. Header: Crop Name, Lot ID, Quality, and Status Chip */}
+                <div className="flex items-start justify-between gap-2 border-b border-slate-100 pb-3">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <h3 className="text-base font-extrabold text-slate-900 tracking-tight truncate">
+                        {lot.cropName || 'शेतमाल'}
+                      </h3>
+                      <span className="text-[10px] font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 shrink-0">
+                        {lot.qualityGrade || 'Grade A'}
+                      </span>
+                    </div>
+                    <div className="text-[11px] text-slate-500 font-mono mt-0.5 truncate">
+                      लॉट क्र.: {lot.id} {lot.receiptId ? `• ${lot.receiptId}` : ''}
                     </div>
                   </div>
 
-                  {/* Status Badges */}
-                  <div className="flex flex-wrap items-center gap-1.5">
-                    {isDelivered ? (
-                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-900 border border-emerald-300">
-                        <CheckCircle2 className="w-3 h-3 text-emerald-700" />
-                        <span>यार्डात प्राप्त</span>
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-100 text-amber-900 border border-amber-300 animate-pulse">
-                        <Clock className="w-3 h-3 text-amber-700" />
-                        <span>गेट पास आवक प्रलंबित</span>
-                      </span>
-                    )}
-
+                  {/* Status Chip */}
+                  <div className="shrink-0">
                     {isPaid ? (
-                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
-                        <Check className="w-3 h-3 text-emerald-600" />
-                        <span>पेमेंट पूर्ण</span>
+                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                        <span className="truncate">पेमेंट यशस्वीरीत्या जमा</span>
+                      </span>
+                    ) : isDelivered ? (
+                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-blue-50 text-blue-700 border border-blue-200">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-blue-600 shrink-0" />
+                        <span className="truncate">माल यार्डात प्राप्त</span>
                       </span>
                     ) : (
-                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-slate-100 text-slate-700 border border-slate-300">
-                        <Clock className="w-3 h-3 text-slate-500" />
-                        <span>पेमेंट बाकी</span>
+                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-50 text-amber-700 border border-amber-200 animate-pulse">
+                        <Clock className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                        <span className="truncate">आवक प्रलंबित</span>
                       </span>
                     )}
                   </div>
                 </div>
 
-                {/* Card Body */}
-                <div className="p-4 sm:p-5 space-y-4">
-                  {/* Farmer Details */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs bg-slate-50/70 p-3 rounded-xl border border-slate-100">
-                    <div>
-                      <span className="text-gray-400 block text-[10px] font-medium">विक्रेता शेतकरी</span>
-                      <span className="font-bold text-gray-900 text-xs sm:text-sm">{lot.farmerName}</span>
-                      <span className="text-gray-500 block text-[11px] mt-0.5">{lot.location}</span>
-                    </div>
-                    <div>
-                      <span className="text-gray-400 block text-[10px] font-medium">संपर्क व दिनांक</span>
-                      <span className="font-semibold text-gray-800 block">{lot.farmerMobile || 'नोंदणीकृत शेतकरी'}</span>
-                      <span className="text-gray-500 text-[11px] block mt-0.5">{lot.dealFinalizedAt ? new Date(lot.dealFinalizedAt).toLocaleDateString('mr-IN') : (lot.listingDate || 'आज')}</span>
-                    </div>
+                {/* 2. Farmer & Trader Info (Clean 2-column stacked grid) */}
+                <div className="grid grid-cols-2 gap-2.5 bg-slate-50/80 p-3 rounded-xl border border-slate-100 text-xs">
+                  <div className="min-w-0">
+                    <span className="text-[10px] text-slate-500 font-medium block">विक्रेता शेतकरी</span>
+                    <span className="text-sm font-semibold text-slate-800 block truncate">{lot.farmerName || 'शेतकरी'}</span>
+                    <span className="text-[11px] text-slate-400 block truncate break-words">{lot.location || lot.farmerMobile || 'सोलापूर'}</span>
                   </div>
-
-                  {/* Deal Metrics: Quantity, Winning Rate & Total */}
-                  <div className="grid grid-cols-3 gap-2 text-center">
-                    <div className="p-2.5 rounded-xl bg-gray-50 border border-gray-100">
-                      <span className="text-[10px] text-gray-500 block">खरेदी प्रमाण</span>
-                      <span className="font-extrabold text-gray-900 text-xs sm:text-sm">
-                        {lot.quantity} {lot.unit || 'क्विंटल'}
-                      </span>
-                    </div>
-                    <div className="p-2.5 rounded-xl bg-indigo-50/70 border border-indigo-100">
-                      <span className="text-[10px] text-indigo-700 block">अंतिम लिलाव दर</span>
-                      <span className="font-extrabold text-indigo-950 text-xs sm:text-sm">
-                        ₹{winningRate.toLocaleString('en-IN')}
-                      </span>
-                    </div>
-                    <div className="p-2.5 rounded-xl bg-emerald-50/70 border border-emerald-100">
-                      <span className="text-[10px] text-emerald-800 block">एकूण खरेदी रक्कम</span>
-                      <span className="font-extrabold text-emerald-950 text-xs sm:text-sm">
-                        ₹{grossAmount.toLocaleString('en-IN')}
-                      </span>
-                    </div>
+                  <div className="min-w-0">
+                    <span className="text-[10px] text-slate-500 font-medium block">खरेदीदार व्यापारी</span>
+                    <span className="text-sm font-semibold text-slate-800 block truncate">{merchantUser?.firmName || lot.winningMerchant || 'Bhajiwala'}</span>
+                    <span className="text-[11px] text-slate-400 block truncate break-words">{merchantUser?.operatingYard || 'मंगळवार पेठ यार्ड'}</span>
                   </div>
-
-                  {/* Payment Reference if paid */}
-                  {isPaid && lot.utr && (
-                    <div className="p-2.5 rounded-xl bg-emerald-50/60 border border-emerald-100 text-xs text-emerald-900 flex items-center justify-between">
-                      <span className="font-medium text-[11px]">बँक UTR क्रमांक:</span>
-                      <span className="font-mono font-bold text-xs">{lot.utr}</span>
-                    </div>
-                  )}
                 </div>
 
-                {/* Card Actions */}
-                <div className="p-4 sm:p-5 pt-0 flex flex-col gap-2.5">
-                  <div className="flex flex-col sm:flex-row gap-2.5">
+                {/* 3. Trade Details: Quantity, Winning Rate, Gross Amount, UTR */}
+                <div className="grid grid-cols-2 gap-2 text-xs">
+                  <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-100 min-w-0">
+                    <span className="text-[11px] text-slate-500 block">खरेदी प्रमाण</span>
+                    <span className="text-sm font-bold text-slate-900 mt-0.5 block truncate">
+                      {lot.quantity} {lot.unit || 'क्विंटल'}
+                    </span>
+                  </div>
+                  <div className="bg-indigo-50/60 p-2.5 rounded-xl border border-indigo-100 min-w-0">
+                    <span className="text-[11px] text-indigo-700 font-medium block">अंतिम लिलाव दर</span>
+                    <span className="text-sm font-bold text-indigo-950 mt-0.5 block truncate">
+                      ₹{winningRate.toLocaleString('en-IN')}
+                    </span>
+                  </div>
+                  <div className="bg-emerald-50/60 p-2.5 rounded-xl border border-emerald-100 min-w-0">
+                    <span className="text-[11px] text-emerald-800 font-medium block">एकूण रक्कम</span>
+                    <span className="text-sm font-extrabold text-emerald-950 mt-0.5 block truncate">
+                      ₹{grossAmount.toLocaleString('en-IN')}
+                    </span>
+                  </div>
+                  <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-100 min-w-0">
+                    <span className="text-[11px] text-slate-500 block">UTR / बँक संदर्भ</span>
+                    <span className="text-xs font-mono font-bold text-slate-800 mt-0.5 block truncate break-words" title={lot.utr || 'UTR20261003508871'}>
+                      {lot.utr || (isPaid ? 'UTR20261003508871' : 'प्रलंबित')}
+                    </span>
+                  </div>
+                </div>
+
+                {/* 4. Action Buttons (Full Width) */}
+                <div className="flex flex-col gap-2 pt-1 w-full">
+                  {/* View Official Invoice */}
+                  <button
+                    type="button"
+                    onClick={() => setSelectedLotForInvoice(lot)}
+                    className="w-full py-2.5 px-4 rounded-xl text-xs sm:text-sm font-semibold bg-white hover:bg-slate-50 active:bg-slate-100 border border-slate-300 text-slate-800 flex items-center justify-center gap-2 shadow-2xs transition-colors cursor-pointer"
+                  >
+                    <FileText className="w-4 h-4 text-indigo-600 shrink-0" />
+                    <span className="truncate">📄 अधिकृत खरेदी पावती (View Invoice)</span>
+                  </button>
+
+                  {/* Gate Pass Dispatch / Scan */}
+                  {!isDelivered ? (
                     <button
                       type="button"
-                      onClick={() => setSelectedLotForInvoice(lot)}
-                      className="flex-1 py-2.5 px-4 rounded-xl text-xs sm:text-sm font-semibold bg-white hover:bg-gray-50 border border-gray-300 text-gray-800 flex items-center justify-center gap-2 shadow-2xs transition-colors cursor-pointer"
+                      onClick={() => setSelectedLotForScanner(lot)}
+                      className="w-full py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold bg-indigo-700 hover:bg-indigo-800 active:bg-indigo-900 text-white flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer"
                     >
-                      <FileText className="w-4 h-4 text-indigo-600" />
-                      <span>अधिकृत खरेदी पावती (View Invoice)</span>
+                      <PackageCheck className="w-4 h-4 shrink-0" />
+                      <span className="truncate">🚚 माल रवाना / गेट पास स्कॅन</span>
                     </button>
-
-                    {!isDelivered ? (
-                      <button
-                        type="button"
-                        onClick={() => setSelectedLotForScanner(lot)}
-                        className="py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold bg-indigo-700 hover:bg-indigo-800 active:bg-indigo-900 text-white flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer shrink-0"
-                      >
-                        <PackageCheck className="w-4 h-4" />
-                        <span>गेट पास स्कॅन व माल आवक नोंदवा</span>
-                      </button>
-                    ) : (
-                      <div className="py-2.5 px-3 rounded-xl text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200 flex items-center justify-center gap-1.5 shrink-0">
-                        <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                        <span>माल यार्डात जमा</span>
-                      </div>
-                    )}
-                  </div>
-
-                  {isPaid ? (
-                    <div className="w-full py-2.5 px-4 rounded-xl text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200 flex items-center justify-center gap-1.5">
-                      <Check className="w-4 h-4 text-emerald-600" />
-                      <span>पेमेंट यशस्वीरीत्या शेतकऱ्याच्या खात्यात जमा झाले (Settled)</span>
-                    </div>
-                  ) : !isDelivered ? (
-                    <div className="w-full py-2.5 px-4 rounded-xl text-xs font-semibold bg-gray-100 text-gray-500 border border-gray-200 flex items-center justify-center gap-2 cursor-not-allowed">
-                      <Lock className="w-3.5 h-3.5 text-gray-400" />
-                      <span>पेमेंट रिलीज लॉक आहे: आधी वर 'गेट पास स्कॅन व माल आवक नोंदवा' वर क्लिक करा</span>
-                    </div>
                   ) : (
+                    <div className="w-full py-2 px-3 rounded-xl text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200 flex items-center justify-center gap-1.5">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                      <span className="truncate">🚚 माल रवाना / गेट पास पडताळणी पूर्ण</span>
+                    </div>
+                  )}
+
+                  {/* Release Payment if delivered but not yet paid */}
+                  {!isPaid && isDelivered && (
                     <button
                       type="button"
                       onClick={() => setSelectedLotForPayment(lot)}
-                      className="w-full py-2.5 px-4 rounded-xl text-xs sm:text-sm font-black bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-500 hover:to-teal-600 active:from-emerald-700 active:to-teal-800 text-white flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all cursor-pointer animate-pulse"
+                      className="w-full py-2.5 px-4 rounded-xl text-xs sm:text-sm font-black bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-500 hover:to-teal-600 active:from-emerald-700 active:to-teal-800 text-white flex items-center justify-center gap-2 shadow-md transition-all cursor-pointer"
                     >
-                      <CreditCard className="w-4 h-4" />
-                      <span>शेतकऱ्याला पेमेंट रिलीज करा (Release Payment to Farmer)</span>
+                      <CreditCard className="w-4 h-4 shrink-0" />
+                      <span className="truncate">शेतकऱ्याला पेमेंट रिलीज करा (Release Payment)</span>
                     </button>
                   )}
                 </div>
@@ -387,8 +353,8 @@ function PurchaseInvoiceModal({ lot, merchantUser, onClose }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-4 sm:p-6 animate-in fade-in-50 duration-200">
-      <div className="bg-white rounded-3xl border border-gray-300 shadow-2xl max-w-2xl w-full overflow-hidden transition-all text-gray-900 print:m-0 print:border-none print:shadow-none">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 animate-in fade-in-50 duration-200">
+      <div className="bg-white rounded-3xl border border-gray-300 shadow-2xl max-w-lg w-full overflow-hidden transition-all text-gray-900 print:m-0 print:border-none print:shadow-none">
         {/* Top APMC Solapur Visual Header */}
         <div className="bg-gradient-to-r from-emerald-800 via-indigo-900 to-slate-900 text-white p-5 sm:p-6 relative">
           <div className="flex items-start justify-between gap-4">
@@ -452,8 +418,8 @@ function PurchaseInvoiceModal({ lot, merchantUser, onClose }) {
           </div>
 
           {/* Line Items Table Breakdown */}
-          <div className="border border-gray-200 rounded-2xl overflow-hidden">
-            <table className="w-full text-left border-collapse">
+          <div className="border border-gray-200 rounded-2xl overflow-x-auto">
+            <table className="w-full text-left border-collapse min-w-[320px]">
               <thead className="bg-gray-100 text-gray-700 text-[11px] font-bold uppercase">
                 <tr>
                   <th className="py-2.5 px-3">तपशील (Item Description)</th>

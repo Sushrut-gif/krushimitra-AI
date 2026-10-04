@@ -51,10 +51,10 @@ export default function MerchantDashboard() {
   return (
     <div className="min-h-screen bg-slate-150 sm:bg-slate-200 flex justify-center items-start selection:bg-indigo-100 font-sans">
       {/* INNER ADAPTIVE PHONE SHELL */}
-      <div className="w-full min-h-screen bg-slate-50 border-0 shadow-none pb-20 sm:max-w-md sm:my-6 sm:rounded-3xl sm:shadow-2xl sm:border sm:border-slate-300 sm:overflow-hidden relative flex flex-col">
+      <div className="w-full max-w-md mx-auto min-h-screen bg-slate-50 px-3 pb-24 sm:my-6 sm:rounded-3xl sm:shadow-2xl sm:border sm:border-slate-300 relative flex flex-col">
         
         {/* 1. TOP NATIVE HEADER */}
-        <header className="sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-slate-200 px-4 py-3 shadow-xs">
+        <header className="sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-slate-200 px-4 py-3 shadow-xs -mx-3 mb-2">
           <div className="flex items-center justify-between">
             {/* Left: Brand Badge + live green dot */}
             <div className="flex items-center gap-2">
@@ -110,7 +110,7 @@ export default function MerchantDashboard() {
 
           {/* TAB 2: MY BIDS / WON DEALS */}
           {activeTab === 'bids' && (
-            <div className="pt-2 px-1">
+            <div className="pt-1 w-full">
               <ErrorBoundary>
                 <MerchantWonDeals onSwitchToFeed={() => setActiveTab('yard')} />
               </ErrorBoundary>
@@ -119,7 +119,7 @@ export default function MerchantDashboard() {
 
           {/* TAB 3: HISHOB / SETTLEMENTS */}
           {activeTab === 'settlements' && (
-            <div className="pt-2 px-1">
+            <div className="pt-1 w-full">
               <ErrorBoundary>
                 <MerchantWonDeals onSwitchToFeed={() => setActiveTab('yard')} />
               </ErrorBoundary>
