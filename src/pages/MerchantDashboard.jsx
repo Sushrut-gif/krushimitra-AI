@@ -49,9 +49,9 @@ export default function MerchantDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-100 flex justify-center py-0 sm:py-4 selection:bg-indigo-100 font-sans">
-      {/* INNER PHONE SHELL */}
-      <div className="w-full max-w-md bg-slate-50 min-h-screen shadow-2xl relative pb-24 overflow-x-hidden border-x border-slate-200 flex flex-col">
+    <div className="min-h-screen bg-slate-150 sm:bg-slate-200 flex justify-center items-start selection:bg-indigo-100 font-sans">
+      {/* INNER ADAPTIVE PHONE SHELL */}
+      <div className="w-full min-h-screen bg-slate-50 border-0 shadow-none pb-20 sm:max-w-md sm:my-6 sm:rounded-3xl sm:shadow-2xl sm:border sm:border-slate-300 sm:overflow-hidden relative flex flex-col">
         
         {/* 1. TOP NATIVE HEADER */}
         <header className="sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-slate-200 px-4 py-3 shadow-xs">
@@ -127,8 +127,8 @@ export default function MerchantDashboard() {
           )}
         </main>
 
-        {/* 3. PERSISTENT BOTTOM NAVIGATION BAR */}
-        <nav className="fixed bottom-0 max-w-md w-full bg-white border-t border-slate-200 py-2 px-3 flex justify-around items-center z-50 shadow-lg">
+        {/* 3. PERSISTENT BOTTOM NAVIGATION BAR (Adaptive edge-to-edge on mobile, centered within sm shell on desktop) */}
+        <nav className="fixed bottom-0 left-0 right-0 sm:left-auto sm:right-auto sm:max-w-md w-full bg-white border-t border-slate-200 py-2 px-3 pb-safe sm:pb-2 flex justify-around items-center z-50 shadow-lg">
           {/* Item 1: Live Yard */}
           <button
             onClick={() => setActiveTab('yard')}
