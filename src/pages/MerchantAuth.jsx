@@ -128,7 +128,8 @@ export default function MerchantAuth({ initialMode = 'login' }) {
       return;
     }
 
-    if (!gstPan.trim()) {
+    const trimmedGstin = gstPan.trim().toUpperCase();
+    if (!trimmedGstin) {
       setError('कृपया GSTIN किंवा PAN क्रमांक टाका.');
       return;
     }
@@ -145,10 +146,13 @@ export default function MerchantAuth({ initialMode = 'login' }) {
 
     setLoading(true);
     const result = await registerMerchant({
-      firmName,
+      firmName: firmName.trim(),
+      traderName: firmName.trim(),
       licenseNo: trimmedLicense,
       mobile: trimmedMobile,
-      gstPan,
+      gstin: trimmedGstin,
+      gstPan: trimmedGstin,
+      yard: operatingYard,
       operatingYard,
       merchantType,
       password: regPassword,

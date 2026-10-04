@@ -16,6 +16,8 @@ function rowToMerchant(m) {
     firmName:      m.firm_name  || m.full_name || '',
     licenseNo:     m.license_no || '',
     mobile:        m.mobile || '',
+    gstin:         m.gstin || '',
+    gstPan:        m.gstin || '',
     operatingYard: m.yard   || 'मंगळवार पेठ (मुख्य मार्केट)',
     merchantType:  m.merchant_type || 'अडत व्यापारी (Commission Agent)',
     status:        m.status  || 'APPROVED',
@@ -57,6 +59,8 @@ function rowToMerchantSession(r) {
     firmName:      r.firm_name  || r.full_name || '',
     licenseNo:     r.license_no || '',
     mobile:        r.mobile || '',
+    gstin:         r.gstin || '',
+    gstPan:        r.gstin || '',
     operatingYard: r.yard   || 'मंगळवार पेठ (मुख्य मार्केट)',
     merchantType:  r.merchant_type || 'अडत व्यापारी (Commission Agent)',
     status:        r.status  || 'APPROVED',
@@ -242,32 +246,45 @@ export function AuthProvider({ children }) {
   // MERCHANT REGISTRATION  →  Supabase profiles (role='merchant', status='PENDING')
   // ═══════════════════════════════════════════════════════════════════════════
   const registerMerchant = async ({
-    firmName, licenseNo, mobile, gstPan, operatingYard, merchantType, password,
+    firmName, traderName, licenseNo, mobile, gstin, gstPan, yard, operatingYard, merchantType, password,
   }) => {
-    const cleanMobile  = mobile.trim();
-    const cleanLicense = licenseNo.trim().toUpperCase();
+    const cleanMobile  = (mobile || '').trim();
+    const cleanLicense = (licenseNo || '').trim().toUpperCase();
+    const cleanFirm    = (traderName || firmName || '').trim();
+    const cleanGstin   = (gstin || gstPan || '').trim().toUpperCase();
+    const cleanYard    = (yard || operatingYard || 'मंगळवार पेठ (मुख्य मार्केट यार्ड, सोलापूर)').trim();
+    const cleanType    = (merchantType || 'अडत व्यापारी (Commission Agent)').trim();
+
     setLoading(true);
     try {
       // 1. Check duplicate mobile
-      const { data: existMobile } = await supabase
+      const { data: existMobile, error: mobileErr } = await supabase
         .from('profiles')
         .select('id')
         .eq('mobile', cleanMobile)
         .eq('role', 'merchant')
         .maybeSingle();
 
+      if (mobileErr) {
+        console.error('Registration Supabase Error:', mobileErr);
+      }
+
       if (existMobile) {
         setLoading(false);
-        return { success: false, error: 'हा मोबाईल नंबर आधीच एका व्यापाऱ्यासाठी नोंदणीकृत आहे. कृपया लॉगिन करा.' };
+        return { success: false, error: 'हा मोबाईल नंबर आधीच नोंदणीकृत आहे.' };
       }
 
       // 2. Check duplicate license
-      const { data: existLic } = await supabase
+      const { data: existLic, error: licErr } = await supabase
         .from('profiles')
         .select('id')
         .eq('license_no', cleanLicense)
         .eq('role', 'merchant')
         .maybeSingle();
+
+      if (licErr) {
+        console.error('Registration Supabase Error:', licErr);
+      }
 
       if (existLic) {
         setLoading(false);
@@ -275,26 +292,35 @@ export function AuthProvider({ children }) {
       }
 
       // 3. Insert new merchant (status: PENDING — Admin must approve)
+      // Strictly matching Supabase columns:
+      // role, full_name, firm_name, license_no, mobile, gstin, merchant_type, yard, password, status
       const { data, error } = await supabase
         .from('profiles')
         .insert([{
-          role:         'merchant',
-          full_name:    firmName.trim(),
-          firm_name:    firmName.trim(),
-          license_no:   cleanLicense,
-          mobile:       cleanMobile,
-          yard:         operatingYard || 'मंगळवार पेठ (मुख्य मार्केट यार्ड, सोलापूर)',
-          merchant_type: merchantType || 'अडत व्यापारी (Commission Agent)',
-          password:     password,
-          status:       'PENDING',
+          role:          'merchant',
+          full_name:     cleanFirm,
+          firm_name:     cleanFirm,
+          license_no:    cleanLicense,
+          mobile:        cleanMobile,
+          gstin:         cleanGstin,
+          merchant_type: cleanType,
+          yard:          cleanYard,
+          password:      password,
+          status:        'PENDING',
         }])
         .select()
         .single();
 
       if (error) {
-        console.error('[Auth] registerMerchant Supabase error:', error);
+        console.error('Registration Supabase Error:', error);
         setLoading(false);
-        return { success: false, error: 'नोंदणी अयशस्वी झाली. कृपया पुन्हा प्रयत्न करा.' };
+        if (error.code === '23505') {
+          return { success: false, error: 'हा मोबाईल नंबर आधीच नोंदणीकृत आहे.' };
+        }
+        return {
+          success: false,
+          error: error.message || error.details || 'नोंदणी अयशस्वी झाली. कृपया पुन्हा प्रयत्न करा.',
+        };
       }
 
       // 4. Store session (status PENDING — user sees pending message)
@@ -309,9 +335,15 @@ export function AuthProvider({ children }) {
       return { success: true, user: session };
 
     } catch (err) {
-      console.error('[Auth] registerMerchant error:', err);
+      console.error('Registration Supabase Error:', err);
       setLoading(false);
-      return { success: false, error: 'नेटवर्क किंवा सर्व्हर त्रुटी. कृपया पुन्हा प्रयत्न करा.' };
+      if (err?.code === '23505') {
+        return { success: false, error: 'हा मोबाईल नंबर आधीच नोंदणीकृत आहे.' };
+      }
+      return {
+        success: false,
+        error: err?.message || 'नेटवर्क किंवा सर्व्हर त्रुटी. कृपया पुन्हा प्रयत्न करा.',
+      };
     }
   };
 
