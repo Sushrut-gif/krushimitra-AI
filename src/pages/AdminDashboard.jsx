@@ -292,380 +292,269 @@ export default function AdminDashboard() {
   };
 
   return (
-    <DashboardLayout role="admin">
-      <div className="space-y-6">
-        {/* 1. ADMIN TOP-BAR / OFFICIAL APMC HEADER */}
-        <div className="bg-gradient-to-r from-slate-900 via-slate-950 to-slate-900 rounded-3xl p-5 sm:p-6 text-white border-2 border-slate-800 shadow-xl relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-80 h-80 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
-
-          <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-5">
-            <div className="space-y-2">
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-amber-400 text-slate-950 shadow-xs">
-                  <ShieldCheck className="w-3.5 h-3.5 text-slate-950" />
-                  सोलापूर APMC प्रशासकीय नियंत्रण कक्ष
-                </span>
-                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-slate-800 text-emerald-400 border border-slate-700">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                  थेट ऑडिट: सक्रिय (Live Watchdog)
-                </span>
-                <span className="text-xs text-slate-400 font-mono">
-                  सत्र वेळ: {formattedLoginTime}
+    <div className="min-h-screen bg-slate-150 sm:bg-slate-200 flex justify-center items-start selection:bg-amber-100 font-sans">
+      {/* INNER ADAPTIVE PHONE SHELL */}
+      <div className="w-full min-h-screen bg-slate-50 border-0 shadow-none pb-24 sm:max-w-md sm:my-6 sm:rounded-3xl sm:shadow-2xl sm:border sm:border-slate-300 sm:overflow-hidden relative flex flex-col">
+        
+        {/* 2. NATIVE TOP ADMIN BAR */}
+        <header className="sticky top-0 z-40 bg-slate-900 text-white px-4 py-3 flex items-center justify-between shadow-md">
+          {/* Left: Brand Badge + Live Indicator */}
+          <div className="flex items-center gap-2">
+            <span className="text-xl">🏛️</span>
+            <div>
+              <div className="flex items-center gap-1.5">
+                <h1 className="text-sm font-extrabold text-white tracking-tight leading-none">
+                  सोलापूर APMC प्रशासक
+                </h1>
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
                 </span>
               </div>
-
-              <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-                कृषी उत्पन्न बाजार समिती सोलापूर - प्रशासकीय डॅशबोर्ड
-              </h1>
-              <p className="text-xs sm:text-sm text-slate-300 max-w-2xl leading-relaxed">
-                अधिकृत नियमन: परवानाधारक अडत व्यापारी मान्यता, थेट ई-लिलाव संनियंत्रण, आवक गेट पास पडताळणी आणि १.०५% बाजार सेस महसूल संकलन.
+              <p className="text-[10px] text-amber-400 font-medium tracking-tight mt-0.5">
+                मुख्य नियंत्रण कक्ष • Live Watchdog
               </p>
             </div>
-
-            {/* Officer Profile Badge & Prominent Logout */}
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 shrink-0">
-              <div className="bg-slate-800/90 border border-slate-700 p-2.5 px-3.5 rounded-2xl space-y-0.5">
-                <div className="text-[10px] text-amber-400 font-bold uppercase tracking-wider flex items-center gap-1">
-                  <UserCheck className="w-3 h-3 text-amber-400" />
-                  <span>अधिकृत प्रशासक</span>
-                </div>
-                <div className="text-xs font-black text-white font-mono">
-                  {adminUser?.id || 'APMC-SLP-ADMIN'}
-                </div>
-                <div className="text-[11px] text-slate-300">
-                  {adminUser?.officerTitle || 'मुख्य बाजार निरीक्षक (Chief Market Inspector)'}
-                </div>
-              </div>
-
-              <button
-                type="button"
-                onClick={handleLogout}
-                className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl bg-rose-600 hover:bg-rose-700 active:bg-rose-800 text-white font-black text-xs sm:text-sm shadow-md transition-all cursor-pointer"
-                title="प्रशासक सत्र समाप्त करा"
-              >
-                <LogOut className="w-4 h-4" />
-                <span>बाहेर पडा (Logout)</span>
-              </button>
-            </div>
           </div>
-        </div>
 
-        {/* 2. REAL-TIME STATS ROW (100% PURE REAL-DATA COMPUTED) */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          {/* Card 1: Registered Merchants */}
-          <div className="bg-white rounded-2xl p-4 border border-gray-200 shadow-xs flex flex-col justify-between">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-gray-500">नोंदणीकृत व्यापारी</span>
-              <div className="p-2 rounded-xl bg-blue-50 text-blue-700">
-                <Users className="w-4 h-4" />
+          {/* Right: Chief Inspector role badge + compact logout button */}
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] font-bold bg-slate-800 text-slate-300 border border-slate-700 px-2 py-0.5 rounded-full">
+              मुख्य निरीक्षक
+            </span>
+            <button
+              onClick={handleLogout}
+              title="बाहेर पडा (Logout)"
+              className="p-1.5 text-slate-400 hover:text-rose-400 hover:bg-slate-800 rounded-lg transition-colors cursor-pointer"
+            >
+              <LogOut className="w-4 h-4" />
+            </button>
+          </div>
+        </header>
+
+        {/* MAIN SCROLLABLE CONTENT */}
+        <main className="flex-1 flex flex-col space-y-2 pb-4">
+          {/* 3. 2x2 KPI STATS GRID */}
+          <div className="grid grid-cols-2 gap-2.5 p-4">
+            {/* Card 1: 👥 व्यापारी */}
+            <div
+              onClick={() => setActiveTab('merchants')}
+              className="bg-white rounded-2xl p-3 border border-slate-200/90 shadow-2xs hover:border-slate-300 transition-colors cursor-pointer"
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-bold text-slate-500">👥 व्यापारी</span>
+                <span className="text-[10px] font-semibold text-indigo-700 bg-indigo-50 px-1.5 py-0.2 rounded">
+                  नोंदणी
+                </span>
               </div>
-            </div>
-            <div className="mt-3">
-              <div className="text-2xl font-black text-gray-900 font-mono">
+              <div className="text-xl font-black text-slate-900 font-mono mt-1">
                 {merchants.length}
               </div>
-              <div className="text-[11px] text-gray-500 mt-0.5">
-                अधिकृत: {merchants.filter((m) => (m.status || 'APPROVED') === 'APPROVED').length} | निलंबित: {merchants.filter((m) => m.status === 'SUSPENDED').length}
+              <div className="text-[10px] text-amber-600 font-medium mt-0.5">
+                {merchants.filter((m) => m.status === 'PENDING').length} प्रलंबित मंजुरी
               </div>
             </div>
-          </div>
 
-          {/* Card 2: Active Live Lots */}
-          <div className="bg-white rounded-2xl p-4 border border-gray-200 shadow-xs flex flex-col justify-between">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-gray-500">सक्रिय ई-लिलाव लॉट्स</span>
-              <div className="p-2 rounded-xl bg-amber-50 text-amber-700">
-                <Gavel className="w-4 h-4" />
+            {/* Card 2: 🌾 सक्रिय लॉट्स */}
+            <div
+              onClick={() => setActiveTab('auctions')}
+              className="bg-white rounded-2xl p-3 border border-slate-200/90 shadow-2xs hover:border-slate-300 transition-colors cursor-pointer"
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-bold text-slate-500">🌾 सक्रिय लॉट्स</span>
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
               </div>
-            </div>
-            <div className="mt-3">
-              <div className="text-2xl font-black text-amber-700 font-mono">
+              <div className="text-xl font-black text-slate-900 font-mono mt-1">
                 {activeAuctions.length}
               </div>
-              <div className="text-[11px] text-gray-500 mt-0.5">
-                हस्तक्षेप/फ्लॅग केलेले: {activeAuctions.filter((a) => a.adminFlagged).length}
+              <div className="text-[10px] text-slate-400 mt-0.5">
+                {activeAuctions.filter((a) => a.adminFlagged).length} फ्लॅग केलेले
               </div>
             </div>
-          </div>
 
-          {/* Card 3: Gate Inward Passes */}
-          <div className="bg-white rounded-2xl p-4 border border-gray-200 shadow-xs flex flex-col justify-between">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-gray-500">यार्डात आवक नोंद (Inward)</span>
-              <div className="p-2 rounded-xl bg-emerald-50 text-emerald-700">
-                <Truck className="w-4 h-4" />
+            {/* Card 3: 🚛 यार्ड आवक */}
+            <div
+              onClick={() => setActiveTab('gate_passes')}
+              className="bg-white rounded-2xl p-3 border border-slate-200/90 shadow-2xs hover:border-slate-300 transition-colors cursor-pointer"
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-bold text-slate-500">🚛 यार्ड आवक</span>
+                <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-1.5 py-0.2 rounded">
+                  गेट पास
+                </span>
               </div>
-            </div>
-            <div className="mt-3">
-              <div className="text-2xl font-black text-emerald-700 font-mono">
+              <div className="text-xl font-black text-emerald-700 font-mono mt-1">
                 {verifiedGatePasses.length}
               </div>
-              <div className="text-[11px] text-gray-500 mt-0.5">
-                QR स्कॅन द्वारे गेटवर पडताळणी पूर्ण
+              <div className="text-[10px] text-slate-400 mt-0.5">
+                QR स्कॅनद्वारे तपासणी
               </div>
             </div>
-          </div>
 
-          {/* Card 4: APMC 1.05% Cess Revenue */}
-          <div className="bg-white rounded-2xl p-4 border border-gray-200 shadow-xs flex flex-col justify-between bg-gradient-to-br from-amber-50/50 to-white">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-slate-700">१.०५% सेस महसूल संकलन</span>
-              <div className="p-2 rounded-xl bg-amber-100 text-amber-800">
-                <Coins className="w-4 h-4" />
+            {/* Card 4: 💰 सेस महसूल */}
+            <div
+              onClick={() => setActiveTab('cess')}
+              className="bg-white rounded-2xl p-3 border border-slate-200/90 shadow-2xs hover:border-slate-300 transition-colors cursor-pointer bg-gradient-to-br from-amber-50/40 to-white"
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-bold text-slate-700">💰 सेस महसूल</span>
+                <span className="text-[9px] font-bold text-amber-800 bg-amber-100 px-1 py-0.2 rounded">
+                  १.०५%
+                </span>
               </div>
-            </div>
-            <div className="mt-3">
-              <div className="text-2xl font-black text-slate-900 font-mono">
+              <div className="text-xl font-black text-slate-900 font-mono mt-1 truncate">
                 ₹{totalCess.toLocaleString('en-IN')}
               </div>
-              <div className="text-[11px] text-slate-600 mt-0.5">
-                उलाढाल: ₹{grossTurnover.toLocaleString('en-IN')} ({settledDeals.length} सौदे)
+              <div className="text-[10px] text-slate-500 mt-0.5 truncate">
+                {settledDeals.length} सौदे पूर्ण
               </div>
             </div>
           </div>
-        </div>
 
-        {/* 3. REAL-TIME NAVIGATION TABS */}
-        <div className="bg-white rounded-3xl border border-gray-200 shadow-xs overflow-hidden">
-          {/* Navigation Bar */}
-          <div className="flex border-b border-gray-200 overflow-x-auto scrollbar-none bg-slate-50/80 p-2 gap-2">
-            <button
-              type="button"
-              onClick={() => setActiveTab('merchants')}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-black transition-all cursor-pointer whitespace-nowrap ${
-                activeTab === 'merchants'
-                  ? 'bg-slate-900 text-white shadow-md'
-                  : 'text-gray-600 hover:text-gray-900 hover:bg-white'
-              }`}
-            >
-              <Building2 className="w-4 h-4" />
-              <span>व्यापारी मान्यता (Merchants Ledger)</span>
-              <span
-                className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                  activeTab === 'merchants'
-                    ? 'bg-amber-400 text-slate-950'
-                    : 'bg-gray-200 text-gray-700'
-                }`}
-              >
-                {merchants.length}
-              </span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setActiveTab('auctions')}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-black transition-all cursor-pointer whitespace-nowrap ${
-                activeTab === 'auctions'
-                  ? 'bg-slate-900 text-white shadow-md'
-                  : 'text-gray-600 hover:text-gray-900 hover:bg-white'
-              }`}
-            >
-              <Gavel className="w-4 h-4" />
-              <span>थेट लिलाव वॉचडॉग (Live Auctions)</span>
-              <span
-                className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                  activeTab === 'auctions'
-                    ? 'bg-amber-400 text-slate-950'
-                    : 'bg-gray-200 text-gray-700'
-                }`}
-              >
-                {activeAuctions.length}
-              </span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setActiveTab('gate_passes')}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-black transition-all cursor-pointer whitespace-nowrap ${
-                activeTab === 'gate_passes'
-                  ? 'bg-slate-900 text-white shadow-md'
-                  : 'text-gray-600 hover:text-gray-900 hover:bg-white'
-              }`}
-            >
-              <Truck className="w-4 h-4" />
-              <span>यार्ड आवक नोंद (Gate Passes)</span>
-              <span
-                className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                  activeTab === 'gate_passes'
-                    ? 'bg-amber-400 text-slate-950'
-                    : 'bg-gray-200 text-gray-700'
-                }`}
-              >
-                {verifiedGatePasses.length}
-              </span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setActiveTab('cess')}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-black transition-all cursor-pointer whitespace-nowrap ${
-                activeTab === 'cess'
-                  ? 'bg-slate-900 text-white shadow-md'
-                  : 'text-gray-600 hover:text-gray-900 hover:bg-white'
-              }`}
-            >
-              <Coins className="w-4 h-4" />
-              <span>सेस महसूल लेजर (१.०५% Mandi Cess)</span>
-              <span
-                className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                  activeTab === 'cess'
-                    ? 'bg-amber-400 text-slate-950'
-                    : 'bg-gray-200 text-gray-700'
-                }`}
-              >
-                {settledDeals.length}
-              </span>
-            </button>
-          </div>
-
-          <div className="p-5 sm:p-7">
+          <div className="flex-1">
             <ErrorBoundary>
             {/* ========================================================================= */}
             {/* TAB 1: MERCHANT VERIFICATION LEDGER */}
             {/* ========================================================================= */}
             {activeTab === 'merchants' && (
-              <div className="space-y-6">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                  <div>
-                    <h2 className="text-lg font-black text-gray-900 flex items-center gap-2">
-                      <Building2 className="w-5 h-5 text-slate-700" />
-                      <span>व्यापारी परवाना पडताळणी व मान्यता नोंदवही</span>
-                    </h2>
-                    <p className="text-xs text-gray-500">
-                      सोलापूर APMC अंतर्गत परवानाधारक अडतदार आणि थेट खरेदीदारांचे अधिकृत लेजर
-                    </p>
+              <div className="space-y-4">
+                <div className="px-4">
+                  <h2 className="text-sm font-black text-slate-900 flex items-center gap-1.5">
+                    <Building2 className="w-4 h-4 text-slate-700" />
+                    <span>व्यापारी परवाना पडताळणी</span>
+                  </h2>
+                  <p className="text-[11px] text-slate-500">
+                    सोलापूर APMC अधिकृत अडत व खरेदीदार पडताळणी
+                  </p>
+                </div>
+
+                {/* Search and Status Filters */}
+                <div className="px-4 space-y-2">
+                  <div className="relative">
+                    <Search className="w-3.5 h-3.5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                    <input
+                      type="text"
+                      value={merchantSearch}
+                      onChange={(e) => setMerchantSearch(e.target.value)}
+                      placeholder="पेढीचे नाव, परवाना क्र., फोन..."
+                      className="w-full pl-8 pr-3 py-2 text-xs rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-slate-800 shadow-2xs placeholder:text-slate-400"
+                    />
                   </div>
 
-                  {/* Search and Status Filters */}
-                  <div className="flex flex-wrap items-center gap-2">
-                    <div className="relative">
-                      <Search className="w-3.5 h-3.5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                      <input
-                        type="text"
-                        value={merchantSearch}
-                        onChange={(e) => setMerchantSearch(e.target.value)}
-                        placeholder="पेढीचे नाव, परवाना क्र., फोन..."
-                        className="pl-8 pr-3 py-1.5 text-xs rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-slate-800 w-48 sm:w-60"
-                      />
-                    </div>
-
-                    <select
-                      value={merchantFilter}
-                      onChange={(e) => setMerchantFilter(e.target.value)}
-                      className="px-3 py-1.5 text-xs rounded-xl border border-gray-200 bg-white font-bold text-gray-700 focus:outline-none focus:ring-2 focus:ring-slate-800"
-                    >
-                      <option value="ALL">सर्व स्थिती ({merchants.length})</option>
-                      <option value="APPROVED">परवाना अधिकृत</option>
-                      <option value="PENDING">मंजुरी प्रलंबित</option>
-                      <option value="SUSPENDED">निलंबित</option>
-                    </select>
+                  <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+                    {[
+                      { id: 'ALL', label: `सर्व (${merchants.length})` },
+                      { id: 'APPROVED', label: 'अधिकृत' },
+                      { id: 'PENDING', label: 'प्रलंबित' },
+                      { id: 'SUSPENDED', label: 'निलंबित' },
+                    ].map((tab) => (
+                      <button
+                        key={tab.id}
+                        type="button"
+                        onClick={() => setMerchantFilter(tab.id)}
+                        className={`py-1 px-3 rounded-full text-[11px] font-bold transition-all shrink-0 border ${
+                          merchantFilter === tab.id
+                            ? 'bg-slate-900 text-white border-slate-900 shadow-2xs'
+                            : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
+                        }`}
+                      >
+                        {tab.label}
+                      </button>
+                    ))}
                   </div>
                 </div>
 
                 {filteredMerchants.length === 0 ? (
-                  <div className="p-12 text-center border-2 border-dashed border-gray-200 rounded-3xl space-y-3">
-                    <div className="w-12 h-12 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center mx-auto">
-                      <Users className="w-6 h-6" />
+                  <div className="p-8 text-center bg-white border border-slate-200 rounded-2xl space-y-2">
+                    <div className="w-10 h-10 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center mx-auto">
+                      <Users className="w-5 h-5" />
                     </div>
-                    <h3 className="font-black text-gray-800 text-base">
+                    <h3 className="font-bold text-slate-800 text-sm">
                       कोणतीही प्रलंबित व्यापारी नोंदणी आढळली नाही
                     </h3>
-                    <p className="text-xs text-gray-500 max-w-md mx-auto">
-                      व्यापारी पोर्टलवरून नवीन परवाना नोंदणी झाल्यावर येथे आपोआप पडताळणीसाठी उपलब्ध होईल.
+                    <p className="text-xs text-slate-400">
+                      व्यापारी नोंदणी झाल्यावर येथे थेट दिसेल.
                     </p>
                   </div>
                 ) : (
-                  <div className="overflow-x-auto border border-gray-200 rounded-2xl">
-                    <table className="w-full text-left text-xs text-gray-600">
-                      <thead className="bg-slate-50 text-gray-700 font-black border-b border-gray-200 uppercase tracking-wider text-[11px]">
-                        <tr>
-                          <th className="py-3 px-4">व्यापारी / पेढीचे नाव</th>
-                          <th className="py-3 px-4">APMC परवाना क्र.</th>
-                          <th className="py-3 px-4">मोबाईल व कर ID</th>
-                          <th className="py-3 px-4">यार्ड व प्रकार</th>
-                          <th className="py-3 px-4">स्थिती (Status)</th>
-                          <th className="py-3 px-4 text-right">प्रशासकीय कारवाई</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-gray-100">
-                        {filteredMerchants.map((merchant) => {
-                          const status = merchant.status || 'APPROVED';
-                          return (
-                            <tr key={merchant.id || merchant.licenseNo} className="hover:bg-slate-50/60 transition-colors">
-                              <td className="py-3.5 px-4">
-                                <div className="font-black text-gray-900 text-sm">
-                                  {merchant.firmName}
-                                </div>
-                                <div className="text-[11px] text-gray-500 font-mono">
-                                  आयडी: {merchant.id}
-                                </div>
-                              </td>
-                              <td className="py-3.5 px-4 font-mono font-bold text-slate-900">
-                                {merchant.licenseNo}
-                              </td>
-                              <td className="py-3.5 px-4">
-                                <div className="font-bold text-gray-800 flex items-center gap-1">
-                                  <Phone className="w-3 h-3 text-gray-400" />
-                                  <span>{merchant.mobile}</span>
-                                </div>
-                                <div className="text-[10px] text-gray-500 font-mono">
-                                  GST/PAN: {merchant.gstPan || 'नोंदवलेले नाही'}
-                                </div>
-                              </td>
-                              <td className="py-3.5 px-4">
-                                <div className="font-medium text-gray-800">
-                                  {merchant.operatingYard}
-                                </div>
-                                <div className="text-[10px] text-gray-500">
-                                  {merchant.merchantType}
-                                </div>
-                              </td>
-                              <td className="py-3.5 px-4">
-                                {status === 'APPROVED' && (
-                                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                                    <CheckCircle2 className="w-3 h-3 text-emerald-600" />
-                                    परवाना अधिकृत
-                                  </span>
-                                )}
-                                {status === 'PENDING' && (
-                                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-50 text-amber-800 border border-amber-200">
-                                    <Clock className="w-3 h-3 text-amber-600" />
-                                    मंजुरी प्रलंबित
-                                  </span>
-                                )}
-                                {status === 'SUSPENDED' && (
-                                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-rose-50 text-rose-700 border border-rose-200">
-                                    <ShieldAlert className="w-3 h-3 text-rose-600" />
-                                    निलंबित (Suspended)
-                                  </span>
-                                )}
-                              </td>
-                              <td className="py-3.5 px-4 text-right">
-                                {status !== 'APPROVED' ? (
-                                  <button
-                                    type="button"
-                                    onClick={() => updateMerchantStatus(merchant.id, 'APPROVED')}
-                                    className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-xs transition-colors cursor-pointer inline-flex items-center gap-1"
-                                  >
-                                    <CheckCircle2 className="w-3 h-3" />
-                                    <span>मंजूर करा (Approve)</span>
-                                  </button>
-                                ) : (
-                                  <button
-                                    type="button"
-                                    onClick={() => updateMerchantStatus(merchant.id, 'SUSPENDED')}
-                                    className="px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-bold text-xs transition-colors cursor-pointer inline-flex items-center gap-1"
-                                  >
-                                    <ShieldAlert className="w-3 h-3" />
-                                    <span>निलंबित करा (Suspend)</span>
-                                  </button>
-                                )}
-                              </td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
+                  <div className="space-y-3">
+                    {filteredMerchants.map((merchant) => {
+                      const status = merchant.status || 'APPROVED';
+                      return (
+                        <div
+                          key={merchant.id || merchant.licenseNo}
+                          className="bg-white rounded-2xl p-3.5 shadow-sm border border-slate-200/90 space-y-2.5 transition-all"
+                        >
+                          {/* Card Header: Firm Name & Status Badge */}
+                          <div className="flex items-start justify-between gap-2">
+                            <div>
+                              <h3 className="font-black text-slate-900 text-sm">
+                                {merchant.firmName}
+                              </h3>
+                              <p className="text-[11px] text-slate-500 font-mono mt-0.5">
+                                परवाना: {merchant.licenseNo}
+                              </p>
+                            </div>
+
+                            {status === 'APPROVED' && (
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 shrink-0">
+                                <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                                अधिकृत
+                              </span>
+                            )}
+                            {status === 'PENDING' && (
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200 shrink-0 animate-pulse">
+                                <Clock className="w-3 h-3 text-amber-600" />
+                                प्रलंबित
+                              </span>
+                            )}
+                            {status === 'SUSPENDED' && (
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200 shrink-0">
+                                <ShieldAlert className="w-3 h-3 text-rose-600" />
+                                निलंबित
+                              </span>
+                            )}
+                          </div>
+
+                          {/* Card Body: Mobile, Yard & Tax ID */}
+                          <div className="grid grid-cols-2 gap-2 p-2 rounded-xl bg-slate-50 border border-slate-100 text-[11px]">
+                            <div>
+                              <span className="text-[9px] text-slate-400 block font-medium">मोबाईल</span>
+                              <span className="font-bold text-slate-800">{merchant.mobile}</span>
+                            </div>
+                            <div>
+                              <span className="text-[9px] text-slate-400 block font-medium">कार्यरत यार्ड</span>
+                              <span className="font-bold text-slate-800 truncate block">
+                                {merchant.operatingYard}
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* Card Actions: Full-width button row */}
+                          <div className="pt-1">
+                            {status !== 'APPROVED' ? (
+                              <button
+                                type="button"
+                                onClick={() => updateMerchantStatus(merchant.id, 'APPROVED')}
+                                className="w-full py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-98 text-white font-bold text-xs shadow-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                              >
+                                <CheckCircle2 className="w-3.5 h-3.5" />
+                                <span>मंजूर करा (Approve)</span>
+                              </button>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={() => updateMerchantStatus(merchant.id, 'SUSPENDED')}
+                                className="w-full py-2 px-3 rounded-xl bg-white hover:bg-rose-50 text-rose-700 border border-rose-300 font-bold text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                              >
+                                <ShieldAlert className="w-3.5 h-3.5 text-rose-600" />
+                                <span>निलंबित करा (Suspend)</span>
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 )}
               </div>
@@ -1200,59 +1089,121 @@ export default function AdminDashboard() {
             )}
             </ErrorBoundary>
           </div>
-        </div>
+        </main>
+
+        {/* 5. PERSISTENT BOTTOM NAVIGATION BAR */}
+        <nav className="fixed bottom-0 left-0 right-0 sm:left-auto sm:right-auto sm:max-w-md w-full bg-white border-t border-slate-200 py-2 px-3 pb-safe sm:pb-2 flex justify-around items-center z-50 shadow-lg">
+          {/* Item 1: Home */}
+          <button
+            onClick={() => setActiveTab('merchants')}
+            className={`flex flex-col items-center gap-0.5 cursor-pointer transition-colors ${
+              activeTab === 'merchants'
+                ? 'text-slate-900 font-extrabold'
+                : 'text-slate-400 hover:text-slate-600 font-medium'
+            }`}
+          >
+            <Building2 className="w-5 h-5" />
+            <span className="text-[10px]">व्यापारी</span>
+          </button>
+
+          {/* Item 2: Live Lots / Auctions */}
+          <button
+            onClick={() => setActiveTab('auctions')}
+            className={`flex flex-col items-center gap-0.5 cursor-pointer transition-colors relative ${
+              activeTab === 'auctions'
+                ? 'text-slate-900 font-extrabold'
+                : 'text-slate-400 hover:text-slate-600 font-medium'
+            }`}
+          >
+            <div className="relative">
+              <Gavel className="w-5 h-5" />
+              {activeAuctions.length > 0 && (
+                <span className="absolute -top-1 -right-2 bg-amber-500 text-slate-950 font-extrabold text-[9px] w-4 h-4 rounded-full flex items-center justify-center">
+                  {activeAuctions.length}
+                </span>
+              )}
+            </div>
+            <span className="text-[10px]">लिलाव</span>
+          </button>
+
+          {/* Item 3: Gate Inward Passes */}
+          <button
+            onClick={() => setActiveTab('gate_passes')}
+            className={`flex flex-col items-center gap-0.5 cursor-pointer transition-colors ${
+              activeTab === 'gate_passes'
+                ? 'text-slate-900 font-extrabold'
+                : 'text-slate-400 hover:text-slate-600 font-medium'
+            }`}
+          >
+            <Truck className="w-5 h-5" />
+            <span className="text-[10px]">आवक</span>
+          </button>
+
+          {/* Item 4: Cess Revenue & Ledger */}
+          <button
+            onClick={() => setActiveTab('cess')}
+            className={`flex flex-col items-center gap-0.5 cursor-pointer transition-colors ${
+              activeTab === 'cess'
+                ? 'text-slate-900 font-extrabold'
+                : 'text-slate-400 hover:text-slate-600 font-medium'
+            }`}
+          >
+            <Coins className="w-5 h-5" />
+            <span className="text-[10px]">सेस</span>
+          </button>
+        </nav>
 
         {/* 4. ADMIN FLAG / PAUSE MODAL */}
         {flagModalLot && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs">
-            <div className="bg-white rounded-3xl max-w-lg w-full p-6 space-y-5 border-2 border-slate-800 shadow-2xl animate-in fade-in zoom-in-95 duration-150">
+            <div className="bg-white rounded-3xl max-w-sm sm:max-w-md w-full p-5 space-y-4 border border-slate-300 shadow-2xl animate-in fade-in zoom-in-95 duration-150">
               <div className="flex items-center justify-between border-b border-gray-100 pb-3">
-                <div className="flex items-center gap-2 text-amber-700 font-black text-base">
-                  <AlertTriangle className="w-5 h-5 text-amber-600" />
+                <div className="flex items-center gap-2 text-amber-700 font-black text-sm">
+                  <AlertTriangle className="w-4 h-4 text-amber-600" />
                   <span>
                     {flagModalLot.adminFlagged
-                      ? 'लिलाव हस्तक्षेप रद्द करा (Unflag Lot)'
-                      : 'लिलाव हस्तक्षेप व हमीभाव फ्लॅग (Flag Lot)'}
+                      ? 'लिलाव हस्तक्षेप रद्द करा'
+                      : 'लिलाव तात्काळ फ्लॅग करा'}
                   </span>
                 </div>
                 <button
                   type="button"
                   onClick={() => setFlagModalLot(null)}
-                  className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-500 font-bold"
+                  className="w-7 h-7 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-500 font-bold text-xs"
                 >
                   ✕
                 </button>
               </div>
 
-              <div className="space-y-3">
-                <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200 text-xs space-y-1">
+              <div className="space-y-2.5">
+                <div className="p-2.5 bg-slate-50 rounded-xl border border-slate-200 text-xs space-y-0.5">
                   <div className="font-black text-slate-900">
-                    लॉट क्र.: {flagModalLot.id} - {flagModalLot.cropName} ({flagModalLot.quantity} {flagModalLot.unit || 'क्विंटल'})
+                    लॉट क्र.: {flagModalLot.id} - {flagModalLot.cropName}
                   </div>
-                  <div className="text-gray-500">
-                    शेतकरी: {flagModalLot.farmerName} | मूळ किंमत: ₹{flagModalLot.basePrice}
+                  <div className="text-[11px] text-gray-500">
+                    शेतकरी: {flagModalLot.farmerName} | मूळ दर: ₹{flagModalLot.basePrice}
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-black text-gray-700 mb-1.5">
-                    हस्तक्षेपाचे प्रशासकीय कारण (Reason / Administrative Note):
+                  <label className="block text-xs font-bold text-gray-700 mb-1">
+                    हस्तक्षेपाचे प्रशासकीय कारण:
                   </label>
                   <textarea
                     rows={3}
                     value={flagReasonInput}
                     onChange={(e) => setFlagReasonInput(e.target.value)}
-                    placeholder="उदा. हमीभावापेक्षा (MSP) अत्यंत कमी बोली, संशयास्पद आडत युती किंवा कागदपत्र अपूर्णता..."
-                    className="w-full p-3 text-xs rounded-xl border border-gray-300 focus:ring-2 focus:ring-slate-900 focus:outline-none"
+                    placeholder="उदा. हमीभावापेक्षा (MSP) अत्यंत कमी बोली किंवा कागदपत्र अपूर्णता..."
+                    className="w-full p-2.5 text-xs rounded-xl border border-gray-300 focus:ring-2 focus:ring-slate-900 focus:outline-none"
                   />
                 </div>
               </div>
 
-              <div className="flex items-center justify-end gap-3 pt-2">
+              <div className="flex items-center justify-end gap-2 pt-1">
                 <button
                   type="button"
                   onClick={() => setFlagModalLot(null)}
-                  className="px-4 py-2 rounded-xl text-xs font-bold text-gray-600 hover:bg-gray-100 cursor-pointer"
+                  className="px-3.5 py-2 rounded-xl text-xs font-bold text-gray-600 hover:bg-gray-100 cursor-pointer"
                 >
                   रद्द करा
                 </button>
@@ -1260,19 +1211,20 @@ export default function AdminDashboard() {
                 <button
                   type="button"
                   onClick={handleConfirmFlag}
-                  className={`px-5 py-2.5 rounded-xl text-xs font-black text-white shadow-md cursor-pointer transition-all ${
+                  className={`px-4 py-2 rounded-xl text-xs font-black text-white shadow-md cursor-pointer transition-all ${
                     flagModalLot.adminFlagged
                       ? 'bg-emerald-600 hover:bg-emerald-700'
                       : 'bg-amber-600 hover:bg-amber-700'
                   }`}
                 >
-                  {flagModalLot.adminFlagged ? 'हस्तक्षेप मागे घ्या व लिलाव सुरू ठेवा' : 'लिलाव तात्काळ फ्लॅग करा'}
+                  {flagModalLot.adminFlagged ? 'लिलाव सुरू ठेवा' : 'फ्लॅग करा'}
                 </button>
               </div>
             </div>
           </div>
         )}
       </div>
-    </DashboardLayout>
+    </div>
   );
 }
+
