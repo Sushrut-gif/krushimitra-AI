@@ -31,14 +31,14 @@ export default function APMCGatePassModal({ isOpen, onClose, lot }) {
   const gatePassId = `GP-SLP-${lot.id}`;
   const quantity = lot.quantity || 1;
   const unit = lot.unit || 'क्विंटल';
-  const cropName = lot.cropName || lot.crop || 'शेतमाल';
-  const qualityGrade = lot.qualityGrade || 'Grade A';
+  const cropName = lot.cropName || lot.crop_name || lot.crop || 'शेतमाल';
+  const qualityGrade = lot.qualityGrade || lot.grade || 'Grade A';
 
-  const farmerName = lot.farmerName || 'नोंदणीकृत शेतकरी';
-  const farmerMobile = lot.farmerMobile || '९८XXXXXX१२';
+  const farmerName = lot.farmerName || lot.farmer_name || 'नोंदणीकृत शेतकरी';
+  const farmerMobile = lot.farmerMobile || lot.farmer_mobile || '९८XXXXXX१२';
   const village = lot.location || 'सोलापूर दक्षिण';
 
-  const winningMerchant = lot.winningMerchant || lot.merchantName || 'सोलापूर ॲग्रो ट्रेडर्स';
+  const winningMerchant = lot.winningMerchant || lot.winning_merchant_id || lot.merchantName || 'सोलापूर ॲग्रो ट्रेडर्स';
   const merchantLicense = lot.merchantLicense || 'APMC/SLP/TRD-8841';
 
   // Determine actual Solapur yard based on crop
@@ -53,15 +53,23 @@ export default function APMCGatePassModal({ isOpen, onClose, lot }) {
     lot.status === 'यार्डात प्राप्त (Delivered at Yard)' ||
     lot.gatePassVerified;
 
-  const rawDate = lot.dealFinalizedAt || lot.listingDate || new Date().toISOString();
-  const formattedDateTime = new Date(rawDate).toLocaleString('mr-IN', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: true,
-  });
+  const rawDate = lot.dealFinalizedAt || lot.listingDate || lot.created_at || new Date().toISOString();
+  let formattedDateTime = 'आज';
+  try {
+    const d = new Date(rawDate);
+    if (!isNaN(d.getTime())) {
+      formattedDateTime = d.toLocaleString('mr-IN', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true,
+      });
+    }
+  } catch {
+    formattedDateTime = String(rawDate);
+  }
 
   // Strict high-contrast scannable QR code payload matching requirements:
   // Must contain { passId: lot.id, status: 'VERIFIED' }

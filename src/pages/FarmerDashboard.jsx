@@ -33,6 +33,9 @@ export default function FarmerDashboard() {
   const [isListingModalOpen, setIsListingModalOpen] = useState(false);
   const [listingInitialData, setListingInitialData] = useState({});
 
+  // Reset key to restore CropQualityAssessment upload card to initial state after listing
+  const [assessmentResetKey, setAssessmentResetKey] = useState(0);
+
   // Solapur APMC Mandi Rates Modal state
   const [isMandiRatesOpen, setIsMandiRatesOpen] = useState(false);
 
@@ -42,11 +45,20 @@ export default function FarmerDashboard() {
   };
 
   const handleListingSuccess = () => {
-    // Optionally scroll down to active listings
-    const element = document.getElementById('active-listings-section');
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
-    }
+    // 1. Reset analysis / upload state so upload card returns to initial state
+    setAssessmentResetKey((k) => k + 1);
+    setListingInitialData({});
+
+    // 2. Ensure view is on produce tab
+    setActiveDashboardTab('produce');
+
+    // 3. Smooth scroll down to active listings section so newly created lot is visible
+    setTimeout(() => {
+      const element = document.getElementById('active-listings-section');
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+      }
+    }, 150);
   };
 
   return (
@@ -183,7 +195,10 @@ export default function FarmerDashboard() {
             {/* PROMINENT AI CROP QUALITY ASSESSMENT SECTION */}
             <section aria-label="AI Crop Quality Assessment">
               <ErrorBoundary>
-                <CropQualityAssessment onListProduce={handleOpenListingModal} />
+                <CropQualityAssessment
+                  key={assessmentResetKey}
+                  onListProduce={handleOpenListingModal}
+                />
               </ErrorBoundary>
             </section>
 

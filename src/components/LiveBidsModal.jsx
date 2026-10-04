@@ -112,11 +112,11 @@ export default function LiveBidsModal({ isOpen, onClose, listing, onOpenReceipt 
           {/* Produce Summary Card */}
           <div className="p-4 sm:p-5 rounded-2xl bg-gray-50 border border-gray-200/90 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div className="flex items-center gap-3.5">
-              {listing.image ? (
+              {(listing.image || listing.image_url) ? (
                 <div className="w-16 h-16 rounded-xl overflow-hidden bg-white border border-gray-200 shrink-0">
                   <img
-                    src={listing.image}
-                    alt={listing.cropName}
+                    src={listing.image || listing.image_url}
+                    alt={listing.cropName || listing.crop_name || 'शेतमाल'}
                     className="w-full h-full object-cover"
                   />
                 </div>
@@ -129,20 +129,20 @@ export default function LiveBidsModal({ isOpen, onClose, listing, onOpenReceipt 
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
                   <h3 className="text-base sm:text-lg font-bold text-gray-950">
-                    {listing.cropName}
+                    {listing.cropName || listing.crop_name || 'शेतमाल'}
                   </h3>
                   <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300">
-                    {listing.qualityGrade}
+                    {listing.qualityGrade || listing.grade || 'मध्यम'}
                   </span>
                 </div>
                 <div className="flex items-center gap-3 text-xs text-gray-600 font-medium">
                   <span className="flex items-center gap-1">
                     <Scale className="w-3.5 h-3.5 text-emerald-600" />
-                    {listing.quantity} {listing.unit}
+                    {listing.quantity || 0} {listing.unit || 'क्विंटल'}
                   </span>
                   <span>•</span>
                   <span>
-                    मूळ किमान दर: <strong className="text-gray-900">₹{listing.basePrice.toLocaleString('en-IN')}</strong> / {listing.unit}
+                    मूळ किमान दर: <strong className="text-gray-900">₹{Number(listing.basePrice || listing.base_price || 0).toLocaleString('en-IN')}</strong> / {listing.unit || 'क्विंटल'}
                   </span>
                 </div>
               </div>

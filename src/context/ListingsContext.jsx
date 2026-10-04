@@ -615,7 +615,14 @@ export function ListingsProvider({ children }) {
    */
   const getFarmerListings = (farmerMobile) => {
     if (!farmerMobile) return listings;
-    return listings.filter((item) => item.farmerMobile === farmerMobile);
+    const cleanPhone = String(farmerMobile).trim().slice(-10);
+    return listings.filter((item) => {
+      const itemMobile = String(item?.farmerMobile || item?.farmer_mobile || '').trim();
+      return (
+        itemMobile === farmerMobile ||
+        (cleanPhone.length >= 10 && itemMobile.slice(-10) === cleanPhone)
+      );
+    });
   };
 
   /**

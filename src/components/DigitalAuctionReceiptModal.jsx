@@ -23,7 +23,7 @@ export default function DigitalAuctionReceiptModal({ isOpen, onClose, listing })
   // Extract / calculate pricing
   const quantity = Number(listing.quantity) || 1;
   const unit = listing.unit || 'क्विंटल';
-  const finalRate = Number(listing.winningPrice || listing.basePrice) || 0;
+  const finalRate = Number(listing.winningPrice || listing.winning_price || listing.basePrice || listing.base_price) || 0;
   const grossAmount = Math.round(quantity * finalRate);
 
   // Standard deductions: 1.0% APMC Cess + 0.5% Weighing/Handling
@@ -33,18 +33,26 @@ export default function DigitalAuctionReceiptModal({ isOpen, onClose, listing })
   const netPayable = grossAmount - totalDeductions;
 
   // Receipt ID and date
-  const receiptId = listing.receiptId || `APMC-SLP-2026-${listing.id.replace('KM-', '')}`;
+  const receiptId = listing.receiptId || `APMC-SLP-2026-${String(listing.id || '').replace('KM-', '')}`;
   const merchantLicense = listing.merchantLicense || 'APMC-SLP-TR-4182';
 
-  const rawDate = listing.dealFinalizedAt || listing.createdAt || new Date().toISOString();
-  const formattedDateTime = new Date(rawDate).toLocaleString('mr-IN', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: true,
-  });
+  const rawDate = listing.dealFinalizedAt || listing.createdAt || listing.created_at || new Date().toISOString();
+  let formattedDateTime = 'आज';
+  try {
+    const d = new Date(rawDate);
+    if (!isNaN(d.getTime())) {
+      formattedDateTime = d.toLocaleString('mr-IN', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true,
+      });
+    }
+  } catch {
+    formattedDateTime = String(rawDate);
+  }
 
   // QR Code payload (verifiable at gate pass entry)
   const qrPayload = JSON.stringify({
