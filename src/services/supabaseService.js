@@ -1,4 +1,5 @@
-import { supabase } from '../lib/supabaseClient';
+import { supabase } from '../lib/supabaseClient.js';
+import { compressImage, DEFAULT_PRODUCE_PLACEHOLDER } from '../utils/imageCompressor.js';
 
 /**
  * Service to manage Supabase data synchronization with fallback handling
@@ -51,30 +52,68 @@ export async function fetchSupabaseBids() {
  */
 export async function insertSupabaseListing(listing) {
   try {
+    // 1. Ensure image is compressed under 100KB-150KB or fallback to placeholder
+    let compressedImg = listing.image || listing.image_url || listing.imageUrl || null;
+    if (compressedImg && typeof compressedImg === 'string' && compressedImg.startsWith('data:image')) {
+      try {
+        compressedImg = await compressImage(compressedImg, 600, 0.6);
+      } catch (compErr) {
+        console.warn('[Supabase] Image downscale warning:', compErr);
+      }
+    }
+
     const payload = {
-      id: listing.id,
-      farmer_name: listing.farmerName || 'शेतकरी',
-      farmer_mobile: listing.farmerMobile || '',
-      crop_name: listing.cropName,
-      grade: listing.qualityGrade || 'मध्यम',
+      id: listing.id || `KM-${Date.now().toString().slice(-6)}`,
+      crop_name: listing.cropName || listing.crop_name || 'शेतमाल',
       quantity: Number(listing.quantity) || 1,
       unit: listing.unit || 'क्विंटल',
-      base_price: Number(listing.basePrice) || 0,
-      status: listing.status || 'बोली सुरू',
-      highest_bid: Number(listing.basePrice) || 0,
-      location: listing.location || '',
-      gate_pass_id: listing.gatePassId || `GP-SLP-${listing.id}`,
+      base_price: Number(listing.basePrice || listing.base_price) || 0,
+      grade: listing.qualityGrade || listing.grade || 'मध्यम',
+      image_url: compressedImg || DEFAULT_PRODUCE_PLACEHOLDER,
+      farmer_mobile: listing.farmerMobile || listing.farmer_mobile || '',
+      farmer_name: listing.farmerName || listing.farmer_name || 'शेतकरी',
+      status: 'ACTIVE',
+      location: (listing.location || 'सोलापूर APMC').trim(),
+      highest_bid: Number(listing.basePrice || listing.base_price) || 0,
+      gate_pass_id: listing.gatePassId || `GP-SLP-${listing.id || Date.now()}`,
     };
 
-    const { data, error } = await supabase.from('listings').insert(payload).select();
+    console.log('Inserting Listing Payload:', payload);
+
+    const { data, error } = await supabase.from('listings').insert([payload]).select();
+
     if (error) {
-      console.warn('[Supabase] Insert listing notice:', error.message);
+      console.error('Listings Insert Error:', error);
+
+      // If the image upload still encounters any payload limit or error,
+      // save the listing with a placeholder/compressed image rather than failing the whole transaction.
+      if (payload.image_url && payload.image_url !== DEFAULT_PRODUCE_PLACEHOLDER) {
+        console.warn('Retrying listing insert with lightweight placeholder image...');
+        const fallbackPayload = {
+          ...payload,
+          image_url: DEFAULT_PRODUCE_PLACEHOLDER,
+        };
+        console.log('Inserting Listing Payload:', fallbackPayload);
+
+        const { data: retryData, error: retryError } = await supabase
+          .from('listings')
+          .insert([fallbackPayload])
+          .select();
+
+        if (retryError) {
+          console.error('Listings Insert Error:', retryError);
+          return { success: false, error: retryError.message };
+        }
+        return { success: true, data: retryData?.[0] };
+      }
+
       return { success: false, error: error.message };
     }
+
     return { success: true, data: data?.[0] };
   } catch (err) {
-    console.error('[Supabase] Insert listing error:', err);
-    return { success: false, error: err.message };
+    console.error('Listings Insert Error:', err);
+    return { success: false, error: err?.message || 'अज्ञात त्रुटी' };
   }
 }
 

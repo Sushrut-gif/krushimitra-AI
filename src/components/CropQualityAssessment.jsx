@@ -21,6 +21,7 @@ import {
   assessCropQualityWithGemini,
   getFallbackCropAssessment,
 } from '../services/geminiService';
+import { compressImage } from '../utils/imageCompressor';
 
 export default function CropQualityAssessment({ onListProduce }) {
   // Image selection state
@@ -109,13 +110,20 @@ export default function CropQualityAssessment({ onListProduce }) {
     const video = videoRef.current;
     const canvas = canvasRef.current;
 
-    canvas.width = video.videoWidth || 640;
-    canvas.height = video.videoHeight || 480;
+    // Downscale via canvas (max width 600px, quality 0.6)
+    const originalWidth = video.videoWidth || 640;
+    const originalHeight = video.videoHeight || 480;
+    const maxWidth = 600;
+    const targetWidth = Math.min(originalWidth, maxWidth);
+    const targetHeight = Math.round((originalHeight * targetWidth) / originalWidth);
+
+    canvas.width = targetWidth;
+    canvas.height = targetHeight;
 
     const ctx = canvas.getContext('2d');
-    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    ctx.drawImage(video, 0, 0, targetWidth, targetHeight);
 
-    const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
+    const dataUrl = canvas.toDataURL('image/jpeg', 0.6);
     setSelectedImage(dataUrl);
 
     stopCameraStream();
@@ -124,7 +132,7 @@ export default function CropQualityAssessment({ onListProduce }) {
   };
 
   // Handle Photo selection from device gallery
-  const handleFileChange = (e) => {
+  const handleFileChange = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -133,14 +141,23 @@ export default function CropQualityAssessment({ onListProduce }) {
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      setSelectedImage(event.target.result);
+    try {
+      const compressed = await compressImage(file, 600, 0.6);
+      setSelectedImage(compressed);
       setAssessmentResult(null);
       setAssessmentError('');
       stopCameraStream();
-    };
-    reader.readAsDataURL(file);
+    } catch (err) {
+      console.warn('Assessment file compression fallback:', err);
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        setSelectedImage(event.target.result);
+        setAssessmentResult(null);
+        setAssessmentError('');
+        stopCameraStream();
+      };
+      reader.readAsDataURL(file);
+    }
 
     e.target.value = '';
   };

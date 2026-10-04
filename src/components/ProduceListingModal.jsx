@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useListings } from '../context/ListingsContext';
+import { compressImage } from '../utils/imageCompressor';
 import {
   X,
   Gavel,
@@ -49,7 +50,14 @@ export default function ProduceListingModal({
       setQuantity('');
       setUnit('क्विंटल (Quintal)');
       setBasePrice('');
-      setProduceImage(initialData?.image || null);
+
+      if (initialData?.image) {
+        compressImage(initialData.image, 600, 0.6)
+          .then((comp) => setProduceImage(comp))
+          .catch(() => setProduceImage(initialData.image));
+      } else {
+        setProduceImage(null);
+      }
 
       // Format default location from farmer's profile
       if (farmerUser) {
@@ -74,7 +82,7 @@ export default function ProduceListingModal({
 
   if (!isOpen) return null;
 
-  const handleImageFileChange = (e) => {
+  const handleImageFileChange = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -83,16 +91,24 @@ export default function ProduceListingModal({
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      setProduceImage(event.target.result);
+    try {
+      // Compress via HTML Canvas: max width 600px, quality 0.6 (<100KB)
+      const compressed = await compressImage(file, 600, 0.6);
+      setProduceImage(compressed);
       setError('');
-    };
-    reader.readAsDataURL(file);
+    } catch (err) {
+      console.warn('ProduceListingModal image compression error:', err);
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        setProduceImage(event.target.result);
+        setError('');
+      };
+      reader.readAsDataURL(file);
+    }
     e.target.value = '';
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
 
@@ -124,7 +140,16 @@ export default function ProduceListingModal({
     // Clean unit label (e.g. 'पोती (Bags / पोती)' -> 'पोती')
     const cleanUnit = unit ? unit.split(' ')[0].trim() : 'क्विंटल';
 
-    const newListing = addListing({
+    let finalImage = produceImage;
+    if (finalImage && typeof finalImage === 'string' && finalImage.startsWith('data:image')) {
+      try {
+        finalImage = await compressImage(finalImage, 600, 0.6);
+      } catch (err) {
+        console.warn('Final image compression fallback:', err);
+      }
+    }
+
+    const newListing = await addListing({
       farmerId: farmerUser?.id || `FARMER_${Date.now()}`,
       farmerName: farmerUser?.name || 'शेतकरी मित्र',
       farmerMobile: farmerUser?.mobile || '',
@@ -135,7 +160,7 @@ export default function ProduceListingModal({
       basePrice: Number(basePrice),
       location: location.trim(),
       listingDate: listingDate,
-      image: produceImage || null,
+      image: finalImage || null,
       notes: initialData?.notes || '',
       estimatedMarketPrice: initialData?.estimatedPrice || '',
     });

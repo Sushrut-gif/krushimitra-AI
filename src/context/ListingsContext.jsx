@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
+import { compressImage, DEFAULT_PRODUCE_PLACEHOLDER } from '../utils/imageCompressor';
 import {
   fetchSupabaseListings,
   fetchSupabaseBids,
@@ -177,8 +178,19 @@ export function ListingsProvider({ children }) {
                 timeFormatted: 'आत्ताच',
               }));
 
-            const isSold = row.status && (row.status.includes('विक्री पूर्ण') || row.status === 'विक्री पूर्ण');
-            const isInward = row.status && (row.status.includes('यार्डात प्राप्त') || row.status === 'यार्डात प्राप्त');
+            const isSold =
+              row.status && (row.status.includes('विक्री पूर्ण') || row.status === 'विक्री पूर्ण');
+            const isInward =
+              row.status && (row.status.includes('यार्डात प्राप्त') || row.status === 'यार्डात प्राप्त');
+
+            let displayStatus = 'बोली सुरू (Active Bidding)';
+            if (isSold) {
+              displayStatus = 'विक्री पूर्ण (Deal Finalized / Sold)';
+            } else if (isInward) {
+              displayStatus = 'यार्डात प्राप्त (Delivered at Yard)';
+            } else if (row.status && row.status !== 'ACTIVE') {
+              displayStatus = row.status;
+            }
 
             return {
               id: row.id,
@@ -191,11 +203,7 @@ export function ListingsProvider({ children }) {
               unit: row.unit || 'क्विंटल',
               basePrice: Number(row.base_price) || 0,
               highestBid: Number(row.highest_bid) || Number(row.base_price) || 0,
-              status: isSold
-                ? 'विक्री पूर्ण (Deal Finalized / Sold)'
-                : isInward
-                ? 'यार्डात प्राप्त (Delivered at Yard)'
-                : (row.status || 'बोली सुरू (Active Bidding)'),
+              status: displayStatus,
               winningMerchant: row.winning_merchant_id || null,
               winningPrice: Number(row.highest_bid) || 0,
               paymentStatus: row.payment_status || (isSold ? 'खात्यात जमा (Completed)' : null),
@@ -204,6 +212,8 @@ export function ListingsProvider({ children }) {
               gatePassVerified: isInward,
               inwardStatus: isInward ? 'यार्डात प्राप्त (Delivered at Yard)' : null,
               createdAt: row.created_at || new Date().toISOString(),
+              image: row.image_url || DEFAULT_PRODUCE_PLACEHOLDER,
+              imageUrl: row.image_url || DEFAULT_PRODUCE_PLACEHOLDER,
               bids: lotBids,
             };
           });
@@ -232,6 +242,18 @@ export function ListingsProvider({ children }) {
           if (payload.eventType === 'INSERT' && payload.new) {
             setListings((prev) => {
               if (prev.some((x) => x.id === payload.new.id)) return prev;
+              const isSold =
+                payload.new.status &&
+                (payload.new.status.includes('विक्री पूर्ण') || payload.new.status === 'विक्री पूर्ण');
+              const isInward =
+                payload.new.status &&
+                (payload.new.status.includes('यार्डात प्राप्त') || payload.new.status === 'यार्डात प्राप्त');
+              let displayStatus = 'बोली सुरू (Active Bidding)';
+              if (isSold) displayStatus = 'विक्री पूर्ण (Deal Finalized / Sold)';
+              else if (isInward) displayStatus = 'यार्डात प्राप्त (Delivered at Yard)';
+              else if (payload.new.status && payload.new.status !== 'ACTIVE')
+                displayStatus = payload.new.status;
+
               const newItem = {
                 id: payload.new.id,
                 farmerName: payload.new.farmer_name || 'शेतकरी',
@@ -243,9 +265,11 @@ export function ListingsProvider({ children }) {
                 unit: payload.new.unit || 'क्विंटल',
                 basePrice: Number(payload.new.base_price) || 0,
                 highestBid: Number(payload.new.highest_bid) || Number(payload.new.base_price) || 0,
-                status: payload.new.status || 'बोली सुरू (Active Bidding)',
+                status: displayStatus,
                 location: payload.new.location || 'सोलापूर',
                 gatePassId: payload.new.gate_pass_id || `GP-SLP-${payload.new.id}`,
+                image: payload.new.image_url || DEFAULT_PRODUCE_PLACEHOLDER,
+                imageUrl: payload.new.image_url || DEFAULT_PRODUCE_PLACEHOLDER,
                 createdAt: payload.new.created_at || new Date().toISOString(),
                 bids: [],
               };
@@ -257,6 +281,11 @@ export function ListingsProvider({ children }) {
                 if (item.id === payload.new.id) {
                   const isSold = payload.new.status && payload.new.status.includes('विक्री पूर्ण');
                   const isInward = payload.new.status && payload.new.status.includes('यार्डात प्राप्त');
+                  let displayStatus = 'बोली सुरू (Active Bidding)';
+                  if (isSold) displayStatus = 'विक्री पूर्ण (Deal Finalized / Sold)';
+                  else if (isInward) displayStatus = 'यार्डात प्राप्त (Delivered at Yard)';
+                  else if (payload.new.status && payload.new.status !== 'ACTIVE')
+                    displayStatus = payload.new.status;
                   return {
                     ...item,
                     status: isSold
@@ -324,9 +353,18 @@ export function ListingsProvider({ children }) {
   /**
    * Add a new produce listing
    */
-  const addListing = (listingData) => {
+  const addListing = async (listingData) => {
     const basePriceNum = Number(listingData.basePrice) || 0;
     const newId = 'KM-' + Date.now().toString().slice(-6);
+
+    let processedImg = listingData.image || null;
+    if (processedImg && typeof processedImg === 'string' && processedImg.startsWith('data:image')) {
+      try {
+        processedImg = await compressImage(processedImg, 600, 0.6);
+      } catch (e) {
+        // use existing
+      }
+    }
 
     const newListing = {
       id: newId,
@@ -340,9 +378,10 @@ export function ListingsProvider({ children }) {
       unit: listingData.unit || 'क्विंटल',
       basePrice: basePriceNum,
       highestBid: basePriceNum,
-      location: listingData.location.trim(),
+      location: (listingData.location || 'सोलापूर APMC').trim(),
       listingDate: listingData.listingDate || new Date().toISOString().split('T')[0],
-      image: listingData.image || null,
+      image: processedImg || DEFAULT_PRODUCE_PLACEHOLDER,
+      imageUrl: processedImg || DEFAULT_PRODUCE_PLACEHOLDER,
       status: 'बोली सुरू (Active Bidding)',
       createdAt: new Date().toISOString(),
       notes: listingData.notes || '',
@@ -358,7 +397,11 @@ export function ListingsProvider({ children }) {
     setListings((prev) => [newListing, ...prev]);
 
     // Asynchronously insert into Supabase
-    insertSupabaseListing(newListing);
+    try {
+      insertSupabaseListing(newListing);
+    } catch (err) {
+      console.error('[ListingsContext] insertSupabaseListing error:', err);
+    }
 
     return newListing;
   };
