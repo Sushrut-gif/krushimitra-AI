@@ -61,8 +61,10 @@ export default function MerchantInwardScannerModal({
   const rawId = lot?.id || '';
   const expectedPassId = rawId.startsWith('GP-SLP-') ? rawId : `GP-SLP-${rawId}`;
 
-  // WebRTC Camera stream initialization
+  // WebRTC Camera stream initialization with robust lifecycle & cleanup
   useEffect(() => {
+    let isActive = true;
+
     if (isOpen && lot && !successPayload) {
       setGatePassCodeInput('');
       setErrorMsg('');
@@ -70,35 +72,65 @@ export default function MerchantInwardScannerModal({
       setSuccessPayload(null);
       setCameraError('');
 
-      // Initialize camera with facingMode environment
-      if (navigator?.mediaDevices?.getUserMedia) {
+      const initCamera = async () => {
         setIsCameraLoading(true);
-        navigator.mediaDevices
-          .getUserMedia({ video: { facingMode: 'environment' } })
-          .then((stream) => {
-            streamRef.current = stream;
-            if (videoRef.current) {
-              videoRef.current.srcObject = stream;
-              videoRef.current.play().catch(() => {});
-            }
-            setIsCameraActive(true);
-            setIsCameraLoading(false);
-          })
-          .catch((err) => {
-            console.warn('Camera stream could not start:', err);
-            setCameraError('कॅमेरा सुरू करता आला नाही, खालील कोड वापरून पडताळणी करा');
+        try {
+          if (!navigator?.mediaDevices?.getUserMedia) {
+            throw new Error('GET_USER_MEDIA_UNSUPPORTED');
+          }
+
+          // Request environment-facing camera
+          const stream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: 'environment' },
+          });
+
+          if (!isActive) {
+            // Modal was closed while request was resolving
+            stream.getTracks().forEach((track) => track.stop());
+            return;
+          }
+
+          streamRef.current = stream;
+
+          if (videoRef.current) {
+            videoRef.current.srcObject = stream;
+            videoRef.current.play().catch((playErr) => {
+              console.warn('Video autoPlay was prevented:', playErr);
+            });
+          }
+
+          setIsCameraActive(true);
+          setIsCameraLoading(false);
+        } catch (err) {
+          console.warn('Camera stream could not start:', err);
+          if (isActive) {
             setIsCameraActive(false);
             setIsCameraLoading(false);
-          });
-      } else {
-        setCameraError('कॅमेरा सुरू करता आला नाही, खालील कोड वापरून पडताळणी करा');
-      }
+            setCameraError(
+              'कॅमेरा सुरू करता आला नाही. कृपया ब्राउझरमध्ये कॅमेरा परवानगी द्या किंवा खाली मॅन्युअल गेट पास आयडी टाका.'
+            );
+          }
+        }
+      };
+
+      initCamera();
     }
 
     return () => {
+      isActive = false;
       stopCameraStream();
     };
   }, [isOpen, lot, successPayload]);
+
+  // Sync video element with stream when camera state changes
+  useEffect(() => {
+    if (isCameraActive && streamRef.current && videoRef.current) {
+      if (videoRef.current.srcObject !== streamRef.current) {
+        videoRef.current.srcObject = streamRef.current;
+      }
+      videoRef.current.play().catch(() => {});
+    }
+  }, [isCameraActive]);
 
   if (!isOpen || !lot) return null;
 
@@ -271,19 +303,21 @@ export default function MerchantInwardScannerModal({
             <>
               {/* WebRTC Camera Viewfinder / Clean Fallback Card */}
               <div className="relative rounded-2xl overflow-hidden bg-slate-950 border-2 border-indigo-500/80 aspect-video flex items-center justify-center text-center">
-                {isCameraActive ? (
-                  <>
-                    {/* Live WebRTC Video Stream */}
-                    <video
-                      ref={videoRef}
-                      autoPlay
-                      playsInline
-                      muted
-                      className="absolute inset-0 w-full h-full object-cover"
-                    />
+                {/* Live WebRTC Video Stream - Permanently mounted so videoRef.current is never null */}
+                <video
+                  ref={videoRef}
+                  autoPlay
+                  playsInline
+                  muted
+                  className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-200 ${
+                    isCameraActive ? 'opacity-100 z-10' : 'opacity-0 pointer-events-none'
+                  }`}
+                />
 
+                {isCameraActive && (
+                  <>
                     {/* Viewfinder Reticle Overlay */}
-                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-20">
                       <div className="w-44 h-44 border-2 border-dashed border-emerald-400 rounded-2xl relative shadow-lg">
                         <span className="absolute -top-1 -left-1 w-4 h-4 border-t-2 border-l-2 border-emerald-400" />
                         <span className="absolute -top-1 -right-1 w-4 h-4 border-t-2 border-r-2 border-emerald-400" />
@@ -294,30 +328,35 @@ export default function MerchantInwardScannerModal({
                       </div>
                     </div>
 
-                    <div className="absolute bottom-2 left-0 right-0 text-center pointer-events-none">
+                    <div className="absolute bottom-2 left-0 right-0 text-center pointer-events-none z-20">
                       <span className="bg-black/70 text-emerald-300 font-bold text-[11px] px-3 py-1 rounded-full backdrop-blur-xs">
                         QR कोड फ्रेममध्ये धरून स्कॅन करा
                       </span>
                     </div>
                   </>
-                ) : isCameraLoading ? (
-                  <div className="p-6 space-y-2 text-center text-white">
+                )}
+
+                {isCameraLoading && (
+                  <div className="p-6 space-y-2 text-center text-white z-0">
                     <div className="w-8 h-8 rounded-full border-2 border-emerald-400 border-t-transparent animate-spin mx-auto" />
                     <p className="text-xs font-semibold text-slate-300">
                       कॅमेरा सुरू केला जात आहे...
                     </p>
                   </div>
-                ) : (
-                  /* Clean Fallback if camera is unavailable or blocked */
-                  <div className="p-6 space-y-2 text-center text-white relative z-10 max-w-sm">
+                )}
+
+                {!isCameraActive && !isCameraLoading && (
+                  /* Clean Fallback if camera is unavailable, blocked or not allowed */
+                  <div className="p-6 space-y-2 text-center text-white relative z-0 max-w-sm">
                     <div className="w-12 h-12 rounded-2xl bg-amber-500/20 border border-amber-400/40 text-amber-400 flex items-center justify-center mx-auto mb-1">
                       <CameraOff className="w-6 h-6" />
                     </div>
                     <div className="text-xs font-bold text-amber-300 leading-snug">
-                      {cameraError || 'कॅमेरा सुरू करता आला नाही, खालील कोड वापरून पडताळणी करा'}
+                      {cameraError ||
+                        'कॅमेरा सुरू करता आला नाही. कृपया ब्राउझरमध्ये कॅमेरा परवानगी द्या किंवा खाली मॅन्युअल गेट पास आयडी टाका.'}
                     </div>
                     <p className="text-[11px] text-slate-400 leading-relaxed">
-                      शेतकऱ्याच्या मोबाईलवरील किंवा छापील पावतीवरील <strong className="text-amber-200">GP-SLP</strong> कोड खालील बॉक्समध्ये टाईप करा.
+                      शेतकऱ्याच्या मोबाईलवरील किंवा छापील पावतीवरील <strong className="text-amber-200">GP-SLP</strong> कोड खालील बॉक्समध्ये टाईप करा किंवा खालील चाचणी कोडवर क्लिक करा.
                     </p>
                   </div>
                 )}
@@ -325,12 +364,12 @@ export default function MerchantInwardScannerModal({
 
               {/* Code Input Form */}
               <div className="space-y-2">
-                <div className="flex items-center justify-between text-xs font-bold text-gray-700">
+                <div className="flex items-center justify-between text-xs font-bold text-gray-700 flex-wrap gap-1">
                   <label htmlFor="gatePassCodeInput">गेट पास क्रमांक (Enter Gate Pass ID):</label>
                   <button
                     type="button"
                     onClick={handleQuickFill}
-                    className="text-indigo-600 hover:text-indigo-800 text-[11px] font-semibold underline cursor-pointer active:scale-95"
+                    className="text-indigo-600 hover:text-indigo-800 text-[11px] font-bold underline cursor-pointer active:scale-95 bg-indigo-50 hover:bg-indigo-100 px-2.5 py-0.5 rounded-full border border-indigo-200 transition-colors"
                   >
                     चाचणीसाठी कोड भरा ({expectedPassId})
                   </button>
